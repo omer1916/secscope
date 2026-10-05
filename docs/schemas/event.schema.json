@@ -1,0 +1,1182 @@
+{
+  "$defs": {
+    "Category": {
+      "enum": [
+        "security",
+        "seo",
+        "performance",
+        "resilience",
+        "quality"
+      ],
+      "title": "Category",
+      "type": "string"
+    },
+    "CodeLocation": {
+      "additionalProperties": false,
+      "description": "A position in the scanned project's source tree (POSIX path, relative to its root).",
+      "properties": {
+        "kind": {
+          "const": "code",
+          "default": "code",
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "line": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Line"
+        },
+        "column": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Column"
+        },
+        "end_line": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End Line"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "CodeLocation",
+      "type": "object"
+    },
+    "CodeSnippet": {
+      "additionalProperties": false,
+      "properties": {
+        "lang": {
+          "title": "Lang",
+          "type": "string"
+        },
+        "code": {
+          "title": "Code",
+          "type": "string"
+        }
+      },
+      "required": [
+        "lang",
+        "code"
+      ],
+      "title": "CodeSnippet",
+      "type": "object"
+    },
+    "ErrorEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        },
+        "ts": {
+          "format": "date-time",
+          "title": "Ts",
+          "type": "string"
+        },
+        "scan_id": {
+          "title": "Scan Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "error",
+          "default": "error",
+          "title": "Type",
+          "type": "string"
+        },
+        "module": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Module"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        }
+      },
+      "required": [
+        "scan_id",
+        "message"
+      ],
+      "title": "ErrorEvent",
+      "type": "object"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "description": "Proof for a finding. All free text is secret-masked on construction.",
+      "properties": {
+        "snippet": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Snippet"
+        },
+        "request": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HttpMessage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "response": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HttpMessage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "screenshot_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Screenshot Path"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
+        },
+        "extra": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Extra",
+          "type": "object"
+        }
+      },
+      "title": "Evidence",
+      "type": "object"
+    },
+    "Finding": {
+      "additionalProperties": false,
+      "description": "A single, explainable result of a scan module (SPEC §5).\n\n``id`` is derived from rule, location and evidence when omitted, so the same\nissue keeps the same id across scans (used for diffs and suppressions).\n``description``/``impact``/``remediation``/``references`` may be left empty\nby a module; they are filled from the remediation KB by ``rule_id``.",
+      "properties": {
+        "id": {
+          "default": "",
+          "title": "Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "pattern": "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$",
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "module": {
+          "title": "Module",
+          "type": "string"
+        },
+        "category": {
+          "$ref": "#/$defs/Category"
+        },
+        "title": {
+          "$ref": "#/$defs/LocalizedStr"
+        },
+        "severity": {
+          "enum": [
+            "critical",
+            "high",
+            "medium",
+            "low",
+            "info"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "confidence": {
+          "enum": [
+            "confirmed",
+            "high",
+            "medium",
+            "low"
+          ],
+          "title": "Confidence",
+          "type": "string"
+        },
+        "location": {
+          "discriminator": {
+            "mapping": {
+              "code": "#/$defs/CodeLocation",
+              "http": "#/$defs/HttpLocation"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/CodeLocation"
+            },
+            {
+              "$ref": "#/$defs/HttpLocation"
+            }
+          ],
+          "title": "Location"
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedStr"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "impact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedStr"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "remediation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Remediation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "references": {
+          "items": {
+            "$ref": "#/$defs/Ref"
+          },
+          "title": "References",
+          "type": "array"
+        },
+        "cwe": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Cwe",
+          "type": "array"
+        },
+        "owasp": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Owasp",
+          "type": "array"
+        },
+        "asvs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Asvs",
+          "type": "array"
+        },
+        "effort": {
+          "default": "M",
+          "enum": [
+            "S",
+            "M",
+            "L"
+          ],
+          "title": "Effort",
+          "type": "string"
+        },
+        "source_tools": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Tools",
+          "type": "array"
+        },
+        "first_seen_scan": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "First Seen Scan"
+        }
+      },
+      "required": [
+        "rule_id",
+        "module",
+        "category",
+        "title",
+        "severity",
+        "confidence",
+        "location",
+        "source_tools"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
+    "FindingEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        },
+        "ts": {
+          "format": "date-time",
+          "title": "Ts",
+          "type": "string"
+        },
+        "scan_id": {
+          "title": "Scan Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "finding",
+          "default": "finding",
+          "title": "Type",
+          "type": "string"
+        },
+        "finding": {
+          "$ref": "#/$defs/Finding"
+        }
+      },
+      "required": [
+        "scan_id",
+        "finding"
+      ],
+      "title": "FindingEvent",
+      "type": "object"
+    },
+    "HttpLocation": {
+      "additionalProperties": false,
+      "description": "An HTTP endpoint (optionally a single parameter of it) on the target.",
+      "properties": {
+        "kind": {
+          "const": "http",
+          "default": "http",
+          "title": "Kind",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "method": {
+          "default": "GET",
+          "title": "Method",
+          "type": "string"
+        },
+        "parameter": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parameter"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "HttpLocation",
+      "type": "object"
+    },
+    "HttpMessage": {
+      "additionalProperties": false,
+      "description": "A captured request or response. Secrets are masked on construction.",
+      "properties": {
+        "method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Method"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        },
+        "headers": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Headers",
+          "type": "array"
+        },
+        "body": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Body"
+        },
+        "body_truncated": {
+          "default": false,
+          "title": "Body Truncated",
+          "type": "boolean"
+        }
+      },
+      "title": "HttpMessage",
+      "type": "object"
+    },
+    "LocalizedList": {
+      "additionalProperties": false,
+      "properties": {
+        "tr": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tr",
+          "type": "array"
+        },
+        "en": {
+          "items": {
+            "type": "string"
+          },
+          "title": "En",
+          "type": "array"
+        }
+      },
+      "title": "LocalizedList",
+      "type": "object"
+    },
+    "LocalizedStr": {
+      "additionalProperties": false,
+      "description": "User-facing text in every supported UI language.",
+      "properties": {
+        "tr": {
+          "title": "Tr",
+          "type": "string"
+        },
+        "en": {
+          "title": "En",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tr",
+        "en"
+      ],
+      "title": "LocalizedStr",
+      "type": "object"
+    },
+    "Metric": {
+      "additionalProperties": false,
+      "description": "A live chart sample, e.g. series=\"load\" values={\"rps\": 120, \"p95_ms\": 340}.",
+      "properties": {
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        },
+        "ts": {
+          "format": "date-time",
+          "title": "Ts",
+          "type": "string"
+        },
+        "scan_id": {
+          "title": "Scan Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "metric",
+          "default": "metric",
+          "title": "Type",
+          "type": "string"
+        },
+        "module": {
+          "title": "Module",
+          "type": "string"
+        },
+        "series": {
+          "title": "Series",
+          "type": "string"
+        },
+        "values": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Values",
+          "type": "object"
+        }
+      },
+      "required": [
+        "scan_id",
+        "module",
+        "series",
+        "values"
+      ],
+      "title": "Metric",
+      "type": "object"
+    },
+    "ModuleFinished": {
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        },
+        "ts": {
+          "format": "date-time",
+          "title": "Ts",
+          "type": "string"
+        },
+        "scan_id": {
+          "title": "Scan Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "module.finished",
+          "default": "module.finished",
+          "title": "Type",
+          "type": "string"
+        },
+        "module": {
+          "title": "Module",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "ok",
+            "failed",
+            "cancelled",
+            "timeout"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "duration_s": {
+          "minimum": 0,
+          "title": "Duration S",
+          "type": "number"
+        },
+        "finding_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Finding Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "scan_id",
+        "module",
+        "status",
+        "duration_s"
+      ],
+      "title": "ModuleFinished",
+      "type": "object"
+    },
+    "ModuleLog": {
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        },
+        "ts": {
+          "format": "date-time",
+          "title": "Ts",
+          "type": "string"
+        },
+        "scan_id": {
+          "title": "Scan Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "module.log",
+          "default": "module.log",
+          "title": "Type",
+          "type": "string"
+        },
+        "module": {
+          "title": "Module",
+          "type": "string"
+        },
+        "level": {
+          "default": "info",
+          "enum": [
+            "debug",
+            "info",
+            "warning",
+            "error"
+          ],
+          "title": "Level",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scan_id",
+        "module",
+        "message"
+      ],
+      "title": "ModuleLog",
+      "type": "object"
+    },
+    "ModuleProgress": {
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        },
+        "ts": {
+          "format": "date-time",
+          "title": "Ts",
+          "type": "string"
+        },
+        "scan_id": {
+          "title": "Scan Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "module.progress",
+          "default": "module.progress",
+          "title": "Type",
+          "type": "string"
+        },
+        "module": {
+          "title": "Module",
+          "type": "string"
+        },
+        "pct": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Pct",
+          "type": "number"
+        },
+        "message": {
+          "default": "",
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scan_id",
+        "module",
+        "pct"
+      ],
+      "title": "ModuleProgress",
+      "type": "object"
+    },
+    "ModuleSkipped": {
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        },
+        "ts": {
+          "format": "date-time",
+          "title": "Ts",
+          "type": "string"
+        },
+        "scan_id": {
+          "title": "Scan Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "module.skipped",
+          "default": "module.skipped",
+          "title": "Type",
+          "type": "string"
+        },
+        "module": {
+          "title": "Module",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "install_hint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Install Hint"
+        }
+      },
+      "required": [
+        "scan_id",
+        "module",
+        "reason"
+      ],
+      "title": "ModuleSkipped",
+      "type": "object"
+    },
+    "ModuleStarted": {
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        },
+        "ts": {
+          "format": "date-time",
+          "title": "Ts",
+          "type": "string"
+        },
+        "scan_id": {
+          "title": "Scan Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "module.started",
+          "default": "module.started",
+          "title": "Type",
+          "type": "string"
+        },
+        "module": {
+          "title": "Module",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scan_id",
+        "module"
+      ],
+      "title": "ModuleStarted",
+      "type": "object"
+    },
+    "Ref": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "cwe",
+            "owasp",
+            "asvs",
+            "url",
+            "mdn",
+            "google",
+            "cve"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Id"
+        },
+        "href": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Href"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Ref",
+      "type": "object"
+    },
+    "Remediation": {
+      "additionalProperties": false,
+      "properties": {
+        "steps": {
+          "$ref": "#/$defs/LocalizedList"
+        },
+        "snippets": {
+          "additionalProperties": {
+            "$ref": "#/$defs/CodeSnippet"
+          },
+          "title": "Snippets",
+          "type": "object"
+        },
+        "verify": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedStr"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "Remediation",
+      "type": "object"
+    },
+    "ScanFinished": {
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        },
+        "ts": {
+          "format": "date-time",
+          "title": "Ts",
+          "type": "string"
+        },
+        "scan_id": {
+          "title": "Scan Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "scan.finished",
+          "default": "scan.finished",
+          "title": "Type",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "completed",
+            "cancelled",
+            "failed",
+            "interrupted"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "duration_s": {
+          "minimum": 0,
+          "title": "Duration S",
+          "type": "number"
+        }
+      },
+      "required": [
+        "scan_id",
+        "status",
+        "duration_s"
+      ],
+      "title": "ScanFinished",
+      "type": "object"
+    },
+    "ScanStarted": {
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        },
+        "ts": {
+          "format": "date-time",
+          "title": "Ts",
+          "type": "string"
+        },
+        "scan_id": {
+          "title": "Scan Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "scan.started",
+          "default": "scan.started",
+          "title": "Type",
+          "type": "string"
+        },
+        "profile": {
+          "title": "Profile",
+          "type": "string"
+        },
+        "modules": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Modules",
+          "type": "array"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scan_id",
+        "profile",
+        "modules",
+        "target"
+      ],
+      "title": "ScanStarted",
+      "type": "object"
+    },
+    "ScopeViolationEvent": {
+      "additionalProperties": false,
+      "description": "A request outside the allowed scope was blocked (SPEC §4.6).",
+      "properties": {
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        },
+        "ts": {
+          "format": "date-time",
+          "title": "Ts",
+          "type": "string"
+        },
+        "scan_id": {
+          "title": "Scan Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "scope.violation",
+          "default": "scope.violation",
+          "title": "Type",
+          "type": "string"
+        },
+        "module": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Module"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "via_redirect": {
+          "default": false,
+          "title": "Via Redirect",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "scan_id",
+        "url",
+        "reason"
+      ],
+      "title": "ScopeViolationEvent",
+      "type": "object"
+    }
+  },
+  "discriminator": {
+    "mapping": {
+      "error": "#/$defs/ErrorEvent",
+      "finding": "#/$defs/FindingEvent",
+      "metric": "#/$defs/Metric",
+      "module.finished": "#/$defs/ModuleFinished",
+      "module.log": "#/$defs/ModuleLog",
+      "module.progress": "#/$defs/ModuleProgress",
+      "module.skipped": "#/$defs/ModuleSkipped",
+      "module.started": "#/$defs/ModuleStarted",
+      "scan.finished": "#/$defs/ScanFinished",
+      "scan.started": "#/$defs/ScanStarted",
+      "scope.violation": "#/$defs/ScopeViolationEvent"
+    },
+    "propertyName": "type"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/ScanStarted"
+    },
+    {
+      "$ref": "#/$defs/ModuleStarted"
+    },
+    {
+      "$ref": "#/$defs/ModuleProgress"
+    },
+    {
+      "$ref": "#/$defs/ModuleLog"
+    },
+    {
+      "$ref": "#/$defs/FindingEvent"
+    },
+    {
+      "$ref": "#/$defs/Metric"
+    },
+    {
+      "$ref": "#/$defs/ModuleSkipped"
+    },
+    {
+      "$ref": "#/$defs/ModuleFinished"
+    },
+    {
+      "$ref": "#/$defs/ScanFinished"
+    },
+    {
+      "$ref": "#/$defs/ErrorEvent"
+    },
+    {
+      "$ref": "#/$defs/ScopeViolationEvent"
+    }
+  ]
+}

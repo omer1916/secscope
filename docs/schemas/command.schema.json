@@ -1,0 +1,134 @@
+{
+  "$defs": {
+    "CancelCommand": {
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        },
+        "cmd": {
+          "const": "cancel",
+          "default": "cancel",
+          "title": "Cmd",
+          "type": "string"
+        }
+      },
+      "title": "CancelCommand",
+      "type": "object"
+    },
+    "KillTargetCommand": {
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        },
+        "cmd": {
+          "const": "kill_target",
+          "default": "kill_target",
+          "title": "Cmd",
+          "type": "string"
+        }
+      },
+      "title": "KillTargetCommand",
+      "type": "object"
+    },
+    "PauseCommand": {
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        },
+        "cmd": {
+          "const": "pause",
+          "default": "pause",
+          "title": "Cmd",
+          "type": "string"
+        }
+      },
+      "title": "PauseCommand",
+      "type": "object"
+    },
+    "ResumeCommand": {
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        },
+        "cmd": {
+          "const": "resume",
+          "default": "resume",
+          "title": "Cmd",
+          "type": "string"
+        }
+      },
+      "title": "ResumeCommand",
+      "type": "object"
+    },
+    "StartCommand": {
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        },
+        "cmd": {
+          "const": "start",
+          "default": "start",
+          "title": "Cmd",
+          "type": "string"
+        },
+        "config": {
+          "additionalProperties": true,
+          "title": "Config",
+          "type": "object"
+        }
+      },
+      "required": [
+        "config"
+      ],
+      "title": "StartCommand",
+      "type": "object"
+    }
+  },
+  "discriminator": {
+    "mapping": {
+      "cancel": "#/$defs/CancelCommand",
+      "kill_target": "#/$defs/KillTargetCommand",
+      "pause": "#/$defs/PauseCommand",
+      "resume": "#/$defs/ResumeCommand",
+      "start": "#/$defs/StartCommand"
+    },
+    "propertyName": "cmd"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/StartCommand"
+    },
+    {
+      "$ref": "#/$defs/PauseCommand"
+    },
+    {
+      "$ref": "#/$defs/ResumeCommand"
+    },
+    {
+      "$ref": "#/$defs/CancelCommand"
+    },
+    {
+      "$ref": "#/$defs/KillTargetCommand"
+    }
+  ]
+}

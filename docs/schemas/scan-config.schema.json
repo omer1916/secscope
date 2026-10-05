@@ -1,0 +1,145 @@
+{
+  "$defs": {
+    "RunConfig": {
+      "additionalProperties": false,
+      "description": "How to start the target app (editable in the wizard, SPEC §6.1).",
+      "properties": {
+        "command": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Command"
+        },
+        "port": {
+          "anyOf": [
+            {
+              "maximum": 65535,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Port"
+        },
+        "workdir": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workdir"
+        },
+        "env": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Env",
+          "type": "object"
+        },
+        "ready_path": {
+          "default": "/",
+          "title": "Ready Path",
+          "type": "string"
+        },
+        "startup_timeout_s": {
+          "default": 60,
+          "exclusiveMinimum": 0,
+          "maximum": 600,
+          "title": "Startup Timeout S",
+          "type": "number"
+        }
+      },
+      "title": "RunConfig",
+      "type": "object"
+    },
+    "ScanProfile": {
+      "enum": [
+        "quick",
+        "standard",
+        "deep",
+        "custom"
+      ],
+      "title": "ScanProfile",
+      "type": "string"
+    },
+    "Target": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/TargetKind"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "value"
+      ],
+      "title": "Target",
+      "type": "object"
+    },
+    "TargetKind": {
+      "enum": [
+        "folder",
+        "archive",
+        "url"
+      ],
+      "title": "TargetKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Everything a single scan needs; produced by the wizard or the CLI.",
+  "properties": {
+    "target": {
+      "$ref": "#/$defs/Target"
+    },
+    "profile": {
+      "$ref": "#/$defs/ScanProfile",
+      "default": "standard"
+    },
+    "modules": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Modules",
+      "type": "array"
+    },
+    "run": {
+      "$ref": "#/$defs/RunConfig"
+    },
+    "scope_statement_accepted": {
+      "default": false,
+      "title": "Scope Statement Accepted",
+      "type": "boolean"
+    },
+    "snapshot_sqlite": {
+      "default": true,
+      "title": "Snapshot Sqlite",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "target"
+  ],
+  "title": "ScanConfig",
+  "type": "object"
+}

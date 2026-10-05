@@ -1,0 +1,167 @@
+{
+  "$defs": {
+    "RateLimits": {
+      "additionalProperties": false,
+      "properties": {
+        "dast_rps": {
+          "default": 20,
+          "exclusiveMinimum": 0,
+          "maximum": 1000,
+          "title": "Dast Rps",
+          "type": "number"
+        },
+        "circuit_breaker_5xx_ratio": {
+          "default": 0.2,
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Circuit Breaker 5Xx Ratio",
+          "type": "number"
+        }
+      },
+      "title": "RateLimits",
+      "type": "object"
+    },
+    "Retention": {
+      "additionalProperties": false,
+      "properties": {
+        "days": {
+          "default": 90,
+          "minimum": 1,
+          "title": "Days",
+          "type": "integer"
+        },
+        "max_scans": {
+          "default": 50,
+          "minimum": 1,
+          "title": "Max Scans",
+          "type": "integer"
+        }
+      },
+      "title": "Retention",
+      "type": "object"
+    },
+    "ScoreWeights": {
+      "additionalProperties": false,
+      "description": "Weights of the overall score (SPEC §9). Must sum to 1.",
+      "properties": {
+        "security": {
+          "default": 0.45,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Security",
+          "type": "number"
+        },
+        "seo": {
+          "default": 0.2,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Seo",
+          "type": "number"
+        },
+        "resilience": {
+          "default": 0.2,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Resilience",
+          "type": "number"
+        },
+        "quality": {
+          "default": 0.1,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Quality",
+          "type": "number"
+        },
+        "dependencies": {
+          "default": 0.05,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Dependencies",
+          "type": "number"
+        }
+      },
+      "title": "ScoreWeights",
+      "type": "object"
+    },
+    "Slo": {
+      "additionalProperties": false,
+      "properties": {
+        "p95_ms": {
+          "default": 500,
+          "exclusiveMinimum": 0,
+          "title": "P95 Ms",
+          "type": "number"
+        },
+        "error_rate": {
+          "default": 0.01,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Error Rate",
+          "type": "number"
+        }
+      },
+      "title": "Slo",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Persistent user settings (Settings screen, SPEC §11.2.6).",
+  "properties": {
+    "language": {
+      "default": "tr",
+      "enum": [
+        "tr",
+        "en"
+      ],
+      "title": "Language",
+      "type": "string"
+    },
+    "theme": {
+      "default": "system",
+      "enum": [
+        "system",
+        "dark",
+        "light"
+      ],
+      "title": "Theme",
+      "type": "string"
+    },
+    "data_dir": {
+      "format": "path",
+      "title": "Data Dir",
+      "type": "string"
+    },
+    "log_level": {
+      "default": "INFO",
+      "enum": [
+        "DEBUG",
+        "INFO",
+        "WARNING",
+        "ERROR"
+      ],
+      "title": "Log Level",
+      "type": "string"
+    },
+    "rate_limits": {
+      "$ref": "#/$defs/RateLimits"
+    },
+    "slo": {
+      "$ref": "#/$defs/Slo"
+    },
+    "weights": {
+      "$ref": "#/$defs/ScoreWeights"
+    },
+    "retention": {
+      "$ref": "#/$defs/Retention"
+    },
+    "allowed_lan_networks": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Allowed Lan Networks",
+      "type": "array"
+    }
+  },
+  "title": "Settings",
+  "type": "object"
+}
