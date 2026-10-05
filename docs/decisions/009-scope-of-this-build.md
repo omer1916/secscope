@@ -1,0 +1,22 @@
+# ADR-009: Scope of this build
+
+- Status: accepted (M10)
+- Date: 2026-10-06
+
+## Decision
+
+This build ships static analysis (SAST, secrets, dependencies, configuration), SEO / launch
+readiness, reporting (HTML, SARIF, CSV, JSON, diff, suppressions), the desktop UI and packaging.
+
+It intentionally does **not** include:
+
+- **Active dynamic testing (SPEC M4/M5)**: no attack payloads, ZAP or Nuclei scans. The scope
+  guard, sandbox runner and module contract remain in place.
+- **Load / stress / resilience testing (SPEC M7)**.
+- The wizard's **authentication step** (only meaningful for authenticated dynamic testing),
+  so the wizard has four steps.
+- **Lab Core Web Vitals** (needs the browser module; ADR-007).
+
+These were decided during development and are recorded here so that documentation, the
+threat model and the UI do not promise them. Nuclei is still listed in the tool manifest but no
+module uses it.

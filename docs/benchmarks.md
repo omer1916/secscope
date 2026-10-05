@@ -25,7 +25,20 @@ Python taint engine).
 Without Semgrep/Bandit/gitleaks/Trivy/osv-scanner the native engines alone still find every
 `must` rule except `SCA-VULN-001` (no offline advisory DB) — "reduced coverage" is reported.
 
+## Dogfooding (M10)
+
+Static scan of SecScope's own `src/` (2026-10-06). The first run produced false positives that
+were fixed in the engines, each with a regression test:
+
+| Finding | Cause | Fix |
+|---|---|---|
+| SSRF on `request.get(...)` | local variable named `request` treated as Flask's | taint only from unshadowed `request.<attr>` (AST); Semgrep sources limited to `flask.request.$ANY` |
+| Generic secret on type annotations / module paths | `name: str = ...` and dotted identifiers matched | separator / value class tightened; plain identifiers without digits ignored |
+| XSS on `|safe` in the report template | constant script pinned by the CSP hash | inline suppression with reason |
+
+After the fixes: **0 findings ≥ medium** — enforced by `tests/integration/test_dogfood.py`.
+
 ## Optional external benchmark
 
-OWASP Juice Shop / DVWA / WebGoat can be run locally in Docker to track detection beyond our
-fixtures; results will be added here once DAST (M4/M5) exists.
+OWASP Juice Shop / DVWA / WebGoat can be scanned statically from their source to track detection
+beyond our fixtures. Dynamic testing is not part of this build (ADR-009).

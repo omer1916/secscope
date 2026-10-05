@@ -78,6 +78,21 @@ the UI down.
 | Diff / plan | `reporting/diff.py`, `reporting/plan.py` | new / fixed / persistent / regressed; quick-wins-first plan. |
 | CLI | `cli.py` | `scan --format html,json,sarif,csv,pdf`, `report`, `diff`, `suppress`. |
 
+## Implemented (M9)
+
+| Area | Module | Notes |
+|---|---|---|
+| App state | `ui/state.py` | Settings, tool status, scan history, reports, suppressions; Qt signals. |
+| Pages | `ui/pages/{dashboard,wizard,monitor,results,history,settings_page}.py` | 4-step wizard (ADR-009), live monitor with pyqtgraph, virtualised findings table, diff, tool manager. |
+| Shared | `ui/widgets.py`, `ui/theme.py`, `ui/main_window.py` | Score ring, findings model/filter, background tasks, light/dark theme. All text via `ui/i18n/`. |
+
+## Implemented (M10)
+
+| Area | Module | Notes |
+|---|---|---|
+| Packaging | `packaging/pyinstaller.spec`, `packaging/launcher.py` | One-folder build, `SecScopeApp` (windowed) + `secscope` (console, also runs the internal `worker`, `static-server`, `run-python-tool` sub-programs). [packaging/README.md](../packaging/README.md). |
+| Hardening | [threat-model.md](threat-model.md), `tests/integration/test_dogfood.py` | SecScope's own source must pass its own static analysis. |
+
 ## Network rule
 
 Only `core/scope_guard.py` (target traffic) and `core/downloader.py` (user-initiated downloads, ADR-006) may use raw network primitives. Enforced by ruff `TID251`
