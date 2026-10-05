@@ -318,3 +318,16 @@ def test_typosquat_and_licences() -> None:
         ("requestss", "requests"),
     }
     assert [p.name for p in copyleft_packages(inv)] == ["copyleft-lib"]
+
+
+@pytest.mark.parametrize(
+    "code",
+    [
+        "class SecretHit:\n    rule_id: str\n",
+        "_TOKEN_PATTERNS: tuple[re.Pattern[str], ...] = (\n",
+        '    "secscope.modules.secrets:SecretsModule",\n',
+        "token_type = SecretStrategy\n",
+    ],
+)
+def test_generic_secret_ignores_code(code: str) -> None:
+    assert "SECRET-GENERIC-001" not in secrets_in(code, "module.py")

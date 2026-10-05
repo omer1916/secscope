@@ -158,6 +158,8 @@ class _Function:
         self.tainted = set(tainted)
         self.dynamic: set[str] = set()  # names holding dynamically built strings
         self.html: set[str] = set()  # names holding dynamic strings with HTML markup
+        # True when `request` is a parameter/local here (e.g. an httpx.Request), not flask.request.
+        self.request_shadowed = False
 
 
 class _Checker(ast.NodeVisitor):
@@ -210,7 +212,12 @@ class _Checker(ast.NodeVisitor):
             while isinstance(root, ast.Attribute):
                 attrs.append(root.attr)
                 root = root.value
-            if isinstance(root, ast.Name) and root.id == "request" and REQUEST_ATTRS & set(attrs):
+            if (
+                isinstance(root, ast.Name)
+                and root.id == "request"
+                and not self.scope.request_shadowed
+                and REQUEST_ATTRS & set(attrs)
+            ):
                 return True
         return any(self.tainted(child) for child in ast.iter_child_nodes(node))
 
@@ -263,6 +270,13 @@ class _Checker(ast.NodeVisitor):
                 self.report("SAST-CSRF-001", d, "high")
         outer = self.scope
         self.scope = _Function(params)
+        all_params = {
+            a.arg for a in [*node.args.posonlyargs, *node.args.args, *node.args.kwonlyargs]
+        }
+        assigned = {
+            n.id for n in ast.walk(node) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)
+        }
+        self.scope.request_shadowed = "request" in all_params | assigned
         self._propagate(node.body)
         self.generic_visit(node)
         self.scope = outer

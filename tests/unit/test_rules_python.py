@@ -212,3 +212,13 @@ def test_syntax_error_is_ignored() -> None:
 
 def test_usedforsecurity_false_not_flagged() -> None:
     assert run("h = hashlib.md5(data, usedforsecurity=False)\n") == set()
+
+
+def test_local_variable_named_request_is_not_flask_request() -> None:
+    code = (
+        "async def handle(request):\n"
+        "    return await httpx.get(request.url)\n"
+        "def other(request):\n"
+        "    open(request.headers['x'])\n"
+    )
+    assert run(code) == set()

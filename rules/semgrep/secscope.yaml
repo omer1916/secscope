@@ -149,9 +149,9 @@ rules:
     message: Request data flows into a SQL query string.
     metadata: {secscope_rule: SAST-SQLI-001, confidence: high}
     pattern-sources:
-      - pattern-either:
-          - pattern: flask.request.$ANY
-          - pattern: request.$ANY
+      # flask.request only (Semgrep resolves `from flask import request`); a local variable
+      # that happens to be called `request` (e.g. an httpx.Request) is not a source.
+      - pattern: flask.request.$ANY
     pattern-sinks:
       - patterns:
           - pattern-either:
@@ -168,9 +168,9 @@ rules:
     message: Request data controls a file path.
     metadata: {secscope_rule: SAST-PATH-001, confidence: high}
     pattern-sources:
-      - pattern-either:
-          - pattern: flask.request.$ANY
-          - pattern: request.$ANY
+      # flask.request only (Semgrep resolves `from flask import request`); a local variable
+      # that happens to be called `request` (e.g. an httpx.Request) is not a source.
+      - pattern: flask.request.$ANY
     pattern-sinks:
       - pattern-either:
           - pattern: open(...)
@@ -188,9 +188,9 @@ rules:
     message: Request data controls a redirect target.
     metadata: {secscope_rule: SAST-REDIRECT-001, confidence: high}
     pattern-sources:
-      - pattern-either:
-          - pattern: flask.request.$ANY
-          - pattern: request.$ANY
+      # flask.request only (Semgrep resolves `from flask import request`); a local variable
+      # that happens to be called `request` (e.g. an httpx.Request) is not a source.
+      - pattern: flask.request.$ANY
     pattern-sinks:
       - pattern-either:
           - pattern: redirect(...)
@@ -203,15 +203,18 @@ rules:
     message: Request data controls an outgoing request URL.
     metadata: {secscope_rule: SAST-SSRF-001, confidence: high}
     pattern-sources:
-      - pattern-either:
-          - pattern: flask.request.$ANY
-          - pattern: request.$ANY
+      # flask.request only (Semgrep resolves `from flask import request`); a local variable
+      # that happens to be called `request` (e.g. an httpx.Request) is not a source.
+      - pattern: flask.request.$ANY
     pattern-sinks:
       - patterns:
           - pattern-either:
               - pattern: requests.$M($URL, ...)
               - pattern: httpx.$M($URL, ...)
               - pattern: urllib.request.urlopen($URL, ...)
+          - metavariable-regex:
+              metavariable: $M
+              regex: ^(get|post|put|patch|delete|head|options|request|stream)$
           - focus-metavariable: $URL
 
   - id: python-subprocess-shell-true

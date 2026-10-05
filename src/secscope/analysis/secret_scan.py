@@ -129,7 +129,7 @@ DETECTORS: tuple[_Detector, ...] = (
 _GENERIC = re.compile(
     r"(?i)(?P<name>[A-Za-z0-9_.\-]{0,30}(?:secret|token|api[_\-]?key|apikey|passw(?:or)?d|passwd|pwd|"
     r"private[_\-]?key|client[_\-]?secret|access[_\-]?key|auth[_\-]?key|credential)[A-Za-z0-9_.\-]{0,20})"
-    r"[\"']?\s*(?::=|=>|[:=])\s*[\"']?(?P<value>[^\s\"'`,;)}\]#]{8,})"
+    r"[\"']?[ \t]*(?::=|=>|[:=])[ \t]*[\"']?(?P<value>[^\s\"'`,;()}\[\]#]{8,})"
 )
 _PLACEHOLDER = re.compile(
     r"(?i)^(?:x+|\*+|\.+|changeme|change[-_]?me|your[-_].*|<.*>|\$[{(]?[A-Za-z_].*|%\(.*\)s|\{\{.*|"
@@ -137,6 +137,7 @@ _PLACEHOLDER = re.compile(
     r"undefined|example.*|sample.*|dummy.*|placeholder.*|todo|required|optional|string|password|secret|"
     r"\w+\(.*|[a-z_]+\.[a-z_]+.*|.*_here)$"
 )
+_IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_.]*$")
 _ENV_EXAMPLE = re.compile(r"(?i)\.(?:example|sample|template|dist|defaults?)$")
 _TEST_PATH = re.compile(
     r"(?i)(?:^|/)(?:tests?|__tests__|spec|specs|docs?|examples?|samples?|mocks?)/"
@@ -195,6 +196,9 @@ def scan_secrets(file: SourceFile) -> Iterator[SecretHit]:
             or value.isdigit()
             or (value.isalpha() and value.islower() and len(value) < 12)
         ):
+            continue
+        # Plain identifiers (class / module names such as SecretsModule) are code, not secrets.
+        if _IDENTIFIER.match(value) and not any(ch.isdigit() for ch in value) and len(value) < 32:
             continue
         seen_lines.add(line)
         conf: Confidence = "low" if test_like else ("high" if entropy >= 4.0 else "medium")
