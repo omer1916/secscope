@@ -26,6 +26,7 @@ dependencies = [
     "protego>=0.7.0",
     "psutil>=7.2.2",
     "pydantic>=2.9",
+    "pyqtgraph>=0.14.0",
     "pyside6>=6.8",
     "pyyaml>=6.0.3",
     "selectolax>=1.0.0",
