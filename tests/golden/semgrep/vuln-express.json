@@ -1,0 +1,145 @@
+{
+ "version": "1.179.0",
+ "results": [
+  {
+   "check_id": "dom-xss-innerhtml-location",
+   "path": "{ROOT}\\public\\app.js",
+   "start": {
+    "line": 4,
+    "col": 51,
+    "offset": 180
+   },
+   "end": {
+    "line": 4,
+    "col": 66,
+    "offset": 195
+   },
+   "extra": {
+    "message": "URL data flows into innerHTML (DOM XSS).",
+    "metadata": {
+     "secscope_rule": "SAST-XSS-001",
+     "confidence": "high"
+    },
+    "severity": "ERROR",
+    "fingerprint": "requires login",
+    "lines": "requires login",
+    "validation_state": "NO_VALIDATOR",
+    "engine_kind": "OSS"
+   }
+  },
+  {
+   "check_id": "express-cors-reflect-origin",
+   "path": "{ROOT}\\server.js",
+   "start": {
+    "line": 21,
+    "col": 5,
+    "offset": 635
+   },
+   "end": {
+    "line": 21,
+    "col": 69,
+    "offset": 699
+   },
+   "extra": {
+    "message": "The request Origin is reflected into Access-Control-Allow-Origin.",
+    "metadata": {
+     "secscope_rule": "SAST-CORS-001",
+     "confidence": "high"
+    },
+    "severity": "ERROR",
+    "fingerprint": "requires login",
+    "lines": "requires login",
+    "validation_state": "NO_VALIDATOR",
+    "engine_kind": "OSS"
+   }
+  },
+  {
+   "check_id": "express-taint-cmdi",
+   "path": "{ROOT}\\server.js",
+   "start": {
+    "line": 57,
+    "col": 8,
+    "offset": 2003
+   },
+   "end": {
+    "line": 57,
+    "col": 40,
+    "offset": 2035
+   },
+   "extra": {
+    "message": "Request data flows into a shell command.",
+    "metadata": {
+     "secscope_rule": "SAST-CMDI-001",
+     "confidence": "high"
+    },
+    "severity": "ERROR",
+    "fingerprint": "requires login",
+    "lines": "requires login",
+    "validation_state": "NO_VALIDATOR",
+    "engine_kind": "OSS"
+   }
+  },
+  {
+   "check_id": "express-taint-eval",
+   "path": "{ROOT}\\server.js",
+   "start": {
+    "line": 65,
+    "col": 24,
+    "offset": 2218
+   },
+   "end": {
+    "line": 65,
+    "col": 44,
+    "offset": 2238
+   },
+   "extra": {
+    "message": "Request data is evaluated as code.",
+    "metadata": {
+     "secscope_rule": "SAST-EVAL-001",
+     "confidence": "high"
+    },
+    "severity": "ERROR",
+    "fingerprint": "requires login",
+    "lines": "requires login",
+    "validation_state": "NO_VALIDATOR",
+    "engine_kind": "OSS"
+   }
+  },
+  {
+   "check_id": "express-taint-proto-pollution",
+   "path": "{ROOT}\\server.js",
+   "start": {
+    "line": 73,
+    "col": 20,
+    "offset": 2462
+   },
+   "end": {
+    "line": 73,
+    "col": 41,
+    "offset": 2483
+   },
+   "extra": {
+    "message": "Request data reaches a deep-merge helper (prototype pollution).",
+    "metadata": {
+     "secscope_rule": "SAST-PROTO-001",
+     "confidence": "high"
+    },
+    "severity": "ERROR",
+    "fingerprint": "requires login",
+    "lines": "requires login",
+    "validation_state": "NO_VALIDATOR",
+    "engine_kind": "OSS"
+   }
+  }
+ ],
+ "errors": [],
+ "paths": {
+  "scanned": [
+   "{ROOT}\\public\\app.js",
+   "{ROOT}\\server.js"
+  ]
+ },
+ "engine_requested": "OSS",
+ "skipped_rules": [],
+ "profiling_results": []
+}

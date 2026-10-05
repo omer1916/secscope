@@ -1,0 +1,1295 @@
+{
+ "SchemaVersion": 2,
+ "Trivy": {
+  "Version": "0.75.0"
+ },
+ "ReportID": "01a10d4f-a0a2-76b7-9ebf-abab0f352e0b",
+ "CreatedAt": "2026-10-05T21:24:44.7064402+03:00",
+ "ArtifactName": "{ROOT}",
+ "ArtifactType": "filesystem",
+ "Results": [
+  {
+   "Target": "requirements.txt",
+   "Class": "lang-pkgs",
+   "Type": "pip",
+   "Vulnerabilities": [
+    {
+     "VulnerabilityID": "CVE-2023-30861",
+     "VendorIDs": [
+      "GHSA-m2qf-hxjv-5gpq"
+     ],
+     "PkgName": "flask",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/flask@2.2.2",
+      "UID": "cd4db4838070484b"
+     },
+     "InstalledVersion": "2.2.2",
+     "FixedVersion": "2.3.2, 2.2.5",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2023-30861",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:2de50ceefd1d5212db2a81c3bf0f8f872ae2711556de9d54b93baf19abfd799d",
+     "Title": "flask: Possible disclosure of permanent session cookie due to missing Vary: Cookie header",
+     "Description": "Flask is a lightweight WSGI web application framework. When all of the following conditions are met, a response containing data intended for one client may be cached and subsequently sent by the proxy to other clients. If the proxy also caches `Set-Cookie` headers, it may send one client's `session` cookie to other clients. The severity depends on the application's use of the session and the proxy's behavior regarding cookies. The risk depends on all these conditions being met.\n\n1. The application must be hosted behind a caching proxy that does not strip cookies or ignore responses with cookies.\n2. The application sets `session.permanent = True`\n3. The application does not access or modify the session at any point during a request.\n4. `SESSION_REFRESH_EACH_REQUEST` enabled (the default).\n5. The application does not set a `Cache-Control` header to indicate that a page is private or should not be cached.\n\nThis happens because vulnerable versions of Flask only set the `Vary: Cookie` header when the session is accessed or modified, not when it is refreshed (re-sent to update the expiration) without being accessed or modified. This issue has been fixed in versions 2.3.2 and 2.2.5.",
+     "Severity": "HIGH",
+     "CweIDs": [
+      "CWE-539"
+     ],
+     "VendorSeverity": {
+      "amazon": 3,
+      "ghsa": 3,
+      "nvd": 3,
+      "oracle-oval": 3,
+      "redhat": 3,
+      "ubuntu": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+       "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N",
+       "V3Score": 7.5,
+       "V40Score": 8.7
+      },
+      "nvd": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+       "V3Score": 7.5
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+       "V3Score": 7.5
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2023-30861",
+      "https://github.com/pallets/flask",
+      "https://github.com/pallets/flask/commit/70f906c51ce49c485f1d355703e9cc3386b1cc2b",
+      "https://github.com/pallets/flask/commit/8646edca6f47e2cd57464081b3911218d4734f8d%20%282.2.5%29",
+      "https://github.com/pallets/flask/commit/8705dd39c4fa563ea0fe0bf84c85da8fcc98b88d%20%282.3.2%29",
+      "https://github.com/pallets/flask/commit/afd63b16170b7c047f5758eb910c416511e9c965",
+      "https://github.com/pallets/flask/releases/tag/2.2.5",
+      "https://github.com/pallets/flask/releases/tag/2.3.2",
+      "https://github.com/pallets/flask/security/advisories/GHSA-m2qf-hxjv-5gpq",
+      "https://github.com/pypa/advisory-database/tree/main/vulns/flask/PYSEC-2023-62.yaml",
+      "https://linux.oracle.com/cve/CVE-2023-30861.html",
+      "https://linux.oracle.com/errata/ELSA-2023-12710.html",
+      "https://lists.debian.org/debian-lts-announce/2023/08/msg00024.html",
+      "https://nvd.nist.gov/vuln/detail/CVE-2023-30861",
+      "https://security.netapp.com/advisory/ntap-20230818-0006",
+      "https://security.netapp.com/advisory/ntap-20230818-0006/",
+      "https://ubuntu.com/security/notices/USN-6111-1",
+      "https://www.cve.org/CVERecord?id=CVE-2023-30861",
+      "https://www.debian.org/security/2023/dsa-5442"
+     ],
+     "PublishedDate": "2023-05-02T18:15:52.373Z",
+     "LastModifiedDate": "2026-06-17T05:55:47.853Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-27205",
+     "VendorIDs": [
+      "GHSA-68rp-wp8r-4726"
+     ],
+     "PkgName": "flask",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/flask@2.2.2",
+      "UID": "cd4db4838070484b"
+     },
+     "InstalledVersion": "2.2.2",
+     "FixedVersion": "3.1.3",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-27205",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:f274ff1e302131bc77cbe0f2e3049f060b30b9dc4aee6eb0e681274cc23e1575",
+     "Title": "flask: Flask: Information disclosure via improper caching of session data",
+     "Description": "Flask is a web server gateway interface (WSGI) web application framework. In versions 3.1.2 and below, when the session object is accessed, Flask should set the Vary: Cookie header., resulting in a Use of Cache Containing Sensitive Information vulnerability. The logic instructs caches not to cache the response, as it may contain information specific to a logged in user. This is handled in most cases, but some forms of access such as the Python in operator were overlooked. The severity and risk depend on the application being hosted behind a caching proxy that doesn't ignore responses with cookies, not setting a Cache-Control header to mark pages as private or non-cacheable, and accessing the session in a way that only touches keys without reading values or mutating the session. The issue has been fixed in version 3.1.3.",
+     "Severity": "LOW",
+     "CweIDs": [
+      "CWE-524"
+     ],
+     "VendorSeverity": {
+      "amazon": 2,
+      "ghsa": 1,
+      "nvd": 2,
+      "redhat": 2,
+      "ubuntu": 1
+     },
+     "CVSS": {
+      "ghsa": {
+       "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N",
+       "V40Score": 2.3
+      },
+      "nvd": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:N",
+       "V3Score": 4.3
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:N",
+       "V3Score": 4.3
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2026-27205",
+      "https://github.com/pallets/flask",
+      "https://github.com/pallets/flask/commit/089cb86dd22bff589a4eafb7ab8e42dc357623b4",
+      "https://github.com/pallets/flask/releases/tag/3.1.3",
+      "https://github.com/pallets/flask/security/advisories/GHSA-68rp-wp8r-4726",
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-27205",
+      "https://ubuntu.com/security/notices/USN-8104-1",
+      "https://www.cve.org/CVERecord?id=CVE-2026-27205"
+     ],
+     "PublishedDate": "2026-02-21T06:17:00.91Z",
+     "LastModifiedDate": "2026-06-17T10:26:50.7Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-102268",
+     "VendorIDs": [
+      "GHSA-ffc3-869f-jxw9"
+     ],
+     "PkgName": "pyjwt",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/pyjwt@2.4.0",
+      "UID": "a2a184fcf732dfc2"
+     },
+     "InstalledVersion": "2.4.0",
+     "FixedVersion": "2.14.0",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-102268",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:2a977af5ec946e2768be14d138e504846bda0625924c46d02d9f5a5a97e523df",
+     "Title": "PyJWT is a Python implementation of JSON Web Token standards. Prior to ...",
+     "Description": "PyJWT is a Python implementation of JSON Web Token standards. Prior to 2.14.0, is_pem_format in jwt/utils.py is affected because is_pem_format does not recognize every PEM representation accepted by the cryptography loader. This occurs when an application mixes HMAC and asymmetric algorithms and supplies a mutated public-key PEM as raw key bytes. As a result, HMACAlgorithm.prepare_key treats the unrecognized asymmetric public key as an HMAC secret. Consequently, an attacker who knows the public key can forge authenticated HMAC tokens. This issue is fixed in version 2.14.0.",
+     "Severity": "CRITICAL",
+     "CweIDs": [
+      "CWE-347"
+     ],
+     "VendorSeverity": {
+      "ghsa": 4
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+       "V3Score": 9.1
+      }
+     },
+     "References": [
+      "https://advisory.echohq.com/cve/CVE-2026-102268",
+      "https://github.com/jpadilla/pyjwt",
+      "https://github.com/jpadilla/pyjwt/commit/8b4e233a22206b34ec1186e912e75c0b2396ac07",
+      "https://github.com/jpadilla/pyjwt/releases/tag/2.14.0",
+      "https://github.com/jpadilla/pyjwt/security/advisories/GHSA-ffc3-869f-jxw9",
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-102268"
+     ],
+     "PublishedDate": "2026-09-28T21:17:14.6Z",
+     "LastModifiedDate": "2026-09-30T19:38:27.293Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-102267",
+     "VendorIDs": [
+      "GHSA-9v7f-9g4p-ffgj"
+     ],
+     "PkgName": "pyjwt",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/pyjwt@2.4.0",
+      "UID": "a2a184fcf732dfc2"
+     },
+     "InstalledVersion": "2.4.0",
+     "FixedVersion": "2.14.0",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-102267",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:552c6eb3828798bcd2fc7363d97ebb091ee579c3dbc9367c2d5889ecf211185e",
+     "Title": "pyjwt: pyjwt: Verification key substitution via unvalidated JWKS redirects",
+     "Description": "PyJWT is a Python implementation of JSON Web Token standards. Prior to 2.14.0, PyJWT PyJWKClient is affected because redirect destinations are not revalidated against the JWKS trust boundary. This occurs when a configured trusted JWKS endpoint returns an attacker-influenced redirect. As a result, PyJWKClient follows the redirect and consumes the redirected response as key material. Consequently, forwarded credentials may be disclosed or verification keys may be substituted. This issue is fixed in version 2.14.0.",
+     "Severity": "HIGH",
+     "CweIDs": [
+      "CWE-200",
+      "CWE-345",
+      "CWE-918"
+     ],
+     "VendorSeverity": {
+      "ghsa": 3,
+      "redhat": 3
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+       "V3Score": 7.4
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+       "V3Score": 7.4
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2026-102267",
+      "https://advisory.echohq.com/cve/CVE-2026-102267",
+      "https://github.com/jpadilla/pyjwt",
+      "https://github.com/jpadilla/pyjwt/commit/0a795b8e1f6ef08f634aa7086fc41cc6d5ce3e56",
+      "https://github.com/jpadilla/pyjwt/releases/tag/2.14.0",
+      "https://github.com/jpadilla/pyjwt/security/advisories/GHSA-9v7f-9g4p-ffgj",
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-102267",
+      "https://www.cve.org/CVERecord?id=CVE-2026-102267"
+     ],
+     "PublishedDate": "2026-09-28T21:17:14.43Z",
+     "LastModifiedDate": "2026-10-01T15:17:25.35Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-102271",
+     "VendorIDs": [
+      "GHSA-p4g4-x82p-q773"
+     ],
+     "PkgName": "pyjwt",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/pyjwt@2.4.0",
+      "UID": "a2a184fcf732dfc2"
+     },
+     "InstalledVersion": "2.4.0",
+     "FixedVersion": "2.14.0",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-102271",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:2409eb3d7dd2c669eeef6438a41585654fad72b1b95f7bbb691fdb6ee390280c",
+     "Title": "pyjwt: PyJWT: Authentication bypass via acceptance of DER public keys as HMAC secrets",
+     "Description": "PyJWT is a Python implementation of JSON Web Token standards. From 2.4.0 until 2.14.0, PyJWT HMACAlgorithm.prepare_key is affected because asymmetric-key guard relies on textual markers that are absent from DER encoding. This occurs when an application mixes HMAC and asymmetric algorithms and supplies a DER public key as the shared verification key. As a result, PyJWT uses public DER bytes as an HMAC secret. Consequently, an attacker who knows the public key can forge authenticated HMAC tokens. This issue is fixed in version 2.14.0.",
+     "Severity": "HIGH",
+     "CweIDs": [
+      "CWE-347"
+     ],
+     "VendorSeverity": {
+      "ghsa": 3,
+      "redhat": 3
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+       "V3Score": 7.4
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+       "V3Score": 7.4
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2026-102271",
+      "https://advisory.echohq.com/cve/CVE-2026-102271",
+      "https://github.com/jpadilla/pyjwt",
+      "https://github.com/jpadilla/pyjwt/commit/2798504fa2663364573cf2d1043d8d7fef389499",
+      "https://github.com/jpadilla/pyjwt/releases/tag/2.14.0",
+      "https://github.com/jpadilla/pyjwt/security/advisories/GHSA-p4g4-x82p-q773",
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-102271",
+      "https://www.cve.org/CVERecord?id=CVE-2026-102271"
+     ],
+     "PublishedDate": "2026-09-28T21:17:15.11Z",
+     "LastModifiedDate": "2026-10-01T15:17:25.47Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-32597",
+     "VendorIDs": [
+      "GHSA-752w-5fwx-jx9f"
+     ],
+     "PkgName": "pyjwt",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/pyjwt@2.4.0",
+      "UID": "a2a184fcf732dfc2"
+     },
+     "InstalledVersion": "2.4.0",
+     "FixedVersion": "2.12.0",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-32597",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:af83cdc1c2f95bec26f2d4a5862e22607a8bfd2d11bfb1cebe1b611ff4646034",
+     "Title": "pyjwt: PyJWT accepts unknown `crit` header extensions (RFC 7515 §4.1.11 MUST violation)",
+     "Description": "PyJWT is a JSON Web Token implementation in Python. Prior to 2.12.0, PyJWT does not validate the crit (Critical) Header Parameter defined in RFC 7515 §4.1.11. When a JWS token contains a crit array listing extensions that PyJWT does not understand, the library accepts the token instead of rejecting it. This violates the MUST requirement in the RFC. This vulnerability is fixed in 2.12.0.",
+     "Severity": "HIGH",
+     "CweIDs": [
+      "CWE-345",
+      "CWE-863",
+      "CWE-347"
+     ],
+     "VendorSeverity": {
+      "alma": 3,
+      "amazon": 2,
+      "azure": 3,
+      "ghsa": 3,
+      "oracle-oval": 3,
+      "photon": 3,
+      "redhat": 3,
+      "rocky": 3,
+      "ubuntu": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+       "V3Score": 7.5
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+       "V3Score": 7.5
+      }
+     },
+     "References": [
+      "https://access.redhat.com/errata/RHSA-2026:10140",
+      "https://access.redhat.com/errata/RHSA-2026:10141",
+      "https://access.redhat.com/errata/RHSA-2026:10184",
+      "https://access.redhat.com/errata/RHSA-2026:12176",
+      "https://access.redhat.com/errata/RHSA-2026:13508",
+      "https://access.redhat.com/errata/RHSA-2026:13512",
+      "https://access.redhat.com/errata/RHSA-2026:13545",
+      "https://access.redhat.com/errata/RHSA-2026:13553",
+      "https://access.redhat.com/errata/RHSA-2026:13672",
+      "https://access.redhat.com/errata/RHSA-2026:13916",
+      "https://access.redhat.com/errata/RHSA-2026:17083",
+      "https://access.redhat.com/errata/RHSA-2026:19138",
+      "https://access.redhat.com/errata/RHSA-2026:19355",
+      "https://access.redhat.com/errata/RHSA-2026:19375",
+      "https://access.redhat.com/errata/RHSA-2026:19712",
+      "https://access.redhat.com/errata/RHSA-2026:21431",
+      "https://access.redhat.com/errata/RHSA-2026:21517",
+      "https://access.redhat.com/errata/RHSA-2026:22330",
+      "https://access.redhat.com/errata/RHSA-2026:24977",
+      "https://access.redhat.com/errata/RHSA-2026:26226",
+      "https://access.redhat.com/errata/RHSA-2026:37275",
+      "https://access.redhat.com/errata/RHSA-2026:42644",
+      "https://access.redhat.com/errata/RHSA-2026:6568",
+      "https://access.redhat.com/errata/RHSA-2026:6720",
+      "https://access.redhat.com/errata/RHSA-2026:6912",
+      "https://access.redhat.com/errata/RHSA-2026:6926",
+      "https://access.redhat.com/errata/RHSA-2026:8437",
+      "https://access.redhat.com/errata/RHSA-2026:8746",
+      "https://access.redhat.com/errata/RHSA-2026:8747",
+      "https://access.redhat.com/errata/RHSA-2026:8748",
+      "https://access.redhat.com/security/cve/CVE-2026-32597",
+      "https://advisory.echohq.com/cve/CVE-2026-32597",
+      "https://bugzilla.redhat.com/2438762",
+      "https://bugzilla.redhat.com/2447194",
+      "https://bugzilla.redhat.com/2448553",
+      "https://bugzilla.redhat.com/show_bug.cgi?id=2438762",
+      "https://bugzilla.redhat.com/show_bug.cgi?id=2447194",
+      "https://bugzilla.redhat.com/show_bug.cgi?id=2448553",
+      "https://creativecommons.org/licenses/by/4.0/",
+      "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-26007",
+      "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-30922",
+      "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32597",
+      "https://errata.almalinux.org/8/ALSA-2026-12176.html",
+      "https://errata.rockylinux.org/RLSA-2026:19355",
+      "https://github.com/jpadilla/pyjwt",
+      "https://github.com/jpadilla/pyjwt/security/advisories/GHSA-752w-5fwx-jx9f",
+      "https://github.com/pypa/advisory-database/tree/main/vulns/pyjwt/PYSEC-2026-120.yaml",
+      "https://linux.oracle.com/cve/CVE-2026-32597.html",
+      "https://linux.oracle.com/errata/ELSA-2026-19355.html",
+      "https://lists.debian.org/debian-lts-announce/2026/05/msg00008.html",
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-32597",
+      "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-32597.json",
+      "https://ubuntu.com/security/notices/USN-8133-1",
+      "https://www.cve.org/CVERecord?id=CVE-2026-32597"
+     ],
+     "PublishedDate": "2026-03-13T19:55:09.5Z",
+     "LastModifiedDate": "2026-09-10T13:18:12.027Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-48526",
+     "VendorIDs": [
+      "GHSA-xgmm-8j9v-c9wx"
+     ],
+     "PkgName": "pyjwt",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/pyjwt@2.4.0",
+      "UID": "a2a184fcf732dfc2"
+     },
+     "InstalledVersion": "2.4.0",
+     "FixedVersion": "2.13.0",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-48526",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:7ec2a630c2e6e3bb06c932034d260588512de421c12b8a57459d53260005c195",
+     "Title": "python-pyjwt: PyJWT: Authentication bypass due to forged JSON Web Tokens",
+     "Description": "PyJWT is a JSON Web Token implementation in Python. Prior to 2.13.0, when the verifier is decoding JSON Web Tokens, while supporting both asymmetric and HMAC algorithms, the library does not validate use of JSON Web Keys in HMAC algorithm, allowing attacker to use the issuer public key as the secret key for HMAC algorithm. This vulnerability is fixed in 2.13.0.",
+     "Severity": "HIGH",
+     "CweIDs": [
+      "CWE-287",
+      "CWE-347"
+     ],
+     "VendorSeverity": {
+      "alma": 3,
+      "amazon": 3,
+      "azure": 3,
+      "ghsa": 3,
+      "oracle-oval": 3,
+      "photon": 3,
+      "redhat": 3,
+      "rocky": 3,
+      "ubuntu": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+       "V3Score": 7.4
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+       "V3Score": 7.4
+      }
+     },
+     "References": [
+      "https://access.redhat.com/errata/RHSA-2026:25902",
+      "https://access.redhat.com/errata/RHSA-2026:25928",
+      "https://access.redhat.com/errata/RHSA-2026:26206",
+      "https://access.redhat.com/errata/RHSA-2026:28571",
+      "https://access.redhat.com/errata/RHSA-2026:30076",
+      "https://access.redhat.com/errata/RHSA-2026:30088",
+      "https://access.redhat.com/errata/RHSA-2026:30089",
+      "https://access.redhat.com/errata/RHSA-2026:33683",
+      "https://access.redhat.com/errata/RHSA-2026:34160",
+      "https://access.redhat.com/errata/RHSA-2026:34365",
+      "https://access.redhat.com/errata/RHSA-2026:34374",
+      "https://access.redhat.com/errata/RHSA-2026:35835",
+      "https://access.redhat.com/errata/RHSA-2026:35836",
+      "https://access.redhat.com/errata/RHSA-2026:35837",
+      "https://access.redhat.com/errata/RHSA-2026:35845",
+      "https://access.redhat.com/errata/RHSA-2026:36350",
+      "https://access.redhat.com/errata/RHSA-2026:37275",
+      "https://access.redhat.com/errata/RHSA-2026:40967",
+      "https://access.redhat.com/errata/RHSA-2026:41066",
+      "https://access.redhat.com/errata/RHSA-2026:42132",
+      "https://access.redhat.com/errata/RHSA-2026:42142",
+      "https://access.redhat.com/errata/RHSA-2026:42144",
+      "https://access.redhat.com/errata/RHSA-2026:42644",
+      "https://access.redhat.com/errata/RHSA-2026:42796",
+      "https://access.redhat.com/errata/RHSA-2026:43038",
+      "https://access.redhat.com/errata/RHSA-2026:48085",
+      "https://access.redhat.com/errata/RHSA-2026:50222",
+      "https://access.redhat.com/errata/RHSA-2026:50223",
+      "https://access.redhat.com/errata/RHSA-2026:50263",
+      "https://access.redhat.com/errata/RHSA-2026:50319",
+      "https://access.redhat.com/errata/RHSA-2026:50336",
+      "https://access.redhat.com/errata/RHSA-2026:50340",
+      "https://access.redhat.com/errata/RHSA-2026:50904",
+      "https://access.redhat.com/errata/RHSA-2026:60520",
+      "https://access.redhat.com/security/cve/CVE-2026-48526",
+      "https://advisory.echohq.com/cve/CVE-2026-48526",
+      "https://bugzilla.redhat.com/2482734",
+      "https://bugzilla.redhat.com/show_bug.cgi?id=2482734",
+      "https://creativecommons.org/licenses/by/4.0/",
+      "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-48526",
+      "https://errata.almalinux.org/10/ALSA-2026-25902.html",
+      "https://errata.rockylinux.org/RLSA-2026:26206",
+      "https://github.com/jpadilla/pyjwt",
+      "https://github.com/jpadilla/pyjwt/security/advisories/GHSA-xgmm-8j9v-c9wx",
+      "https://github.com/pypa/advisory-database/tree/main/vulns/pyjwt/PYSEC-2026-179.yaml",
+      "https://linux.oracle.com/cve/CVE-2026-48526.html",
+      "https://linux.oracle.com/errata/ELSA-2026-26206.html",
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-48526",
+      "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-48526.json",
+      "https://ubuntu.com/security/notices/USN-8823-1",
+      "https://www.cve.org/CVERecord?id=CVE-2026-48526"
+     ],
+     "PublishedDate": "2026-05-28T16:16:29.657Z",
+     "LastModifiedDate": "2026-09-10T13:20:19.447Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-101917",
+     "VendorIDs": [
+      "GHSA-2gx3-rcp4-g85q"
+     ],
+     "PkgName": "pyjwt",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/pyjwt@2.4.0",
+      "UID": "a2a184fcf732dfc2"
+     },
+     "InstalledVersion": "2.4.0",
+     "FixedVersion": "2.14.0",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-101917",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:c4dc38d531b15ce2b82bad9ead0a3b43fefa25b29ab928689dca31771c8e81ca",
+     "Title": "pyjwt: PyJWT: Denial of Service via outbound request amplification on unknown key identifiers",
+     "Description": "PyJWT is a Python implementation of JSON Web Token standards. Prior to 2.14.0, PyJWT get_signing_key_from_jwt is affected because unknown kid misses force refreshes without a negative cache or minimum refresh interval. This occurs when unauthenticated tokens repeatedly use the same unknown kid or varying kid values absent from the cached JWKS. As a result, each cache miss causes PyJWKClient to refresh the JWKS. Consequently, attacker traffic can amplify outbound requests to the configured JWKS endpoint. This issue is fixed in version 2.14.0.",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-770"
+     ],
+     "VendorSeverity": {
+      "ghsa": 2,
+      "redhat": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+       "V3Score": 5.3
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+       "V3Score": 5.3
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2026-101917",
+      "https://advisory.echohq.com/cve/CVE-2026-101917",
+      "https://github.com/jpadilla/pyjwt",
+      "https://github.com/jpadilla/pyjwt/commit/ba4853a75fb9676362da17f67d0f64bd18afd4e1",
+      "https://github.com/jpadilla/pyjwt/releases/tag/2.14.0",
+      "https://github.com/jpadilla/pyjwt/security/advisories/GHSA-2gx3-rcp4-g85q",
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-101917",
+      "https://www.cve.org/CVERecord?id=CVE-2026-101917"
+     ],
+     "PublishedDate": "2026-09-28T21:17:13.21Z",
+     "LastModifiedDate": "2026-09-30T19:38:27.293Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-101918",
+     "VendorIDs": [
+      "GHSA-42vr-xj54-vc7v"
+     ],
+     "PkgName": "pyjwt",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/pyjwt@2.4.0",
+      "UID": "a2a184fcf732dfc2"
+     },
+     "InstalledVersion": "2.4.0",
+     "FixedVersion": "2.15.0",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-101918",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:dcffd96e070298d41066631462416b41ec5d4963a8fc34ff8528d69f1908214f",
+     "Title": "pyjwt: PyJWT: Denial of Service via deeply nested JSON token payload",
+     "Description": "PyJWT is a Python implementation of JSON Web Token standards. From 2.0.0a1 until 2.15.0, PyJWT PyJWKClient.get_signing_key_from_jwt is affected because payload parser catches ValueError but not RecursionError. This occurs when an attacker-controlled recursively nested payload reaches json.loads. As a result, documented PyJWT exception handling does not contain the failure. Consequently, an unauthenticated request can raise an exception that may produce an HTTP 500 response. The advisory-defined affected implementation also includes jwt/api_jwt.py, verify_signature=False. This issue is fixed in version 2.15.0.",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-248"
+     ],
+     "VendorSeverity": {
+      "ghsa": 2,
+      "redhat": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+       "V3Score": 5.3
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+       "V3Score": 5.3
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2026-101918",
+      "https://advisory.echohq.com/cve/CVE-2026-101918",
+      "https://github.com/jpadilla/pyjwt",
+      "https://github.com/jpadilla/pyjwt/commit/5fde08a6cf906aa7698de2d6391d88b73006b17b",
+      "https://github.com/jpadilla/pyjwt/releases/tag/2.15.0",
+      "https://github.com/jpadilla/pyjwt/security/advisories/GHSA-42vr-xj54-vc7v",
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-101918",
+      "https://www.cve.org/CVERecord?id=CVE-2026-101918"
+     ],
+     "PublishedDate": "2026-09-28T21:17:13.41Z",
+     "LastModifiedDate": "2026-09-30T19:38:27.293Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-102269",
+     "VendorIDs": [
+      "GHSA-hxm8-2xgr-2p9m"
+     ],
+     "PkgName": "pyjwt",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/pyjwt@2.4.0",
+      "UID": "a2a184fcf732dfc2"
+     },
+     "InstalledVersion": "2.4.0",
+     "FixedVersion": "2.14.0",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-102269",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:2ee482fec18636e28d722baf764678d29bf326a95d89cb8e638686f15b89cab4",
+     "Title": "pyjwt: PyJWT: Token revocation bypass via non-canonical signature decoding",
+     "Description": "PyJWT is a Python implementation of JSON Web Token standards. Prior to 2.14.0, PyJWT signature segment is affected because signature segment decoding accepts characters outside the canonical Base64URL representation. This occurs when non-Base64URL characters are appended to a valid compact JWS signature segment. As a result, base64url_decode produces the same signature bytes for different serialized segments. Consequently, raw-token revocation checks can fail to recognize an equivalent modified token. This issue is fixed in version 2.14.0.",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-180"
+     ],
+     "VendorSeverity": {
+      "ghsa": 2,
+      "redhat": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+       "V3Score": 4.8
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+       "V3Score": 4.8
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2026-102269",
+      "https://advisory.echohq.com/cve/CVE-2026-102269",
+      "https://github.com/jpadilla/pyjwt",
+      "https://github.com/jpadilla/pyjwt/commit/e6f48401001609a8f99e71fcaf355fb895d508a8",
+      "https://github.com/jpadilla/pyjwt/releases/tag/2.14.0",
+      "https://github.com/jpadilla/pyjwt/security/advisories/GHSA-hxm8-2xgr-2p9m",
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-102269",
+      "https://www.cve.org/CVERecord?id=CVE-2026-102269"
+     ],
+     "PublishedDate": "2026-09-28T21:17:14.773Z",
+     "LastModifiedDate": "2026-09-30T19:38:27.293Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-102270",
+     "VendorIDs": [
+      "GHSA-jwrc-g2q2-pq5p"
+     ],
+     "PkgName": "pyjwt",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/pyjwt@2.4.0",
+      "UID": "a2a184fcf732dfc2"
+     },
+     "InstalledVersion": "2.4.0",
+     "FixedVersion": "2.14.0",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-102270",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:fe842f20c18cc503107295f9391c3f46abdca85c9cda9787acb8988f0be37eab",
+     "Title": "pyjwt: pyjwt: Denial of Service via regular expression backtracking in is_pem_format",
+     "Description": "PyJWT is a Python implementation of JSON Web Token standards. Prior to 2.14.0, PyJWT is_pem_format is affected because lazy PEM regular expression backtracks extensively. This occurs when a certificate-like input contains repeated BEGIN markers without a matching END marker. As a result, is_pem_format performs unbounded backtracking while searching for a PEM end marker. Consequently, an attacker can cause intensive CPU consumption. This issue is fixed in version 2.14.0.",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-1333"
+     ],
+     "VendorSeverity": {
+      "ghsa": 2,
+      "redhat": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:N/I:N/A:H",
+       "V3Score": 4.4
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:N/I:N/A:H",
+       "V3Score": 4.4
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2026-102270",
+      "https://advisory.echohq.com/cve/CVE-2026-102270",
+      "https://github.com/jpadilla/pyjwt",
+      "https://github.com/jpadilla/pyjwt/commit/8b4e233a22206b34ec1186e912e75c0b2396ac07",
+      "https://github.com/jpadilla/pyjwt/releases/tag/2.14.0",
+      "https://github.com/jpadilla/pyjwt/security/advisories/GHSA-jwrc-g2q2-pq5p",
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-102270",
+      "https://www.cve.org/CVERecord?id=CVE-2026-102270"
+     ],
+     "PublishedDate": "2026-09-28T21:17:14.943Z",
+     "LastModifiedDate": "2026-09-30T19:38:27.293Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-48522",
+     "VendorIDs": [
+      "GHSA-993g-76c3-p5m4"
+     ],
+     "PkgName": "pyjwt",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/pyjwt@2.4.0",
+      "UID": "a2a184fcf732dfc2"
+     },
+     "InstalledVersion": "2.4.0",
+     "FixedVersion": "2.13.0",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-48522",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:1e54c2a203c0c3f921c08884531d15a666ae6dae30a406f491ade67caeada11b",
+     "Title": "python-pyjwt: PyJWT: Server-Side Request Forgery (SSRF) via uncontrolled URL fetching in PyJWKClient",
+     "Description": "PyJWT is a JSON Web Token implementation in Python. Prior to 2.13.0, PyJWKClient passes its uri argument directly to urllib.request.urlopen() which uses Python stdlib's default OpenerDirector registering HTTPHandler, HTTPSHandler, FTPHandler, FileHandler, and DataHandler. There is currently no documented option to restrict which schemes PyJWKClient will fetch. If an application's jku URL ingestion path accepts attacker-influenced URLs (e.g., from JWT header, configuration file, OAuth flow parameter), the attacker can cause PyJWKClient to read arbitrary local files via file:// (SSRF on local filesystem), cause PyJWKClient to attempt FTP / data-URI fetches (broader SSRF surface), or forge tokens that PyJWT verifies as valid. The library does not directly return non-HTTP(S) URI contents to the attacker; the chained \"plant a JWKS to forge tokens\" scenario described in the original report requires additional application-layer flaws (attacker write access to a filesystem path, untrusted jku derivation) that this fix does not address. This vulnerability is fixed in 2.13.0.",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-441",
+      "CWE-918"
+     ],
+     "VendorSeverity": {
+      "amazon": 2,
+      "azure": 2,
+      "ghsa": 2,
+      "photon": 2,
+      "redhat": 2,
+      "ubuntu": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:L/A:N",
+       "V3Score": 4.2
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:L/A:N",
+       "V3Score": 4.2
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2026-48522",
+      "https://advisory.echohq.com/cve/CVE-2026-48522",
+      "https://github.com/github/advisory-database/pull/8521",
+      "https://github.com/jpadilla/pyjwt",
+      "https://github.com/jpadilla/pyjwt/commit/95791b1759b8aa4f2203575d344d5c78564cdc81",
+      "https://github.com/jpadilla/pyjwt/security/advisories/GHSA-993g-76c3-p5m4",
+      "https://github.com/pypa/advisory-database/tree/main/vulns/pyjwt/PYSEC-2026-175.yaml",
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-48522",
+      "https://ubuntu.com/security/notices/USN-8823-1",
+      "https://www.cve.org/CVERecord?id=CVE-2026-48522"
+     ],
+     "PublishedDate": "2026-05-28T16:16:29.15Z",
+     "LastModifiedDate": "2026-06-17T10:55:03.53Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-48524",
+     "VendorIDs": [
+      "GHSA-fhv5-28vv-h8m8"
+     ],
+     "PkgName": "pyjwt",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/pyjwt@2.4.0",
+      "UID": "a2a184fcf732dfc2"
+     },
+     "InstalledVersion": "2.4.0",
+     "FixedVersion": "2.13.0",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-48524",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:3159c9d4ed4c765cec457f53d627b83a42af88d0f03dfcab2cfe8483a2c75633",
+     "Title": "python-pyjwt: PyJWT: Denial of Service via unverified JSON Web Token key IDs",
+     "Description": "PyJWT is a JSON Web Token implementation in Python. Prior to 2.13.0, PyJWKClient.get_signing_key() forces a fresh HTTP request to the JWKS endpoint for every JWT with an unknown kid value, with no rate limiting. Since kid comes from the unverified token header, an attacker can trigger unlimited outbound requests. The vulnerability surfaces only when a JWKS fetch fails; an attacker can attempt to provoke that with sustained unknown-kid traffic, but the outcome depends on upstream JWKS-endpoint behavior (rate limiting, transient errors) which is beyond the attacker's control. This vulnerability is fixed in 2.13.0.",
+     "Severity": "LOW",
+     "CweIDs": [
+      "CWE-460",
+      "CWE-755"
+     ],
+     "VendorSeverity": {
+      "azure": 1,
+      "ghsa": 1,
+      "photon": 1,
+      "redhat": 2,
+      "ubuntu": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L",
+       "V3Score": 3.7
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+       "V3Score": 5.9
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2026-48524",
+      "https://advisory.echohq.com/cve/CVE-2026-48524",
+      "https://github.com/github/advisory-database/pull/8522",
+      "https://github.com/jpadilla/pyjwt",
+      "https://github.com/jpadilla/pyjwt/security/advisories/GHSA-fhv5-28vv-h8m8",
+      "https://github.com/pypa/advisory-database/tree/main/vulns/pyjwt/PYSEC-2026-177.yaml",
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-48524",
+      "https://ubuntu.com/security/notices/USN-8823-1",
+      "https://www.cve.org/CVERecord?id=CVE-2026-48524"
+     ],
+     "PublishedDate": "2026-05-28T16:16:29.403Z",
+     "LastModifiedDate": "2026-06-17T10:55:03.867Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2024-34069",
+     "VendorIDs": [
+      "GHSA-2g68-c3qc-8985"
+     ],
+     "PkgName": "werkzeug",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/werkzeug@2.2.3",
+      "UID": "e2e433f87a4a41e3"
+     },
+     "InstalledVersion": "2.2.3",
+     "FixedVersion": "3.0.3",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2024-34069",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:b3cfdefbfbd175b0257fd7ed6a3279d59356bde05e41f9470df3b49e7a8e6c55",
+     "Title": "python-werkzeug: user may execute code on a developer's machine",
+     "Description": "Werkzeug is a comprehensive WSGI web application library. The debugger in affected versions of Werkzeug can allow an attacker to execute code on a developer's machine under some circumstances. This requires the attacker to get the developer to interact with a domain and subdomain they control, and enter the debugger PIN, but if they are successful it allows access to the debugger even if it is only running on localhost. This also requires the attacker to guess a URL in the developer's application that will trigger the debugger. This vulnerability is fixed in 3.0.3.",
+     "Severity": "HIGH",
+     "CweIDs": [
+      "CWE-352"
+     ],
+     "VendorSeverity": {
+      "amazon": 3,
+      "azure": 3,
+      "cbl-mariner": 3,
+      "ghsa": 3,
+      "photon": 3,
+      "redhat": 3,
+      "ubuntu": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H",
+       "V3Score": 7.5
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H",
+       "V3Score": 7.5
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2024-34069",
+      "https://advisory.echohq.com/cve/CVE-2024-34069",
+      "https://github.com/pallets/werkzeug",
+      "https://github.com/pallets/werkzeug/commit/3386395b24c7371db11a5b8eaac0c91da5362692",
+      "https://github.com/pallets/werkzeug/security/advisories/GHSA-2g68-c3qc-8985",
+      "https://lists.debian.org/debian-lts-announce/2025/02/msg00026.html",
+      "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/H4SH32AM3CTPMAAEOIDAN7VU565LO4IR",
+      "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/H4SH32AM3CTPMAAEOIDAN7VU565LO4IR/",
+      "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/HFERFN7PINV4MOGMGA3DPIXJPDCYOEJZ",
+      "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/HFERFN7PINV4MOGMGA3DPIXJPDCYOEJZ/",
+      "https://nvd.nist.gov/vuln/detail/CVE-2024-34069",
+      "https://security.netapp.com/advisory/ntap-20240614-0004",
+      "https://security.netapp.com/advisory/ntap-20240614-0004/",
+      "https://ubuntu.com/security/notices/USN-6799-1",
+      "https://www.cve.org/CVERecord?id=CVE-2024-34069"
+     ],
+     "PublishedDate": "2024-05-06T15:15:23.99Z",
+     "LastModifiedDate": "2026-06-17T07:32:50.85Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2023-46136",
+     "VendorIDs": [
+      "GHSA-hrfv-mqp8-q5rw"
+     ],
+     "PkgName": "werkzeug",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/werkzeug@2.2.3",
+      "UID": "e2e433f87a4a41e3"
+     },
+     "InstalledVersion": "2.2.3",
+     "FixedVersion": "3.0.1, 2.3.8",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2023-46136",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:cfe0830f6c07808fb0f8ce4295832015044180ff92a2cea1534569ce0509b564",
+     "Title": "python-werkzeug: high resource consumption leading to denial of service",
+     "Description": "Werkzeug is a comprehensive WSGI web application library. In versions on the 3.x branch prior to 3.0.1 and on the 2.x branch prior to 2.3.8, if an upload of a file that starts with CR or LF and then is followed by megabytes of data without these characters: all of these bytes are appended chunk by chunk into internal bytearray and lookup for boundary is performed on growing buffer. This allows an attacker to cause a denial of service by sending crafted multipart data to an endpoint that will parse it. The amount of CPU time required can block worker processes from handling legitimate requests. This vulnerability has been patched in version 3.0.1 and 2.3.8.",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-400",
+      "CWE-407",
+      "CWE-787"
+     ],
+     "VendorSeverity": {
+      "azure": 3,
+      "cbl-mariner": 3,
+      "ghsa": 2,
+      "nvd": 3,
+      "photon": 3,
+      "redhat": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:A/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H",
+       "V3Score": 5.7
+      },
+      "nvd": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+       "V3Score": 7.5
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+       "V3Score": 7.5
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2023-46136",
+      "https://advisory.echohq.com/cve/CVE-2023-46136",
+      "https://github.com/pallets/werkzeug",
+      "https://github.com/pallets/werkzeug/commit/b1916c0c083e0be1c9d887ee2f3d696922bfc5c1",
+      "https://github.com/pallets/werkzeug/commit/cbb446fdcada7685fce936ded01b76c08dbd6eb5",
+      "https://github.com/pallets/werkzeug/commit/f2300208d5e2a5076cbbb4c2aad71096fd040ef9",
+      "https://github.com/pallets/werkzeug/commit/f3c803b3ade485a45f12b6d6617595350c0f03e2",
+      "https://github.com/pallets/werkzeug/security/advisories/GHSA-hrfv-mqp8-q5rw",
+      "https://github.com/pypa/advisory-database/tree/main/vulns/werkzeug/PYSEC-2023-221.yaml",
+      "https://nvd.nist.gov/vuln/detail/CVE-2023-46136",
+      "https://security.netapp.com/advisory/ntap-20231124-0008",
+      "https://security.netapp.com/advisory/ntap-20231124-0008/",
+      "https://www.cve.org/CVERecord?id=CVE-2023-46136"
+     ],
+     "PublishedDate": "2023-10-25T18:17:36.753Z",
+     "LastModifiedDate": "2026-06-17T06:30:13.7Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2024-49766",
+     "VendorIDs": [
+      "GHSA-f9vj-2wh5-fj8j"
+     ],
+     "PkgName": "werkzeug",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/werkzeug@2.2.3",
+      "UID": "e2e433f87a4a41e3"
+     },
+     "InstalledVersion": "2.2.3",
+     "FixedVersion": "3.0.6",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2024-49766",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:607143795c2f30f322feaaa887c28c4ed9328ac453b373542635b7e71f18a2e2",
+     "Title": "werkzeug: python-werkzeug: Werkzeug safe_join not safe on Windows",
+     "Description": "Werkzeug is a Web Server Gateway Interface web application library. On Python < 3.11 on Windows, os.path.isabs() does not catch UNC paths like //server/share. Werkzeug's safe_join() relies on this check, and so can produce a path that is not safe, potentially allowing unintended access to data. Applications using Python >= 3.11, or not using Windows, are not vulnerable. Werkzeug version 3.0.6 contains a patch.",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-22"
+     ],
+     "VendorSeverity": {
+      "ghsa": 2,
+      "nvd": 2,
+      "redhat": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V40Vector": "CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N",
+       "V40Score": 6.3
+      },
+      "nvd": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+       "V3Score": 5.3
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+       "V3Score": 3.7
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2024-49766",
+      "https://advisory.echohq.com/cve/CVE-2024-49766",
+      "https://github.com/pallets/werkzeug",
+      "https://github.com/pallets/werkzeug/commit/2767bcb10a7dd1c297d812cc5e6d11a474c1f092",
+      "https://github.com/pallets/werkzeug/releases/tag/3.0.6",
+      "https://github.com/pallets/werkzeug/security/advisories/GHSA-f9vj-2wh5-fj8j",
+      "https://nvd.nist.gov/vuln/detail/CVE-2024-49766",
+      "https://security.netapp.com/advisory/ntap-20250131-0005",
+      "https://security.netapp.com/advisory/ntap-20250131-0005/",
+      "https://www.cve.org/CVERecord?id=CVE-2024-49766"
+     ],
+     "PublishedDate": "2024-10-25T20:15:04.41Z",
+     "LastModifiedDate": "2026-06-17T08:00:24.517Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2024-49767",
+     "VendorIDs": [
+      "GHSA-q34m-jh98-gwm2"
+     ],
+     "PkgName": "werkzeug",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/werkzeug@2.2.3",
+      "UID": "e2e433f87a4a41e3"
+     },
+     "InstalledVersion": "2.2.3",
+     "FixedVersion": "3.0.6",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2024-49767",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:0e330d803f6e855a372a689c0b15901308c8128caca31efe609f1cd29a52ab14",
+     "Title": "werkzeug: python-werkzeug: Werkzeug possible resource exhaustion when parsing file data in forms",
+     "Description": "Werkzeug is a Web Server Gateway Interface web application library. Applications using `werkzeug.formparser.MultiPartParser` corresponding to a version of Werkzeug prior to 3.0.6 to parse `multipart/form-data` requests (e.g. all flask applications) are vulnerable to a relatively simple but effective resource exhaustion (denial of service) attack. A specifically crafted form submission request can cause the parser to allocate and block 3 to 8 times the upload size in main memory. There is no upper limit; a single upload at 1 Gbit/s can exhaust 32 GB of RAM in less than 60 seconds. Werkzeug version 3.0.6 fixes this issue.",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-400",
+      "CWE-770"
+     ],
+     "VendorSeverity": {
+      "azure": 3,
+      "cbl-mariner": 3,
+      "ghsa": 2,
+      "nvd": 3,
+      "photon": 3,
+      "redhat": 2,
+      "ubuntu": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+       "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N",
+       "V3Score": 7.5,
+       "V40Score": 6.9
+      },
+      "nvd": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+       "V3Score": 7.5
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+       "V3Score": 5.3
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2024-49767",
+      "https://advisory.echohq.com/cve/CVE-2024-49767",
+      "https://github.com/pallets/quart/commit/5e78c4169b8eb66b91ead3e62d44721b9e1644ee",
+      "https://github.com/pallets/quart/commit/abb04a512496206de279225340ed022852fbf51f",
+      "https://github.com/pallets/werkzeug",
+      "https://github.com/pallets/werkzeug/commit/50cfeebcb0727e18cc52ffbeb125f4a66551179b",
+      "https://github.com/pallets/werkzeug/commit/cbb446fdcada7685fce936ded01b76c08dbd6eb5",
+      "https://github.com/pallets/werkzeug/releases/tag/3.0.6",
+      "https://github.com/pallets/werkzeug/security/advisories/GHSA-q34m-jh98-gwm2",
+      "https://nvd.nist.gov/vuln/detail/CVE-2024-49767",
+      "https://security.netapp.com/advisory/ntap-20250103-0007",
+      "https://security.netapp.com/advisory/ntap-20250103-0007/",
+      "https://ubuntu.com/security/notices/USN-7093-1",
+      "https://www.cve.org/CVERecord?id=CVE-2024-49767"
+     ],
+     "PublishedDate": "2024-10-25T20:15:04.53Z",
+     "LastModifiedDate": "2026-06-17T08:00:24.643Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2025-66221",
+     "VendorIDs": [
+      "GHSA-hgf8-39gv-g3f2"
+     ],
+     "PkgName": "werkzeug",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/werkzeug@2.2.3",
+      "UID": "e2e433f87a4a41e3"
+     },
+     "InstalledVersion": "2.2.3",
+     "FixedVersion": "3.1.4",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-66221",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:9cc9e5fe5597cdfd49483fabe3c11e9d233c5bdb57e878ae71d5dc1632c180dc",
+     "Title": "Werkzeug: Werkzeug: Denial of service via Windows device names in path segments",
+     "Description": "Werkzeug is a comprehensive WSGI web application library. Prior to version 3.1.4, Werkzeug's safe_join function allows path segments with Windows device names. On Windows, there are special device names such as CON, AUX, etc that are implicitly present and readable in every directory. send_from_directory uses safe_join to safely serve files at user-specified paths under a directory. If the application is running on Windows, and the requested path ends with a special device name, the file will be opened successfully, but reading will hang indefinitely. This issue has been patched in version 3.1.4.",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-67"
+     ],
+     "VendorSeverity": {
+      "ghsa": 2,
+      "nvd": 2,
+      "redhat": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N",
+       "V40Score": 6.3
+      },
+      "nvd": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+       "V3Score": 5.3
+      },
+      "redhat": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+       "V3Score": 5.3
+      }
+     },
+     "References": [
+      "https://access.redhat.com/security/cve/CVE-2025-66221",
+      "https://advisory.echohq.com/cve/CVE-2025-66221",
+      "https://github.com/advisories/GHSA-hgf8-39gv-g3f2",
+      "https://github.com/pallets/werkzeug",
+      "https://github.com/pallets/werkzeug/commit/4b833376a45c323a189cd11d2362bcffdb1c0c13",
+      "https://github.com/pallets/werkzeug/releases/tag/3.1.4",
+      "https://github.com/pallets/werkzeug/security/advisories/GHSA-hgf8-39gv-g3f2",
+      "https://nvd.nist.gov/vuln/detail/CVE-2025-66221",
+      "https://www.cve.org/CVERecord?id=CVE-2025-66221"
+     ],
+     "PublishedDate": "2025-11-29T03:16:00.05Z",
+     "LastModifiedDate": "2026-06-17T09:56:30.263Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-21860",
+     "VendorIDs": [
+      "GHSA-87hc-h4r5-73f7"
+     ],
+     "PkgName": "werkzeug",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/werkzeug@2.2.3",
+      "UID": "e2e433f87a4a41e3"
+     },
+     "InstalledVersion": "2.2.3",
+     "FixedVersion": "3.1.5",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-21860",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:2ac89fd56821d7912fd2d9e8e8ec32439acc256416b59257f899f4cb3ae2987d",
+     "Title": " Werkzeug safe_join() allows Windows special device names with compound extensions",
+     "Description": "Werkzeug is a comprehensive WSGI web application library. Prior to version 3.1.5, Werkzeug's safe_join function allows path segments with Windows device names that have file extensions or trailing spaces. On Windows, there are special device names such as CON, AUX, etc that are implicitly present and readable in every directory. Windows still accepts them with any file extension, such as CON.txt, or trailing spaces such as CON. This issue has been patched in version 3.1.5.",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-67"
+     ],
+     "VendorSeverity": {
+      "ghsa": 2,
+      "nvd": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+       "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N",
+       "V3Score": 5.3,
+       "V40Score": 6.3
+      },
+      "nvd": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+       "V3Score": 5.3
+      }
+     },
+     "References": [
+      "https://advisory.echohq.com/cve/CVE-2026-21860",
+      "https://github.com/pallets/werkzeug",
+      "https://github.com/pallets/werkzeug/commit/7ae1d254e04a0c33e241ac1cca4783ce6c875ca3",
+      "https://github.com/pallets/werkzeug/security/advisories/GHSA-87hc-h4r5-73f7",
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-21860"
+     ],
+     "PublishedDate": "2026-01-08T19:15:59Z",
+     "LastModifiedDate": "2026-06-17T10:19:02.74Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-27199",
+     "VendorIDs": [
+      "GHSA-29vq-49wr-vm6x"
+     ],
+     "PkgName": "werkzeug",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/werkzeug@2.2.3",
+      "UID": "e2e433f87a4a41e3"
+     },
+     "InstalledVersion": "2.2.3",
+     "FixedVersion": "3.1.6",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-27199",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:1b2f49f4e348510884aa73b1a4c4e7456ad7774e7dd57f4ac5215604026a4264",
+     "Title": " Werkzeug safe_join() allows Windows special device names",
+     "Description": "Werkzeug is a comprehensive WSGI web application library. Versions 3.1.5 and below, the safe_join function allows Windows device names as filenames if preceded by other path segments. This was previously reported as GHSA-hgf8-39gv-g3f2, but the added filtering failed to account for the fact that safe_join accepts paths with multiple segments, such as example/NUL. The function send_from_directory uses safe_join to safely serve files at user-specified paths under a directory. If the application is running on Windows, and the requested path ends with a special device name, the file will be opened successfully, but reading will hang indefinitely. This issue has been fixed in version 3.1.6.",
+     "Severity": "MEDIUM",
+     "CweIDs": [
+      "CWE-67"
+     ],
+     "VendorSeverity": {
+      "ghsa": 2,
+      "nvd": 2
+     },
+     "CVSS": {
+      "ghsa": {
+       "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N",
+       "V40Score": 6.3
+      },
+      "nvd": {
+       "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+       "V3Score": 5.3
+      }
+     },
+     "References": [
+      "https://advisory.echohq.com/cve/CVE-2026-27199",
+      "https://github.com/pallets/werkzeug",
+      "https://github.com/pallets/werkzeug/commit/f407712fdc60a09c2b3f4fe7db557703e5d9338d",
+      "https://github.com/pallets/werkzeug/releases/tag/3.1.6",
+      "https://github.com/pallets/werkzeug/security/advisories/GHSA-29vq-49wr-vm6x",
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-27199"
+     ],
+     "PublishedDate": "2026-02-21T06:17:00.71Z",
+     "LastModifiedDate": "2026-06-17T10:26:50.207Z"
+    }
+   ]
+  }
+ ]
+}

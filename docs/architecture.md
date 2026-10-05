@@ -52,7 +52,18 @@ the UI down.
 | Snapshots | `core/snapshot.py` | SQLite backup/restore of the run copy. |
 | Fixtures | `fixtures/` | vuln-flask, vuln-express, vuln-php, clean-flask, clean-express, static-seo-bad/good, slow-app. |
 
+## Implemented (M3)
+
+| Area | Module | Notes |
+|---|---|---|
+| Rule catalogue / KB | `analysis/kb.py`, `remediation/*.yaml` | 64 rules, tr/en, CWE + OWASP 2025 + ASVS 5.0, stack-specific snippets. Catalogue: [rules.md](rules.md), mapping: [owasp-mapping.md](owasp-mapping.md). |
+| Native engines | `analysis/regex_rules.py`, `analysis/python_checks.py`, `analysis/secret_scan.py`, `analysis/config_checks.py`, `analysis/deps.py` | Pattern rules (JS/TS/PHP/templates), Python AST taint, secrets, config, dependency inventory + SBOM. |
+| Modules | `modules/sast.py`, `secrets.py`, `sca.py`, `config_audit.py` | Native always; Semgrep, Bandit, gitleaks, Trivy, osv-scanner when present. Docs: [modules/static-analysis.md](modules/static-analysis.md). |
+| Dedup | `core/dedup.py` | Rule families, ±2-line tolerance for code rules, confidence raised by agreement. |
+| Scoring | `core/scoring.py` | SPEC §9, [scoring.md](scoring.md). |
+| Downloads | `core/downloader.py`, `core/advisories.py` | SHA-256 pinned tools, offline advisory DBs, telemetry off. ADR-006. |
+
 ## Network rule
 
-Only `core/scope_guard.py` may use raw network primitives. Enforced by ruff `TID251`
+Only `core/scope_guard.py` (target traffic) and `core/downloader.py` (user-initiated downloads, ADR-006) may use raw network primitives. Enforced by ruff `TID251`
 (banned API) and `tests/unit/test_network_ban.py` (AST scan; cannot be silenced).

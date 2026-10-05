@@ -17,11 +17,14 @@ classifiers = [
     "Topic :: Security",
 ]
 dependencies = [
+    "bandit>=1.9.4",
     "httpx>=0.28",
+    "packaging>=26.3",
     "platformdirs>=4.3",
     "psutil>=7.2.2",
     "pydantic>=2.9",
     "pyside6>=6.8",
+    "pyyaml>=6.0.3",
 ]
 
 [project.scripts]
@@ -41,6 +44,7 @@ dev = [
     "pytest-qt>=4.5.0",
     "ruff>=0.8",
     "types-psutil>=7.2.2.20260906",
+    "types-pyyaml>=6.0.12.20260906",
 ]
 
 [build-system]
@@ -66,6 +70,10 @@ select = [
     "E", "W", "F", "I", "B", "UP", "SIM", "RUF", "N", "S", "PT", "PTH", "TID", "C4", "PL",
 ]
 ignore = [
+    "E501",     # line length is the formatter's job (ruff format); fmt: skip tables may be wider
+    "SIM102",   # nested ifs are sometimes clearer for multi-step guards
+    "PLR0915",  # long AST visitors / module run() methods read top-to-bottom
+    "PLR0917",  # positional-argument count: internal helpers
     "PLR0911",  # many returns: guard-clause decision functions read best that way
     "PLR0912",  # many branches: same
     "PLR0913",  # too many arguments: models/CLI legitimately take many
@@ -74,12 +82,13 @@ ignore = [
 ]
 
 # Turkish UI/reason text legitimately uses the dotless i.
-allowed-confusables = ["ı"]
+allowed-confusables = ["ı", "×"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S", "PLR", "N802", "TID251"]
-# The only place allowed to touch raw network primitives.
+# The only places allowed to touch raw network primitives (ADR-001, ADR-006).
 "src/secscope/core/scope_guard.py" = ["TID251"]
+"src/secscope/core/downloader.py" = ["TID251"]
 
 [tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"

@@ -8,7 +8,12 @@ from collections.abc import Iterable
 from secscope.core.config import ScanProfile
 from secscope.modules.base import BaseModule
 
-BUILTIN_MODULES: tuple[str, ...] = ()
+BUILTIN_MODULES: tuple[str, ...] = (
+    "secscope.modules.sast:SastModule",
+    "secscope.modules.secrets:SecretsModule",
+    "secscope.modules.sca:ScaModule",
+    "secscope.modules.config_audit:ConfigAuditModule",
+)
 
 
 class ModuleRegistry:

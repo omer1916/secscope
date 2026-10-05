@@ -78,6 +78,11 @@ def build_parser() -> argparse.ArgumentParser:
     tools = sub.add_parser("tools", help="external tool management")
     tools_sub = tools.add_subparsers(dest="tools_command", metavar="<action>", required=True)
     tools_sub.add_parser("list", help="show detected tools and versions")
+    install = tools_sub.add_parser("install", help="download a pinned tool (SHA-256 verified)")
+    install.add_argument("names", nargs="+")
+    tools_sub.add_parser("update-db", help="download/refresh offline vulnerability databases")
+    verify = tools_sub.add_parser("verify", help="re-check managed tools")
+    verify.add_argument("names", nargs="*")
 
     modules = sub.add_parser("modules", help="list available scan modules")
     modules.add_argument("--profile", choices=["quick", "standard", "deep"])
@@ -106,6 +111,52 @@ def _cmd_tools_list(out: TextIO) -> int:
             hint = status.install_hint.get(lang) if status.install_hint else ""
             out.write(f"  MISSING {status.name:<14} {status.problem}\n          -> {hint}\n")
     return EXIT_OK
+
+
+def _cmd_tools_install(names: list[str], out: TextIO, err: TextIO) -> int:
+    from secscope.core.config import Settings  # noqa: PLC0415
+    from secscope.core.downloader import DownloadError, install_tool  # noqa: PLC0415
+    from secscope.core.session import tool_manager  # noqa: PLC0415
+
+    manager = tool_manager(Settings.load())
+    code = EXIT_OK
+    for name in names:
+        try:
+            path = install_tool(manager, name)
+        except (DownloadError, KeyError, OSError) as exc:
+            err.write(f"  FAILED  {name}: {exc}\n")
+            code = EXIT_FAILED
+            continue
+        status = manager.status(name)
+        out.write(f"  OK      {name} {status.version} -> {path} (sha256 verified)\n")
+    return code
+
+
+def _cmd_tools_update_db(out: TextIO) -> int:
+    from secscope.core.advisories import update_databases  # noqa: PLC0415
+    from secscope.core.config import Settings  # noqa: PLC0415
+    from secscope.core.session import tool_manager  # noqa: PLC0415
+
+    settings = Settings.load()
+    lines = asyncio.run(update_databases(tool_manager(settings), settings.data_dir))
+    for line in lines:
+        out.write(f"  {line}\n")
+    return EXIT_OK if all("failed" not in line for line in lines) else EXIT_FAILED
+
+
+def _cmd_tools_verify(names: list[str], out: TextIO) -> int:
+    from secscope.core.config import Settings  # noqa: PLC0415
+    from secscope.core.downloader import verify_tool  # noqa: PLC0415
+    from secscope.core.session import tool_manager  # noqa: PLC0415
+
+    manager = tool_manager(Settings.load())
+    targets = names or [n for n, s in manager.manifest.tools.items() if s.downloads]
+    ok = True
+    for name in targets:
+        good = verify_tool(manager, name)
+        ok = ok and good
+        out.write(f"  {'OK' if good else 'MISSING':<7} {name}\n")
+    return EXIT_OK if ok else EXIT_FAILED
 
 
 def _cmd_modules(profile: str | None, out: TextIO) -> int:
@@ -185,8 +236,18 @@ def _cmd_scan(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
         session.repo.finish_scan(session.ctx.scan_id, "interrupted")
         session.close()
         return EXIT_FAILED
-    session.repo.finish_scan(session.ctx.scan_id, outcome.status)
+    session.repo.replace_findings(session.ctx.scan_id, outcome.findings)
+    session.repo.finish_scan(session.ctx.scan_id, outcome.status, outcome.scores)
 
+    scores = outcome.scores
+    if scores:
+        err.write(
+            f"[score] overall {scores['overall']} ({scores['grade']}) | security {scores['security']}"
+            f" | dependencies {scores['dependencies']} | quality {scores['quality']}\n"
+        )
+    for module_id, notes in outcome.notes.items():
+        for note in notes:
+            err.write(f"[note] {module_id}: {note}\n")
     formats = {f.strip() for f in args.format.split(",") if f.strip()}
     args.out.mkdir(parents=True, exist_ok=True)
     if "json" in formats:
@@ -221,6 +282,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             json.dump(_schema(args.kind), sys.stdout, indent=2, ensure_ascii=True)
             sys.stdout.write("\n")
             return EXIT_OK
+        case "tools" if args.tools_command == "install":
+            return _cmd_tools_install(args.names, sys.stdout, sys.stderr)
+        case "tools" if args.tools_command == "update-db":
+            return _cmd_tools_update_db(sys.stdout)
+        case "tools" if args.tools_command == "verify":
+            return _cmd_tools_verify(args.names, sys.stdout)
         case "tools":
             return _cmd_tools_list(sys.stdout)
         case "modules":

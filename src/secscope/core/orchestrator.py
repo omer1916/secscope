@@ -84,6 +84,9 @@ class ScanOutcome:
     findings: list[Finding] = field(default_factory=list[Finding])
     module_status: dict[str, str] = field(default_factory=dict[str, str])
     duration_s: float = 0.0
+    # Notes such as "reduced-coverage: ..." per module (from ModuleResult.notes).
+    notes: dict[str, list[str]] = field(default_factory=dict[str, list[str]])
+    scores: dict[str, object] = field(default_factory=dict[str, object])
 
 
 class _ModuleEmitter:

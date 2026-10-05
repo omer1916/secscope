@@ -87,7 +87,7 @@ def _stdin_reader(
     loop.call_soon_threadsafe(queue.put_nowait, None)  # EOF: UI is gone
 
 
-async def serve(writer: EventWriter) -> int:  # noqa: PLR0915 - linear protocol script
+async def serve(writer: EventWriter) -> int:
     loop = asyncio.get_running_loop()
     queue: asyncio.Queue[Command | None] = asyncio.Queue()
     threading.Thread(target=_stdin_reader, args=(loop, queue, writer), daemon=True).start()
@@ -162,7 +162,8 @@ async def serve(writer: EventWriter) -> int:  # noqa: PLR0915 - linear protocol 
         with contextlib.suppress(asyncio.CancelledError):
             await pump
         journal.close()
-    session.repo.finish_scan(ctx.scan_id, outcome.status)
+    session.repo.replace_findings(ctx.scan_id, outcome.findings)
+    session.repo.finish_scan(ctx.scan_id, outcome.status, outcome.scores)
     session.close()
     return 0 if outcome.status in ("completed", "cancelled") else 1
 

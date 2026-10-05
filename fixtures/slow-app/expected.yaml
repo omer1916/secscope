@@ -1,0 +1,4 @@
+static:
+  must:
+    - QUAL-EXCEPT-001    # worker swallows every exception
+  may: [SECRET-GENERIC-001]

@@ -12,7 +12,8 @@
    - Code locations use the *path only*; line/column are excluded because they drift
      whenever code above changes, which would make every edit look like "fixed + new"
      in diffs. The whitespace-normalised evidence snippet disambiguates within a file.
-     Trade-off: two byte-identical snippets in one file share an id.
+     Two byte-identical snippets in one file would share an id; dedup keeps both and gives
+     later occurrences (in line order) a derived id `sha256(id + "#n")` (M3, found by tests).
    - HTTP locations use method + origin + path + sorted query **parameter names** +
      tested parameter. Query values (cache busters, ids) do not change the identity.
    - A stored id is never recomputed on load, so changes to masking rules cannot break

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import sqlite3
 from collections.abc import Iterable
 from datetime import UTC, datetime
@@ -36,9 +37,12 @@ class ScanRepository:
             ),
         )
 
-    def finish_scan(self, scan_id: str, status: str) -> None:
+    def finish_scan(
+        self, scan_id: str, status: str, scores: dict[str, object] | None = None
+    ) -> None:
         self._conn.execute(
-            "UPDATE scans SET status = ?, finished_at = ? WHERE id = ?", (status, _now(), scan_id)
+            "UPDATE scans SET status = ?, finished_at = ?, scores_json = ? WHERE id = ?",
+            (status, _now(), json.dumps(scores) if scores is not None else None, scan_id),
         )
 
     def get_scan(self, scan_id: str) -> sqlite3.Row | None:
@@ -74,6 +78,11 @@ class ScanRepository:
             self._conn.execute("ROLLBACK")
             raise
         return len(rows)
+
+    def replace_findings(self, scan_id: str, findings: Iterable[Finding]) -> int:
+        """Swap the per-module raw findings for the final, de-duplicated list."""
+        self._conn.execute("DELETE FROM findings WHERE scan_id = ?", (scan_id,))
+        return self.add_findings(scan_id, findings)
 
     def record_module_run(
         self, scan_id: str, module: str, status: str, reason: str | None, duration_s: float

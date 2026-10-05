@@ -22,6 +22,7 @@ import signal
 import subprocess
 import sys
 from collections.abc import AsyncIterator, Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 
 import psutil
@@ -138,6 +139,40 @@ class _WindowsJob:
         if self.handle:
             self._kernel32.CloseHandle(self.handle)
             self.handle = 0
+
+
+@dataclass(frozen=True, slots=True)
+class CompletedRun:
+    returncode: int
+    stdout: str
+    stderr: str
+
+
+async def run_capture(
+    argv: Sequence[str],
+    *,
+    cwd: Path | str | None = None,
+    env: Mapping[str, str] | None = None,
+    timeout: float = 600,
+) -> CompletedRun:
+    """Run an external tool to completion, capturing output; the tree dies on timeout/cancel."""
+    proc = await ManagedProcess.start(
+        argv, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    try:
+        out, err = await asyncio.wait_for(proc.proc.communicate(), timeout)
+    except BaseException:  # timeout or cancellation
+        await proc.terminate_tree()
+        raise
+    proc.close()
+    return CompletedRun(proc.proc.returncode or 0, decode_output(out), decode_output(err))
+
+
+def python_tool_command(module: str) -> list[str]:
+    """Run a Python-based tool we depend on (bandit, pip-audit) from our own environment."""
+    if getattr(sys, "frozen", False):
+        return [sys.executable, "run-python-tool", module]
+    return [sys.executable, "-m", module]
 
 
 class ManagedProcess:

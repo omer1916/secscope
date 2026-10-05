@@ -1,0 +1,8 @@
+static:
+  must:
+    - SAST-SQLI-001              # "... WHERE id = " . $_GET['id']
+    - SAST-LFI-001               # include ... $page
+    - SAST-DESER-001             # unserialize(cookie)
+    - SAST-PHPINFO-001           # phpinfo.php
+    - CONF-HTACCESS-INDEXES-001  # uploads/.htaccess Options +Indexes
+  may: []

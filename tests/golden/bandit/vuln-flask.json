@@ -1,0 +1,147 @@
+{
+ "errors": [],
+ "generated_at": "2026-10-05T18:24:43Z",
+ "metrics": {
+  "{ROOT}\\app.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 3,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 1,
+   "SEVERITY.LOW": 1,
+   "SEVERITY.MEDIUM": 1,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 128,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
+  "{ROOT}\\config.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 2,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 2,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 4,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
+  "_totals": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 5,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 1,
+   "SEVERITY.LOW": 3,
+   "SEVERITY.MEDIUM": 1,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 132,
+   "nosec": 0,
+   "skipped_tests": 0
+  }
+ },
+ "results": [
+  {
+   "code": "15 app = Flask(__name__, static_folder=\".\", static_url_path=\"\")\n16 app.secret_key = \"supersecretkey123\"  # hardcoded secret\n17 \n",
+   "col_offset": 17,
+   "end_col_offset": 36,
+   "filename": "{ROOT}\\app.py",
+   "issue_confidence": "MEDIUM",
+   "issue_cwe": {
+    "id": 259,
+    "link": "https://cwe.mitre.org/data/definitions/259.html"
+   },
+   "issue_severity": "LOW",
+   "issue_text": "Possible hardcoded password: 'supersecretkey123'",
+   "line_number": 16,
+   "line_range": [
+    16
+   ],
+   "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html",
+   "test_id": "B105",
+   "test_name": "hardcoded_password_string"
+  },
+  {
+   "code": "77         rows = conn.execute(\n78             \"SELECT name, price FROM products WHERE name LIKE '%\" + q + \"%'\"\n79         ).fetchall()\n",
+   "col_offset": 12,
+   "end_col_offset": 65,
+   "filename": "{ROOT}\\app.py",
+   "issue_confidence": "MEDIUM",
+   "issue_cwe": {
+    "id": 89,
+    "link": "https://cwe.mitre.org/data/definitions/89.html"
+   },
+   "issue_severity": "MEDIUM",
+   "issue_text": "Possible SQL injection vector through string-based query construction.",
+   "line_number": 78,
+   "line_range": [
+    78
+   ],
+   "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+   "test_id": "B608",
+   "test_name": "hardcoded_sql_expressions"
+  },
+  {
+   "code": "162 if __name__ == \"__main__\":\n163     app.run(host=\"127.0.0.1\", port=int(os.environ.get(\"PORT\", \"5000\")), debug=True)\n",
+   "col_offset": 4,
+   "end_col_offset": 83,
+   "filename": "{ROOT}\\app.py",
+   "issue_confidence": "MEDIUM",
+   "issue_cwe": {
+    "id": 94,
+    "link": "https://cwe.mitre.org/data/definitions/94.html"
+   },
+   "issue_severity": "HIGH",
+   "issue_text": "A Flask app appears to be run with debug=True, which exposes the Werkzeug debugger and allows the execution of arbitrary code.",
+   "line_number": 163,
+   "line_range": [
+    163
+   ],
+   "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b201_flask_debug_true.html",
+   "test_id": "B201",
+   "test_name": "flask_debug_true"
+  },
+  {
+   "code": "2 AWS_ACCESS_KEY_ID = \"AKIA\u005a5YQ7Q3XJ2KQ7W4P\"\n3 AWS_SECRET_ACCESS_KEY = \"q8Vb\u0033kT9yLm2Nx7Rp4Wz6Hs1Jd5Fg0Ac2Ue8Io3K\"\n4 DATABASE_URL = \"postgresql://admin:Pr0dPassw0rd!@db.internal:5432/shop\"\n",
+   "col_offset": 24,
+   "end_col_offset": 66,
+   "filename": "{ROOT}\\config.py",
+   "issue_confidence": "MEDIUM",
+   "issue_cwe": {
+    "id": 259,
+    "link": "https://cwe.mitre.org/data/definitions/259.html"
+   },
+   "issue_severity": "LOW",
+   "issue_text": "Possible hardcoded password: 'q8Vb\u0033kT9yLm2Nx7Rp4Wz6Hs1Jd5Fg0Ac2Ue8Io3K'",
+   "line_number": 3,
+   "line_range": [
+    3
+   ],
+   "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html",
+   "test_id": "B105",
+   "test_name": "hardcoded_password_string"
+  },
+  {
+   "code": "4 DATABASE_URL = \"postgresql://admin:Pr0dPassw0rd!@db.internal:5432/shop\"\n5 JWT_SECRET = \"secret\"\n",
+   "col_offset": 13,
+   "end_col_offset": 21,
+   "filename": "{ROOT}\\config.py",
+   "issue_confidence": "MEDIUM",
+   "issue_cwe": {
+    "id": 259,
+    "link": "https://cwe.mitre.org/data/definitions/259.html"
+   },
+   "issue_severity": "LOW",
+   "issue_text": "Possible hardcoded password: 'secret'",
+   "line_number": 5,
+   "line_range": [
+    5
+   ],
+   "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html",
+   "test_id": "B105",
+   "test_name": "hardcoded_password_string"
+  }
+ ]
+}

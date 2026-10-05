@@ -11,10 +11,12 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from secscope.core.config import TargetKind
+from secscope.core.dedup import deduplicate
 from secscope.core.fingerprint import fingerprint
 from secscope.core.intake import make_run_copy, prepare_source
 from secscope.core.orchestrator import Orchestrator, ScanOutcome
 from secscope.core.sandbox import SandboxRunner, TargetStartError
+from secscope.core.scoring import compute_scores
 from secscope.core.snapshot import Snapshot
 from secscope.modules.base import Emitter, ScanContext
 
@@ -129,4 +131,11 @@ async def run_scan(
             restored = snap.restore()
             emit.log(f"restored {len(restored)} SQLite database(s)")
 
-    return await orchestrator.run(ctx, module_ids, setup=prepare, teardown=cleanup)
+    outcome = await orchestrator.run(ctx, module_ids, setup=prepare, teardown=cleanup)
+    outcome.findings = deduplicate(outcome.findings)
+    outcome.notes = {mid: list(res.notes) for mid, res in ctx.results.items() if res.notes}
+    ran = [m for m, status in outcome.module_status.items() if status == "ok"]
+    outcome.scores = compute_scores(
+        outcome.findings, weights=ctx.settings.weights, ran=ran
+    ).as_dict()
+    return outcome

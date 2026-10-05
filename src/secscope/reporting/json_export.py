@@ -29,6 +29,8 @@ def build_json_report(scan_id: str, config: ScanConfig, outcome: ScanOutcome) ->
         "status": outcome.status,
         "duration_s": round(outcome.duration_s, 3),
         "modules": outcome.module_status,
+        "notes": outcome.notes,
+        "scores": outcome.scores,
         "findings": [f.model_dump(mode="json") for f in outcome.findings],
     }
 

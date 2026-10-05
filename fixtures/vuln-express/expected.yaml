@@ -1,0 +1,18 @@
+static:
+  must:
+    - SAST-NOSQLI-001      # findOne({user: req.body.user, pass: req.body.pass})
+    - SAST-CMDI-001        # exec("echo pinging " + req.query.host)
+    - SAST-EVAL-001        # eval(req.query.expr)
+    - SAST-XSS-001         # innerHTML from location.hash (public/app.js)
+    - SAST-CORS-001        # reflected Origin + credentials
+    - SAST-JWT-001         # JWT_SECRET = "changeme"
+    - SAST-JWT-002         # header.alg === "none" accepted
+    - SAST-PROTO-001       # _.merge({}, req.body)
+    - SAST-STORAGE-001     # localStorage authToken
+    - SAST-ERRLEAK-001     # res.send(e.stack)
+    - CONF-SOURCEMAP-001   # public/app.js.map
+  needs_db:
+    - SCA-VULN-001         # lodash 4.17.15
+  may:
+    - SAST-HARDCODED-001
+    - SECRET-GENERIC-001

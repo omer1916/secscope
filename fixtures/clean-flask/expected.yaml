@@ -1,0 +1,4 @@
+# Secure counterpart: anything reported here beyond 'allowed' is a false positive.
+static:
+  must: []
+  allowed: []

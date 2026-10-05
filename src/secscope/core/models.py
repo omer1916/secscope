@@ -46,6 +46,14 @@ SEVERITY_ORDER: dict[Severity, int] = {"critical": 4, "high": 3, "medium": 2, "l
 CONFIDENCE_ORDER: dict[Confidence, int] = {"confirmed": 3, "high": 2, "medium": 1, "low": 0}
 
 
+def max_severity(values: list[Severity], default: Severity = "medium") -> Severity:
+    best: Severity | None = None
+    for value in values:
+        if best is None or SEVERITY_ORDER[value] > SEVERITY_ORDER[best]:
+            best = value
+    return best or default
+
+
 class LocalizedStr(_Model):
     """User-facing text in every supported UI language."""
 
