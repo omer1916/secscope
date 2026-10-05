@@ -167,4 +167,7 @@ class ScanConfig(_Model):
     run: RunConfig = Field(default_factory=RunConfig)
     # SPEC §4.5: dynamic modules refuse to run unless this is true.
     scope_statement_accepted: bool = False
+    # Public address the site will have in production (canonical/sitemap base), e.g.
+    # https://www.example.com — used by SEO checks and generated files. Never contacted.
+    public_url: str | None = None
     snapshot_sqlite: bool = True

@@ -1,0 +1,23 @@
+rule_id: SEO-IMG-001
+title:
+  tr: Görsellerde alt metni yok
+  en: Images without alt text
+severity: medium
+category: seo
+confidence: high
+why:
+  tr: alt metni görme engelli kullanıcılar ve Google Görseller için içeriği açıklar; dekoratif görseller
+    alt="" almalı.
+  en: alt text describes images for screen readers and Google Images; decorative images take alt="".
+fix_steps:
+  tr:
+  - Anlamlı görsellere açıklayıcı alt ekleyin; dekoratiflere alt="" verin.
+  en:
+  - Add descriptive alt to meaningful images; give decorative ones alt="".
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/appearance/google-images
+effort: S

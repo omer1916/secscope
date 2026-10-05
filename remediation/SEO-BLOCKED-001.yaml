@@ -1,0 +1,23 @@
+rule_id: SEO-BLOCKED-001
+title:
+  tr: Sayfalar robots.txt ile engelli
+  en: Pages blocked by robots.txt
+severity: medium
+category: seo
+confidence: high
+why:
+  tr: Engelli sayfalar taranamaz; içlerindeki noindex de okunamaz, bu yüzden URL yine de dizinde görünebilir.
+  en: Blocked pages are not crawled; a noindex inside them cannot be read, so the bare URL may still be
+    indexed.
+fix_steps:
+  tr:
+  - Dizinde istemediğiniz sayfaları engellemek yerine noindex kullanın ve taramaya izin verin.
+  en:
+  - Use noindex (and allow crawling) for pages you do not want indexed instead of blocking them.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/crawling-indexing/block-indexing
+effort: S

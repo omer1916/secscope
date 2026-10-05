@@ -1,0 +1,29 @@
+rule_id: SEO-CANONICAL-001
+title:
+  tr: Canonical sorunlu
+  en: Canonical problem
+severity: high
+category: seo
+confidence: high
+why:
+  tr: rel=canonical yok, birden fazla, göreli veya başka bir siteyi gösteriyor; Google yanlış URL'yi seçebilir.
+  en: rel=canonical is missing, duplicated, relative or points to another site; Google may pick the wrong
+    URL.
+fix_steps:
+  tr:
+  - Her sayfaya tek bir, mutlak, kendini gösteren canonical ekleyin.
+  - Parametreli kopyalarda canonical'ı asıl sayfaya verin.
+  en:
+  - Give each page one absolute, self-referencing canonical.
+  - Point parameterised duplicates to the main page.
+snippets:
+  static:
+    lang: html
+    code: <link rel="canonical" href="https://www.example.com/about.html">
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls
+effort: S

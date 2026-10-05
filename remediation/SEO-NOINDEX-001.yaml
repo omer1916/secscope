@@ -1,0 +1,32 @@
+rule_id: SEO-NOINDEX-001
+title:
+  tr: Sayfa noindex ile işaretli
+  en: Page marked noindex
+severity: critical
+category: seo
+confidence: high
+why:
+  tr: meta robots veya X-Robots-Tag 'noindex' içeriyor; Google bu sayfayı dizine eklemez.
+  en: meta robots or X-Robots-Tag contains 'noindex'; Google will not index the page.
+impact:
+  tr: Sayfa Google'da görünmez.
+  en: The page is invisible in Google.
+fix_steps:
+  tr:
+  - Yayında görünmesi gereken sayfalardan noindex'i kaldırın (çoğu zaman hazırlık ortamından kalmıştır).
+  en:
+  - Remove noindex from pages that must appear in search (often left over from staging).
+snippets:
+  static:
+    lang: html
+    code: '<!-- remove: <meta name="robots" content="noindex"> -->'
+  nginx:
+    lang: nginx
+    code: '# remove: add_header X-Robots-Tag noindex;'
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/crawling-indexing/block-indexing
+effort: S

@@ -1,0 +1,22 @@
+rule_id: SEO-LANG-001
+title:
+  tr: Dil (lang) veya karakter seti belirtilmemiş
+  en: Language (lang) or charset not declared
+severity: medium
+category: seo
+confidence: high
+why:
+  tr: <html lang> ve <meta charset> tarayıcıların ve arama motorlarının içeriği doğru yorumlamasını sağlar.
+  en: <html lang> and <meta charset> let browsers and search engines interpret the content correctly.
+fix_steps:
+  tr:
+  - <html lang="tr"> (veya ilgili dil) ve <meta charset="utf-8"> ekleyin.
+  en:
+  - Add <html lang="en"> (or the right language) and <meta charset="utf-8">.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developer.mozilla.org/docs/Web/HTML/Global_attributes/lang
+effort: S

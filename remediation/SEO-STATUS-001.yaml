@@ -1,0 +1,22 @@
+rule_id: SEO-STATUS-001
+title:
+  tr: Kırık iç bağlantı (4xx/5xx)
+  en: Broken internal link (4xx/5xx)
+severity: high
+category: seo
+confidence: high
+why:
+  tr: Bir iç bağlantı hata kodu dönen bir sayfaya gidiyor.
+  en: An internal link leads to a page that returns an error status.
+fix_steps:
+  tr:
+  - Bağlantıyı düzeltin veya taşınan sayfayı 301 ile yönlendirin.
+  en:
+  - Fix the link or 301-redirect the moved page.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/crawling-indexing/http-network-errors
+effort: S

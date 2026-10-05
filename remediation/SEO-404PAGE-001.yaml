@@ -1,0 +1,23 @@
+rule_id: SEO-404PAGE-001
+title:
+  tr: Olmayan sayfa 404 dönmüyor
+  en: Missing pages do not return 404
+severity: medium
+category: seo
+confidence: high
+why:
+  tr: Rastgele bir URL 404 yerine başka bir kod döndü (ör. 200 ile ana sayfa); bu, sınırsız kopya sayfa
+    üretir.
+  en: A random URL returned something other than 404 (e.g. the home page with 200), creating endless duplicates.
+fix_steps:
+  tr:
+  - Bulunamayan URL'ler için 404 durum kodu ve yardımcı bir 404 sayfası sunun.
+  en:
+  - Serve a 404 status and a helpful 404 page for unknown URLs.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/crawling-indexing/http-network-errors
+effort: S

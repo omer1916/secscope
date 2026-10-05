@@ -1,0 +1,26 @@
+rule_id: SEO-TITLE-001
+title:
+  tr: Başlık (title) eksik veya birden fazla
+  en: Title missing or duplicated in page
+severity: high
+category: seo
+confidence: high
+why:
+  tr: <title> yok/boş veya sayfada birden fazla var; arama sonuçlarındaki başlık bundan üretilir.
+  en: <title> is missing/empty or repeated; search result titles are built from it.
+fix_steps:
+  tr:
+  - Her sayfaya içeriği özetleyen tek, benzersiz bir <title> ekleyin (SecScope öneri taslağı üretti).
+  en:
+  - Give every page one unique, descriptive <title> (SecScope generated draft suggestions).
+snippets:
+  static:
+    lang: html
+    code: <title>Fresh Sourdough Bread in Springfield – Example Bakery</title>
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/appearance/title-link
+effort: S

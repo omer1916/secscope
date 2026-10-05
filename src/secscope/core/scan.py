@@ -135,7 +135,9 @@ async def run_scan(
     outcome.findings = deduplicate(outcome.findings)
     outcome.notes = {mid: list(res.notes) for mid, res in ctx.results.items() if res.notes}
     ran = [m for m, status in outcome.module_status.items() if status == "ok"]
+    seo = ctx.results.get("seo")
+    seo_value = seo.data.get("seo_score", {}).get("score") if seo is not None else None
     outcome.scores = compute_scores(
-        outcome.findings, weights=ctx.settings.weights, ran=ran
+        outcome.findings, weights=ctx.settings.weights, ran=ran, seo=seo_value
     ).as_dict()
     return outcome

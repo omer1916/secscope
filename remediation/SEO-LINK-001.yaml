@@ -1,0 +1,24 @@
+rule_id: SEO-LINK-001
+title:
+  tr: Zayıf veya geçersiz bağlantılar
+  en: Weak or invalid links
+severity: low
+category: seo
+confidence: medium
+why:
+  tr: 'Boş, ''#'' veya javascript: bağlantılar taranamaz; ''buraya tıklayın'' gibi metinler hedef hakkında
+    bilgi vermez.'
+  en: 'Empty, ''#'' or javascript: links cannot be crawled; anchor text like ''click here'' says nothing
+    about the target.'
+fix_steps:
+  tr:
+  - Gerçek href kullanın ve bağlantı metninde hedefi tarif edin.
+  en:
+  - Use real hrefs and describe the target in the anchor text.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/crawling-indexing/links-crawlable
+effort: S

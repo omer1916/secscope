@@ -1,0 +1,29 @@
+rule_id: SEO-OG-001
+title:
+  tr: Open Graph etiketleri yok
+  en: No Open Graph tags
+severity: low
+category: seo
+confidence: high
+why:
+  tr: Sosyal medyada paylaşıldığında başlık, açıklama ve görsel önizlemesi oluşmaz.
+  en: Shared links on social media show no title, description or image preview.
+fix_steps:
+  tr:
+  - og:title, og:description, og:image (≥1200×630), og:url ve og:type ekleyin.
+  en:
+  - Add og:title, og:description, og:image (≥1200×630), og:url and og:type.
+snippets:
+  static:
+    lang: html
+    code: |-
+      <meta property="og:title" content="...">
+      <meta property="og:description" content="...">
+      <meta property="og:image" content="https://www.example.com/og.png">
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://ogp.me/
+effort: S

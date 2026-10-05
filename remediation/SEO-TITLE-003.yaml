@@ -1,0 +1,22 @@
+rule_id: SEO-TITLE-003
+title:
+  tr: Başlık çok kısa veya çok uzun
+  en: Title too short or too long
+severity: low
+category: seo
+confidence: medium
+why:
+  tr: Google resmi bir sınır vermez; ~30–60 karakter genellikle kesilmeden görünür (yalnızca ipucu).
+  en: Google sets no official limit; ~30–60 characters usually display without truncation (hint only).
+fix_steps:
+  tr:
+  - Önemli kelimeleri başa alın, gereksiz tekrarı kaldırın.
+  en:
+  - Put the important words first and remove repetition.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/appearance/title-link
+effort: S

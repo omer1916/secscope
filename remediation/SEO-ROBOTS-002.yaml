@@ -1,0 +1,27 @@
+rule_id: SEO-ROBOTS-002
+title:
+  tr: robots.txt tüm siteyi engelliyor
+  en: robots.txt blocks the whole site
+severity: critical
+category: seo
+confidence: high
+why:
+  tr: '''Disallow: /'' Googlebot''un hiçbir sayfayı taramasına izin vermez; site arama sonuçlarından kaybolur.'
+  en: '''Disallow: /'' stops Googlebot from crawling any page; the site disappears from search.'
+impact:
+  tr: Site Google'da görünmez.
+  en: The site is invisible in Google.
+fix_steps:
+  tr:
+  - 'Disallow: / satırını kaldırın; yalnızca gerçekten gizli yolları engelleyin.'
+  - Hazırlık (staging) ortamını robots.txt yerine parola ile koruyun.
+  en:
+  - 'Remove the Disallow: / line; block only paths that must stay private.'
+  - Protect staging with a password instead of robots.txt.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/crawling-indexing/robots/create-robots-txt
+effort: S

@@ -1,0 +1,26 @@
+rule_id: SEO-VIEWPORT-001
+title:
+  tr: Mobil viewport etiketi yok
+  en: No mobile viewport meta tag
+severity: high
+category: seo
+confidence: high
+why:
+  tr: Google mobil öncelikli dizinler; viewport olmadan sayfa telefonda masaüstü genişliğinde görünür.
+  en: Google indexes mobile-first; without a viewport the page renders at desktop width on phones.
+fix_steps:
+  tr:
+  - <head> içine viewport meta etiketini ekleyin.
+  en:
+  - Add the viewport meta tag to <head>.
+snippets:
+  static:
+    lang: html
+    code: <meta name="viewport" content="width=device-width, initial-scale=1">
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/crawling-indexing/mobile/mobile-sites-mobile-first-indexing
+effort: S

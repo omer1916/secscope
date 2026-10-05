@@ -1,0 +1,22 @@
+rule_id: SEO-IMG-004
+title:
+  tr: Büyük veya eski formatlı görseller
+  en: Large or legacy-format images
+severity: low
+category: seo
+confidence: high
+why:
+  tr: Büyük görseller sayfa yüklemesini yavaşlatır; WebP/AVIF genellikle çok daha küçüktür.
+  en: Large images slow page load; WebP/AVIF are usually much smaller.
+fix_steps:
+  tr:
+  - Görselleri gösterildikleri boyuta küçültün, WebP/AVIF'e dönüştürün, srcset kullanın.
+  en:
+  - Resize images to their display size, convert to WebP/AVIF, use srcset.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://web.dev/articles/choose-the-right-image-format
+effort: S

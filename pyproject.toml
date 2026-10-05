@@ -18,13 +18,17 @@ classifiers = [
 ]
 dependencies = [
     "bandit>=1.9.4",
+    "defusedxml>=0.7.1",
     "httpx>=0.28",
+    "jinja2>=3.1.6",
     "packaging>=26.3",
     "platformdirs>=4.3",
+    "protego>=0.7.0",
     "psutil>=7.2.2",
     "pydantic>=2.9",
     "pyside6>=6.8",
     "pyyaml>=6.0.3",
+    "selectolax>=1.0.0",
 ]
 
 [project.scripts]
@@ -43,6 +47,7 @@ dev = [
     "pytest-cov>=6.0",
     "pytest-qt>=4.5.0",
     "ruff>=0.8",
+    "types-defusedxml>=0.7.0.20260504",
     "types-psutil>=7.2.2.20260906",
     "types-pyyaml>=6.0.12.20260906",
 ]
@@ -82,7 +87,7 @@ ignore = [
 ]
 
 # Turkish UI/reason text legitimately uses the dotless i.
-allowed-confusables = ["ı", "×"]
+allowed-confusables = ["ı", "×", "–"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S", "PLR", "N802", "TID251"]

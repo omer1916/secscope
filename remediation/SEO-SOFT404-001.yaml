@@ -1,0 +1,22 @@
+rule_id: SEO-SOFT404-001
+title:
+  tr: Soft 404 (hata sayfası 200 dönüyor)
+  en: Soft 404 (error page returns 200)
+severity: medium
+category: seo
+confidence: high
+why:
+  tr: Sayfa 'bulunamadı' içeriği gösteriyor ama HTTP 200 dönüyor; Google bunu soft 404 olarak işaretler.
+  en: The page shows 'not found' content but returns HTTP 200; Google flags it as a soft 404.
+fix_steps:
+  tr:
+  - Olmayan içerik için gerçek 404 veya 410 durum kodu döndürün.
+  en:
+  - Return a real 404 or 410 status for missing content.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/crawling-indexing/http-network-errors
+effort: S

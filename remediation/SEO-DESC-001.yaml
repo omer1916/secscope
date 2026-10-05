@@ -1,0 +1,27 @@
+rule_id: SEO-DESC-001
+title:
+  tr: Meta açıklama eksik, yinelenen veya uzunluğu uygunsuz
+  en: Meta description missing, duplicated or off-length
+severity: medium
+category: seo
+confidence: high
+why:
+  tr: Açıklama arama sonucu özetini etkileyebilir; Google yeniden yazabilir, bu yüzden önemi orta düzeydedir.
+  en: The description can shape the result snippet; Google may rewrite it, so impact is moderate.
+fix_steps:
+  tr:
+  - Her sayfaya ~70–160 karakterlik benzersiz, sayfayı özetleyen bir açıklama yazın.
+  en:
+  - Write a unique ~70–160 character summary for each page.
+snippets:
+  static:
+    lang: html
+    code: <meta name="description" content="Fresh sourdough, pastries and cakes baked every morning in
+      Springfield.">
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/appearance/snippet
+effort: S

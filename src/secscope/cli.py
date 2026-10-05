@@ -74,6 +74,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="I own this system and it is tested locally only (required for dynamic modules)",
     )
     scan.add_argument("--data-dir", type=Path, help="override the data directory")
+    scan.add_argument(
+        "--public-url", help="production address of the site (SEO), e.g. https://example.com"
+    )
+    scan.add_argument(
+        "--install",
+        action="store_true",
+        help="install the project's dependencies before starting it",
+    )
 
     tools = sub.add_parser("tools", help="external tool management")
     tools_sub = tools.add_subparsers(dest="tools_command", metavar="<action>", required=True)
@@ -209,8 +217,10 @@ def _cmd_scan(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
             command=args.run.split() if args.run else None,
             port=args.port,
             ready_path=args.ready_path,
+            install=args.install,
         ),
         scope_statement_accepted=args.accept_scope_statement,
+        public_url=args.public_url,
     )
     registry = load_builtin()
     module_ids = config.modules or registry.for_profile(config.profile)

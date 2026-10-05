@@ -1,0 +1,22 @@
+rule_id: SEO-FAVICON-001
+title:
+  tr: Favicon yok
+  en: No favicon
+severity: low
+category: seo
+confidence: high
+why:
+  tr: Google arama sonuçlarında site simgesi gösterir; tanımlı değilse genel bir simge görünür.
+  en: Google shows a site icon in results; without one a generic icon appears.
+fix_steps:
+  tr:
+  - <link rel="icon"> ile kare (≥48×48) bir favicon ekleyin.
+  en:
+  - Add a square (≥48×48) favicon with <link rel="icon">.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/appearance/favicon-in-search
+effort: S

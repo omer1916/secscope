@@ -1,0 +1,26 @@
+rule_id: SEO-SITEMAP-002
+title:
+  tr: sitemap.xml geçersiz
+  en: Invalid sitemap.xml
+severity: high
+category: seo
+confidence: high
+why:
+  tr: XML hatalı, <loc> mutlak URL değil, lastmod geçersiz veya 50.000 URL / 50 MB sınırı aşılmış.
+  en: Broken XML, relative <loc> values, invalid lastmod, or the 50,000-URL / 50 MB limit exceeded.
+fix_steps:
+  tr:
+  - <loc> değerlerini tam (https://...) URL yapın.
+  - lastmod'u W3C tarih biçiminde (YYYY-MM-DD) yazın.
+  - Büyük siteleri sitemap index ile bölün.
+  en:
+  - Use absolute (https://...) URLs in <loc>.
+  - Write lastmod in W3C date format (YYYY-MM-DD).
+  - Split large sites with a sitemap index.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap
+effort: S

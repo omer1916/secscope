@@ -1,0 +1,23 @@
+rule_id: SEO-URL-001
+title:
+  tr: URL yapısı sorunlu
+  en: URL hygiene issues
+severity: low
+category: seo
+confidence: medium
+why:
+  tr: Büyük harf, alt çizgi, oturum kimliği veya çok uzun URL'ler kopya içerik ve kötü kullanıcı deneyimi
+    yaratır.
+  en: Upper case, underscores, session ids or very long URLs create duplicates and poor UX.
+fix_steps:
+  tr:
+  - Küçük harf ve tire kullanan kısa, okunabilir URL'ler tercih edin.
+  en:
+  - Prefer short, readable, lower-case URLs with hyphens.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/crawling-indexing/url-structure
+effort: S

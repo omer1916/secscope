@@ -1,0 +1,22 @@
+rule_id: SEO-SITEMAP-003
+title:
+  tr: Site haritasında dizine alınamayan URL'ler
+  en: Sitemap lists non-indexable URLs
+severity: medium
+category: seo
+confidence: high
+why:
+  tr: Haritada 404, yönlendirme veya noindex sayfalar var; Google'a çelişkili sinyal verir.
+  en: The sitemap contains 404s, redirects or noindex pages, which sends Google mixed signals.
+fix_steps:
+  tr:
+  - Haritada yalnızca 200 dönen, dizine alınabilir, canonical URL'leri bırakın.
+  en:
+  - Keep only 200, indexable, canonical URLs in the sitemap.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap
+effort: S

@@ -1,0 +1,22 @@
+rule_id: SEO-TITLE-002
+title:
+  tr: Birden fazla sayfa aynı başlığı kullanıyor
+  en: Several pages share one title
+severity: medium
+category: seo
+confidence: high
+why:
+  tr: Aynı başlık Google'ın sayfaları ayırt etmesini zorlaştırır.
+  en: Identical titles make it hard for Google to tell pages apart.
+fix_steps:
+  tr:
+  - Her sayfanın başlığını kendi konusuna göre yazın.
+  en:
+  - Write each page's title for its own topic.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/appearance/title-link
+effort: S

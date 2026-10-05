@@ -1,0 +1,28 @@
+rule_id: SEO-IMG-003
+title:
+  tr: İlk (LCP) görseli tembel yükleniyor
+  en: First (LCP) image is lazy-loaded
+severity: medium
+category: seo
+confidence: high
+why:
+  tr: Ekranın üstündeki ana görselde loading=lazy, Largest Contentful Paint'i geciktirir.
+  en: loading=lazy on the main above-the-fold image delays Largest Contentful Paint.
+fix_steps:
+  tr:
+  - İlk görselden loading=lazy'yi kaldırın; fetchpriority="high" ve/veya <link rel=preload> ekleyin.
+  en:
+  - Remove loading=lazy from the first image; add fetchpriority="high" and/or <link rel=preload>.
+snippets:
+  static:
+    lang: html
+    code: |-
+      <link rel="preload" as="image" href="/hero.webp">
+      <img src="/hero.webp" alt="..." width="1200" height="600" fetchpriority="high">
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://web.dev/articles/optimize-lcp
+effort: S

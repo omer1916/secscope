@@ -1,0 +1,26 @@
+rule_id: SEO-RENDERBLOCK-001
+title:
+  tr: <head> içinde bloklayan betik
+  en: Render-blocking script in <head>
+severity: low
+category: seo
+confidence: high
+why:
+  tr: async/defer olmayan betikler HTML ayrıştırmasını durdurur ve ilk görüntülemeyi geciktirir.
+  en: Scripts without async/defer stop HTML parsing and delay the first render.
+fix_steps:
+  tr:
+  - Betiklere defer (veya bağımsızsa async) ekleyin.
+  en:
+  - Add defer (or async for independent scripts).
+snippets:
+  static:
+    lang: html
+    code: <script src="/app.js" defer></script>
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://web.dev/articles/render-blocking-resources
+effort: S

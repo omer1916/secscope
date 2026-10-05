@@ -151,6 +151,18 @@
       "title": "Scope Statement Accepted",
       "type": "boolean"
     },
+    "public_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Public Url"
+    },
     "snapshot_sqlite": {
       "default": true,
       "title": "Snapshot Sqlite",

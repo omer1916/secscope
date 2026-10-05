@@ -1,0 +1,22 @@
+rule_id: SEO-DEPTH-001
+title:
+  tr: Derin veya yetim sayfalar
+  en: Deep or orphan pages
+severity: medium
+category: seo
+confidence: medium
+why:
+  tr: Ana sayfadan 4'ten fazla tıklamayla ulaşılan veya hiç iç bağlantı almayan sayfalar zor bulunur.
+  en: Pages more than 4 clicks from home, or without any internal link, are hard to discover.
+fix_steps:
+  tr:
+  - Önemli sayfalara menü, kategori veya ilgili içerik bağlantıları ekleyin.
+  en:
+  - Link important pages from navigation, categories or related content.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/crawling-indexing/links-crawlable
+effort: S

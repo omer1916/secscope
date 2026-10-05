@@ -1,0 +1,22 @@
+rule_id: SEO-THIN-001
+title:
+  tr: Çok az içerik
+  en: Thin content
+severity: low
+category: seo
+confidence: medium
+why:
+  tr: Sayfada çok az metin var; değerli, özgün içerik dizinde daha iyi performans gösterir.
+  en: The page has very little text; useful original content performs better in search.
+fix_steps:
+  tr:
+  - Sayfanın amacını karşılayan özgün içerik ekleyin veya sayfayı birleştirin/noindex yapın.
+  en:
+  - Add original content that serves the page's purpose, or merge the page / mark it noindex.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/fundamentals/creating-helpful-content
+effort: S

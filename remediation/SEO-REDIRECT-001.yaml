@@ -1,0 +1,33 @@
+rule_id: SEO-REDIRECT-001
+title:
+  tr: Yönlendirme zinciri veya geçici yönlendirme
+  en: Redirect chain or temporary redirect
+severity: medium
+category: seo
+confidence: high
+why:
+  tr: Birden fazla atlamalı zincirler taramayı yavaşlatır; kalıcı taşımalar için 302 yerine 301/308 kullanılmalı.
+  en: Multi-hop chains slow crawling; permanent moves should use 301/308 instead of 302.
+fix_steps:
+  tr:
+  - Eski URL'yi doğrudan son hedefe tek bir 301 ile yönlendirin.
+  - İç bağlantıları son URL'ye güncelleyin.
+  en:
+  - Redirect the old URL straight to the final target with a single 301.
+  - Update internal links to the final URL.
+snippets:
+  nginx:
+    lang: nginx
+    code: location = /old { return 301 /about.html; }
+  static:
+    lang: text
+    code: |-
+      # _redirects
+      /old  /about.html  301
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/crawling-indexing/301-redirects
+effort: S

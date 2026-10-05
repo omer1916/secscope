@@ -1,0 +1,22 @@
+rule_id: SEO-JSONLD-002
+title:
+  tr: Yapısal veride zorunlu alan eksik
+  en: Structured data missing required properties
+severity: medium
+category: seo
+confidence: high
+why:
+  tr: Türün gerektirdiği özellikler (ör. Article için headline, datePublished, author) eksik.
+  en: Properties required by the type (e.g. headline, datePublished, author for Article) are missing.
+fix_steps:
+  tr:
+  - Eksik alanları sayfada görünen içerikle eşleşecek şekilde ekleyin; görünmeyen bilgi işaretlemeyin.
+  en:
+  - Add the missing properties matching what the page shows; never mark up invisible content.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/appearance/structured-data/sd-policies
+effort: S

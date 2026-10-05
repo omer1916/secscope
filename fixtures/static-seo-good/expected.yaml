@@ -1,3 +1,7 @@
 static:
   must: []
   allowed: []
+seo:
+  must: []
+  # Acceptance (SPEC M6): no critical/high SEO finding on the good site.
+  max_severity: medium

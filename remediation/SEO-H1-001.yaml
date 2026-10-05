@@ -1,0 +1,22 @@
+rule_id: SEO-H1-001
+title:
+  tr: Başlık hiyerarşisi sorunlu (h1)
+  en: Heading structure problem (h1)
+severity: medium
+category: seo
+confidence: medium
+why:
+  tr: Sayfada tek bir anlamlı <h1> olmalı ve başlık seviyeleri atlanmamalı.
+  en: A page should have one meaningful <h1> and heading levels should not skip.
+fix_steps:
+  tr:
+  - Ana konuyu tek <h1> ile belirtin; alt başlıklar için h2, h3 sırasını koruyun.
+  en:
+  - State the main topic in a single <h1>; use h2, h3 in order for sections.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/fundamentals/seo-starter-guide
+effort: S

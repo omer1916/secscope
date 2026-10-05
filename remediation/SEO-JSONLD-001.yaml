@@ -1,0 +1,22 @@
+rule_id: SEO-JSONLD-001
+title:
+  tr: JSON-LD geçersiz
+  en: Invalid JSON-LD
+severity: medium
+category: seo
+confidence: high
+why:
+  tr: Yapısal veri bloğu geçerli JSON değil; Google tümüyle yok sayar.
+  en: A structured data block is not valid JSON; Google ignores it entirely.
+fix_steps:
+  tr:
+  - JSON sözdizimini düzeltin ve Zengin Sonuç Testi ile doğrulayın.
+  en:
+  - Fix the JSON syntax and validate with the Rich Results Test.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data
+effort: S

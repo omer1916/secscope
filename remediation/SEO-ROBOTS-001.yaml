@@ -1,0 +1,32 @@
+rule_id: SEO-ROBOTS-001
+title:
+  tr: robots.txt yok veya okunamıyor
+  en: robots.txt missing or unreadable
+severity: medium
+category: seo
+confidence: high
+why:
+  tr: /robots.txt 200 dönmüyor. Google 404'ü 'her şey serbest' sayar, ama 5xx hatası taramayı durdurabilir.
+  en: /robots.txt does not return 200. Google treats 404 as 'allow all', but 5xx errors can stop crawling.
+fix_steps:
+  tr:
+  - Kök dizine geçerli bir robots.txt ekleyin (SecScope taslak üretti).
+  - Sitemap satırını ekleyin.
+  en:
+  - Add a valid robots.txt at the root (SecScope generated a draft).
+  - Include a Sitemap line.
+snippets:
+  static:
+    lang: text
+    code: |-
+      User-agent: *
+      Allow: /
+
+      Sitemap: https://www.example.com/sitemap.xml
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://developers.google.com/search/docs/crawling-indexing/robots/intro
+effort: S

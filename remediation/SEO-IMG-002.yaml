@@ -1,0 +1,26 @@
+rule_id: SEO-IMG-002
+title:
+  tr: Görsellerde width/height yok (CLS)
+  en: Images without width/height (CLS)
+severity: medium
+category: seo
+confidence: high
+why:
+  tr: Boyutu belirtilmeyen görseller yüklenince sayfa kayar; bu Cumulative Layout Shift'i kötüleştirir.
+  en: Images without dimensions shift the layout when they load, hurting Cumulative Layout Shift.
+fix_steps:
+  tr:
+  - width ve height özniteliklerini ekleyin; CSS'te height:auto ile duyarlı kalabilir.
+  en:
+  - Add width and height attributes; keep them responsive with height:auto in CSS.
+snippets:
+  static:
+    lang: html
+    code: <img src="/hero.webp" alt="..." width="1200" height="600">
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; yayından sonra Search Console > URL Denetimi ile doğrulayın.
+  en: Re-scan after fixing; after launch confirm with Search Console > URL Inspection.
+references:
+- type: url
+  href: https://web.dev/articles/optimize-cls
+effort: S
