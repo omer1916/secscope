@@ -1,0 +1,240 @@
+# SecScope's own Semgrep rules (licensed with this project; no Semgrep Registry content).
+# metadata.secscope_rule maps each result to a SecScope rule id / KB entry.
+
+rules:
+  # ---------------------------------------------------------------- Express / Node
+  - id: express-taint-sqli
+    mode: taint
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Request data flows into a SQL query string.
+    metadata: {secscope_rule: SAST-SQLI-001, confidence: high}
+    pattern-sources:
+      - pattern-either:
+          - pattern: req.query
+          - pattern: req.body
+          - pattern: req.params
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: $DB.query($SQL, ...)
+              - pattern: $DB.execute($SQL, ...)
+              - pattern: $DB.raw($SQL, ...)
+          - focus-metavariable: $SQL
+
+  - id: express-taint-cmdi
+    mode: taint
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Request data flows into a shell command.
+    metadata: {secscope_rule: SAST-CMDI-001, confidence: high}
+    pattern-sources:
+      - pattern-either:
+          - pattern: req.query
+          - pattern: req.body
+          - pattern: req.params
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: exec($CMD, ...)
+              - pattern: execSync($CMD, ...)
+              - pattern: $CP.exec($CMD, ...)
+              - pattern: $CP.execSync($CMD, ...)
+          - focus-metavariable: $CMD
+
+  - id: express-taint-eval
+    mode: taint
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Request data is evaluated as code.
+    metadata: {secscope_rule: SAST-EVAL-001, confidence: high}
+    pattern-sources:
+      - pattern-either:
+          - pattern: req.query
+          - pattern: req.body
+          - pattern: req.params
+    pattern-sinks:
+      - pattern-either:
+          - pattern: eval(...)
+          - pattern: new Function(...)
+          - pattern: vm.runInNewContext(...)
+          - pattern: vm.runInThisContext(...)
+
+  - id: express-taint-redirect
+    mode: taint
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: Request data controls a redirect target.
+    metadata: {secscope_rule: SAST-REDIRECT-001, confidence: high}
+    pattern-sources:
+      - pattern-either:
+          - pattern: req.query
+          - pattern: req.body
+          - pattern: req.params
+    pattern-sinks:
+      - pattern: $RES.redirect(...)
+
+  - id: express-taint-path
+    mode: taint
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Request data controls a file system path.
+    metadata: {secscope_rule: SAST-PATH-001, confidence: high}
+    pattern-sources:
+      - pattern-either:
+          - pattern: req.query
+          - pattern: req.body
+          - pattern: req.params
+    pattern-sinks:
+      - pattern-either:
+          - pattern: fs.readFile(...)
+          - pattern: fs.readFileSync(...)
+          - pattern: fs.createReadStream(...)
+          - pattern: $RES.sendFile(...)
+          - pattern: $RES.download(...)
+
+  - id: express-cors-reflect-origin
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: The request Origin is reflected into Access-Control-Allow-Origin.
+    metadata: {secscope_rule: SAST-CORS-001, confidence: high}
+    pattern-either:
+      - pattern: $RES.setHeader("Access-Control-Allow-Origin", $REQ.headers.origin)
+      - pattern: $RES.header("Access-Control-Allow-Origin", $REQ.headers.origin)
+      - pattern: $RES.set("Access-Control-Allow-Origin", $REQ.headers.origin)
+
+  - id: express-taint-proto-pollution
+    mode: taint
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Request data reaches a deep-merge helper (prototype pollution).
+    metadata: {secscope_rule: SAST-PROTO-001, confidence: high}
+    pattern-sources:
+      - pattern-either:
+          - pattern: req.body
+          - pattern: req.query
+    pattern-sinks:
+      - pattern-either:
+          - pattern: _.merge(...)
+          - pattern: _.mergeWith(...)
+          - pattern: _.defaultsDeep(...)
+          - pattern: _.set(...)
+
+  - id: dom-xss-innerhtml-location
+    mode: taint
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: URL data flows into innerHTML (DOM XSS).
+    metadata: {secscope_rule: SAST-XSS-001, confidence: high}
+    pattern-sources:
+      - pattern-either:
+          - pattern: location.hash
+          - pattern: location.search
+          - pattern: location.href
+          - pattern: document.URL
+          - pattern: document.referrer
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: $EL.innerHTML = $X
+              - pattern: $EL.outerHTML = $X
+              - pattern: document.write($X)
+          - focus-metavariable: $X
+
+  # ---------------------------------------------------------------- Flask / Python
+  - id: flask-taint-sqli
+    mode: taint
+    languages: [python]
+    severity: ERROR
+    message: Request data flows into a SQL query string.
+    metadata: {secscope_rule: SAST-SQLI-001, confidence: high}
+    pattern-sources:
+      - pattern-either:
+          - pattern: flask.request.$ANY
+          - pattern: request.$ANY
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: $C.execute($SQL, ...)
+              - pattern: $C.executemany($SQL, ...)
+          - focus-metavariable: $SQL
+    pattern-sanitizers:
+      - pattern: int(...)
+
+  - id: flask-taint-path
+    mode: taint
+    languages: [python]
+    severity: ERROR
+    message: Request data controls a file path.
+    metadata: {secscope_rule: SAST-PATH-001, confidence: high}
+    pattern-sources:
+      - pattern-either:
+          - pattern: flask.request.$ANY
+          - pattern: request.$ANY
+    pattern-sinks:
+      - pattern-either:
+          - pattern: open(...)
+          - pattern: flask.send_file(...)
+          - pattern: send_file(...)
+    pattern-sanitizers:
+      - pattern-either:
+          - pattern: werkzeug.utils.secure_filename(...)
+          - pattern: secure_filename(...)
+
+  - id: flask-taint-redirect
+    mode: taint
+    languages: [python]
+    severity: WARNING
+    message: Request data controls a redirect target.
+    metadata: {secscope_rule: SAST-REDIRECT-001, confidence: high}
+    pattern-sources:
+      - pattern-either:
+          - pattern: flask.request.$ANY
+          - pattern: request.$ANY
+    pattern-sinks:
+      - pattern-either:
+          - pattern: redirect(...)
+          - pattern: flask.redirect(...)
+
+  - id: flask-taint-ssrf
+    mode: taint
+    languages: [python]
+    severity: ERROR
+    message: Request data controls an outgoing request URL.
+    metadata: {secscope_rule: SAST-SSRF-001, confidence: high}
+    pattern-sources:
+      - pattern-either:
+          - pattern: flask.request.$ANY
+          - pattern: request.$ANY
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: requests.$M($URL, ...)
+              - pattern: httpx.$M($URL, ...)
+              - pattern: urllib.request.urlopen($URL, ...)
+          - focus-metavariable: $URL
+
+  - id: python-subprocess-shell-true
+    languages: [python]
+    severity: ERROR
+    message: subprocess with shell=True and a non-literal command.
+    metadata: {secscope_rule: SAST-CMDI-001, confidence: medium}
+    patterns:
+      - pattern: subprocess.$F($CMD, ..., shell=True, ...)
+      - pattern-not: subprocess.$F("...", ..., shell=True, ...)
+
+  - id: flask-debug-true
+    languages: [python]
+    severity: ERROR
+    message: Flask debug mode enabled.
+    metadata: {secscope_rule: SAST-DEBUG-001, confidence: high}
+    pattern: $APP.run(..., debug=True, ...)
+
+  - id: python-render-template-string
+    languages: [python]
+    severity: ERROR
+    message: Template rendered from a non-literal string (SSTI risk).
+    metadata: {secscope_rule: SAST-SSTI-001, confidence: medium}
+    patterns:
+      - pattern: render_template_string($X, ...)
+      - pattern-not: render_template_string("...", ...)

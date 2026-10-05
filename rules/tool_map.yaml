@@ -1,0 +1,46 @@
+# External tool rule ids -> SecScope rule ids (used by normalisation + dedup).
+# A null value means: ignore this tool rule (too noisy / out of scope).
+# confidence: overrides the tool's own confidence for that mapping.
+
+bandit:
+  B102: {rule: SAST-EVAL-001}
+  B307: {rule: SAST-EVAL-001}
+  B105: {rule: SAST-HARDCODED-001}
+  B106: {rule: SAST-HARDCODED-001}
+  B107: {rule: SAST-HARDCODED-001}
+  B201: {rule: SAST-DEBUG-001}
+  B301: {rule: SAST-DESER-001}
+  B302: {rule: SAST-DESER-001}
+  B506: {rule: SAST-DESER-001}
+  B303: {rule: SAST-CRYPTO-001, confidence: low}
+  B324: {rule: SAST-CRYPTO-001, confidence: low}
+  B304: {rule: SAST-CRYPTO-002}
+  B305: {rule: SAST-CRYPTO-002}
+  B501: {rule: SAST-TLS-001}
+  B323: {rule: SAST-TLS-001}
+  B602: {rule: SAST-CMDI-001}
+  B605: {rule: SAST-CMDI-001}
+  B608: {rule: SAST-SQLI-001}
+  B610: {rule: SAST-SQLI-001}
+  B611: {rule: SAST-SQLI-001}
+  B701: {rule: SAST-XSS-003}
+  B702: {rule: SAST-XSS-003}
+  B703: {rule: SAST-XSS-003}
+  B308: {rule: SAST-XSS-003}
+  B110: {rule: QUAL-EXCEPT-001}
+  B112: {rule: QUAL-EXCEPT-001}
+  B310: {rule: SAST-SSRF-001, confidence: low}
+  B313: {rule: SAST-XXE-001, confidence: low}
+  B314: {rule: SAST-XXE-001, confidence: low}
+  B320: {rule: SAST-XXE-001, confidence: low}
+  B101: null   # assert used
+  B104: null   # binding to all interfaces (handled by the runner's listen check)
+  B108: null   # hardcoded tmp dir
+  B113: null   # request without timeout (robustness, not security)
+  B311: null   # random module (too noisy; SAST-RAND-001 checks the context natively)
+  B403: null   # import pickle (B301 covers usage)
+  B404: null   # import subprocess
+  B603: null   # subprocess without shell
+  B607: null   # partial executable path
+
+# Semgrep rules carry their SecScope id in metadata.secscope_rule (rules/semgrep/*.yaml).

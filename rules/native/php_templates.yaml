@@ -1,0 +1,81 @@
+# Native pattern rules for PHP and server-side templates.
+
+- id: SAST-SQLI-001
+  languages: [php]
+  pattern: '(?:->(?:query|exec|prepare)|\b(?:mysqli_query|mysql_query|pg_query|sqlite_query))\s*\([^;]*(?:[''"][^''"]*\b(?:SELECT|INSERT|UPDATE|DELETE)\b[^''"]*[''"]\s*\.\s*\$|"[^"]*\b(?:SELECT|INSERT|UPDATE|DELETE)\b[^"]*\$\w)'
+  confidence: high
+
+- id: SAST-CMDI-001
+  languages: [php]
+  pattern: '\b(?:system|exec|shell_exec|passthru|popen|proc_open|pcntl_exec)\s*\([^;]*\$_(?:GET|POST|REQUEST|COOKIE|SERVER)|`[^`]*\$_(?:GET|POST|REQUEST)'
+  confidence: high
+
+- id: SAST-EVAL-001
+  languages: [php]
+  pattern: '(?<![\w>])(?:eval|assert|create_function)\s*\(\s*\$|preg_replace\s*\(\s*[''"](.).*\1[a-z]*e[a-z]*[''"]'
+
+- id: SAST-LFI-001
+  languages: [php]
+  pattern: '\b(?:include|require)(?:_once)?\b\s*\(?[^;]*\$(?:_(?:GET|POST|REQUEST|COOKIE)|\w+)'
+  not_pattern: '__DIR__\s*\.\s*[''"][^''"$]*[''"]\s*\)?\s*;'
+  confidence: medium
+
+- id: SAST-DESER-001
+  languages: [php]
+  pattern: '\bunserialize\s*\('
+  not_pattern: 'allowed_classes[''"]?\s*=>\s*false'
+  confidence: high
+
+- id: SAST-XSS-003
+  languages: [php]
+  pattern: '\b(?:echo|print)\b[^;]*\$_(?:GET|POST|REQUEST|COOKIE|SERVER)'
+  not_pattern: 'htmlspecialchars|htmlentities|intval|\(int\)'
+
+- id: SAST-REDIRECT-001
+  languages: [php]
+  pattern: 'header\s*\(\s*[''"]Location:\s*[''"]?\s*\.\s*\$_(?:GET|POST|REQUEST)'
+
+- id: SAST-SSRF-001
+  languages: [php]
+  pattern: '\b(?:file_get_contents|fopen|curl_init|readfile|get_headers)\s*\(\s*\$_(?:GET|POST|REQUEST)'
+
+- id: SAST-CRYPTO-001
+  languages: [php]
+  pattern: '(?i)\b(?:md5|sha1)\s*\(\s*\$\w*pass'
+
+- id: SAST-TLS-001
+  languages: [php]
+  pattern: 'CURLOPT_SSL_VERIFY(?:PEER|HOST)\s*,\s*(?:false|0)\b'
+
+- id: SAST-CORS-001
+  languages: [php]
+  pattern: 'Access-Control-Allow-Origin:\s*[''"]\s*\.\s*\$_SERVER\[\s*[''"]HTTP_ORIGIN'
+
+- id: SAST-DEBUG-001
+  languages: [php]
+  pattern: 'ini_set\(\s*[''"]display_errors[''"]\s*,\s*[''"]?(?:1|on|true)|error_reporting\(\s*E_ALL\s*\)\s*;\s*ini_set'
+
+- id: SAST-PHPINFO-001
+  languages: [php]
+  pattern: '\bphpinfo\s*\(\s*\)'
+  severity: medium
+
+- id: SAST-HARDCODED-001
+  languages: [php]
+  pattern: '(?i)\$\w*(?:passw(?:or)?d|secret|api_?key|db_?pass)\w*\s*=\s*[''"][^''"\s]{6,}[''"]'
+  not_pattern: '(?i)getenv|\$_ENV|placeholder|example|your[_-]'
+
+- id: QUAL-DEBUGCODE-001
+  languages: [php]
+  pattern: '\b(?:var_dump|print_r|debug_zval_dump)\s*\(\s*\$_'
+
+# --- templates (Jinja/Django/EJS/Handlebars/Twig/Nunjucks) ---
+
+- id: SAST-XSS-003
+  languages: [template, html]
+  pattern: '\{\{[^}]*\|\s*safe\b|\{%\s*autoescape\s+(?:false|off)|<%-|\{\{\{|\|\s*raw\b|\{!!'
+  confidence: medium
+
+- id: SAST-XSS-001
+  languages: [html, template]
+  pattern: '\.(?:innerHTML|outerHTML)\s*\+?=\s*(?![''"`][^''"`$]*[''"`]\s*;?\s*$)|\bdocument\.write\('

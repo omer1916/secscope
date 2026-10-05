@@ -1,0 +1,134 @@
+# Native pattern rules for JavaScript / TypeScript (incl. JSX, Vue, Svelte).
+# Python is covered by the AST checks in secscope/analysis/python_checks.py.
+# Keep patterns specific: every rule has positive and negative tests in tests/unit/test_rules_js_php.py.
+
+- id: SAST-SQLI-001
+  languages: [javascript]
+  pattern: '\.(?:query|execute|raw|prepare)\(\s*(?:[''"][^''"]*\b(?:SELECT|INSERT|UPDATE|DELETE)\b[^''"]*[''"]\s*\+|`[^`]*\b(?:SELECT|INSERT|UPDATE|DELETE)\b[^`]*\$\{)'
+  confidence: high
+
+- id: SAST-NOSQLI-001
+  languages: [javascript]
+  pattern: '(?:\.|\b)(?:find|findOne|findOneAndUpdate|findOneAndDelete|updateOne|updateMany|deleteOne|deleteMany|countDocuments|where)\(\s*\{[^}]*\breq\.(?:body|query|params)\b'
+
+- id: SAST-CMDI-001
+  languages: [javascript]
+  pattern: '\b(?:exec|execSync)\(\s*(?:[''"][^''"]*[''"]\s*\+|`[^`]*\$\{|req\.)'
+  confidence: high
+
+- id: SAST-CMDI-001
+  languages: [javascript]
+  pattern: '\bspawn(?:Sync)?\([^)]*\bshell\s*:\s*true'
+  confidence: medium
+
+- id: SAST-EVAL-001
+  languages: [javascript]
+  pattern: '(?<![\w.$])eval\(\s*(?![''"`][^''"`]*[''"`]\s*\))'
+  confidence: high
+
+- id: SAST-EVAL-001
+  languages: [javascript]
+  pattern: '\bnew\s+Function\(|\bset(?:Timeout|Interval)\(\s*[''"`]'
+
+- id: SAST-XSS-001
+  languages: [javascript]
+  pattern: '\.(?:innerHTML|outerHTML)\s*\+?=\s*(?![''"`][^''"`$]*[''"`]\s*;?\s*$)'
+  confidence: medium
+
+- id: SAST-XSS-001
+  languages: [javascript]
+  pattern: '\bdocument\.(?:write|writeln)\(|\.insertAdjacentHTML\(\s*[''"][^''"]+[''"]\s*,\s*(?![''"`])'
+
+- id: SAST-XSS-002
+  languages: [javascript]
+  pattern: 'dangerouslySetInnerHTML\s*=|\bv-html\s*=|\[innerHTML\]\s*=|bypassSecurityTrust(?:Html|Script|Url|ResourceUrl)\(|\{@html\s'
+
+- id: SAST-REDIRECT-001
+  languages: [javascript]
+  pattern: '\.redirect\(\s*(?:\d{3}\s*,\s*)?req\.(?:query|body|params|headers)\b|location(?:\.href)?\s*=\s*(?:new\s+URLSearchParams|location\.(?:hash|search))'
+
+- id: SAST-PATH-001
+  languages: [javascript]
+  pattern: '\b(?:readFile|readFileSync|createReadStream|sendFile|download|unlink|unlinkSync|writeFile|writeFileSync)\(\s*(?:path\.join\([^)]*)?[^)]*\breq\.(?:query|params|body)\b'
+
+- id: SAST-SSRF-001
+  languages: [javascript]
+  pattern: '\b(?:fetch|axios(?:\.(?:get|post|put|request))?|got|needle|superagent\.get|https?\.get|request)\(\s*req\.(?:query|body|params)\b'
+
+- id: SAST-DESER-001
+  languages: [javascript]
+  pattern: '\bunserialize\(|require\(\s*[''"]node-serialize[''"]\s*\)|\.deserialize\(\s*req\.'
+
+- id: SAST-CRYPTO-001
+  languages: [javascript]
+  pattern: 'createHash\(\s*[''"](?:md5|sha1|md4)[''"]\s*\)'
+  confidence: medium
+
+- id: SAST-CRYPTO-002
+  languages: [javascript]
+  pattern: 'createCipheriv?\(\s*[''"][a-z0-9-]*-ecb[''"]|\bcreateCipher\('
+
+- id: SAST-RAND-001
+  languages: [javascript]
+  pattern: '(?i)\b\w*(?:token|secret|passw(?:or)?d|nonce|session|apikey|api_key|otp|salt)\w*\s*[:=][^;\n]*Math\.random\(\)'
+
+- id: SAST-TLS-001
+  languages: [javascript]
+  pattern: 'rejectUnauthorized\s*:\s*false|NODE_TLS_REJECT_UNAUTHORIZED[''"]?\s*\]?\s*=\s*[''"]?0'
+
+- id: SAST-JWT-001
+  languages: [javascript]
+  pattern: '\bjwt\.sign\([^,()]+,\s*[''"][^''"]{1,}[''"]|(?i:\b(?:jwt_?secret|token_?secret|jwtKey|signing_?key)\s*[:=]\s*[''"][^''"]{1,}[''"])'
+  not_pattern: 'process\.env|getenv|config\.get'
+
+- id: SAST-JWT-002
+  languages: [javascript]
+  pattern: 'algorithms\s*:\s*\[[^\]]*[''"]none[''"]|\balg\s*===?\s*[''"]none[''"]|\bignoreExpiration\s*:\s*true|jwt\.decode\(\s*[^)]*\)\s*;?\s*//\s*no verify'
+  severity: critical
+
+- id: SAST-CORS-001
+  languages: [javascript]
+  pattern: 'Access-Control-Allow-Origin[''"]\s*,\s*req\.(?:headers\.origin|get\(\s*[''"]origin)|\borigin\s*:\s*(?:true|[''"]\*[''"])\s*,\s*credentials\s*:\s*true|\bcredentials\s*:\s*true\s*,\s*origin\s*:\s*(?:true|[''"]\*[''"])'
+  confidence: high
+
+- id: SAST-PROTO-001
+  languages: [javascript]
+  pattern: '\b(?:_|lodash)\.(?:merge|mergeWith|defaultsDeep|set|setWith|zipObjectDeep)\([^)]*\breq\.(?:body|query|params)\b|\$\.extend\(\s*true\s*,[^)]*\breq\.'
+
+- id: SAST-MASSASSIGN-001
+  languages: [javascript]
+  pattern: '\.(?:create|insertOne|insert|update|updateOne|build|save)\(\s*req\.body\s*\)|Object\.assign\(\s*\w+\s*,\s*req\.body\s*\)|new\s+[A-Z]\w*\(\s*req\.body\s*\)'
+
+- id: SAST-STORAGE-001
+  languages: [javascript]
+  pattern: '(?i)(?:localStorage|sessionStorage)\.setItem\(\s*[''"`][^''"`]*(?:token|jwt|auth|session|secret|password)'
+
+- id: SAST-COOKIE-001
+  languages: [javascript]
+  pattern: '\bres\.cookie\(\s*[''"][^''"]+[''"]\s*,[^;]*\)'
+  not_pattern: 'httpOnly\s*:\s*true'
+
+- id: SAST-LOG-001
+  languages: [javascript]
+  pattern: '(?i)console\.(?:log|info|debug|warn)\([^)\n]*\b(?:password|passwd|secret|token|api_?key|authorization)\b'
+  not_pattern: '(?i)[''"][^''"]*(?:password|token|secret)[^''"]*[''"]\s*\)'
+
+- id: SAST-HARDCODED-001
+  languages: [javascript]
+  pattern: '(?i)\b(?:const|let|var)?\s*\w*(?:passw(?:or)?d|secret|api_?key|private_?key|client_?secret)\w*\s*[:=]\s*[''"][^''"\s]{6,}[''"]'
+  not_pattern: '(?i)process\.env|getenv|placeholder|example|your[_-]|<[^>]+>|\$\{|changeme_in_prod|type\s*=|name\s*='
+
+- id: QUAL-DEBUGCODE-001
+  languages: [javascript]
+  pattern: '^\s*debugger\s*;?\s*$'
+
+- id: QUAL-DEFAULTCRED-001
+  languages: [javascript, php, python]
+  pattern: '(?i)[''"](?:admin|root|test|user)[''"]\s*[,:]\s*[''"]?(?:pass(?:word)?)?[''"]?\s*[,:]?\s*[''"](?:admin|root|password|123456|12345678|changeme|test|toor|letmein)[''"]'
+  not_pattern: '^\s*(?://|#|\*|/\*|<!--)'
+  confidence: low
+
+- id: SAST-ERRLEAK-001
+  languages: [javascript]
+  pattern: '\.(?:send|json|end|write)\(\s*(?:\{[^}]*)?\b(?:e|err|error|ex|exception)\.stack\b'
+  confidence: high
