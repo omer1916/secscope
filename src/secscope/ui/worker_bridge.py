@@ -33,6 +33,8 @@ class WorkerBridge(QObject):
         program, *args = worker_command()
         proc.setProgram(program)
         proc.setArguments(args)
+        # Qt already starts children with CREATE_NO_WINDOW when the GUI has no console,
+        # so the frozen console worker never flashes a window.
         if env is not None:
             qenv = QProcessEnvironment()
             for key, value in env.items():

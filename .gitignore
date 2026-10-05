@@ -40,4 +40,5 @@ Thumbs.db
 !fixtures/**/*.pem
 node_modules/
 shop.db
-.autopilot/
+build/
+dist/

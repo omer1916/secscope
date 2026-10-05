@@ -171,7 +171,9 @@ async def run_capture(
 def python_tool_command(module: str) -> list[str]:
     """Run a Python-based tool we depend on (bandit, pip-audit) from our own environment."""
     if getattr(sys, "frozen", False):
-        return [sys.executable, "run-python-tool", module]
+        exe = Path(sys.executable)
+        console = exe.with_name("secscope.exe" if sys.platform == "win32" else "secscope")
+        return [str(console if console.exists() else exe), "run-python-tool", module]
     return [sys.executable, "-m", module]
 
 

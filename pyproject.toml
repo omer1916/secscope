@@ -43,6 +43,7 @@ dev = [
     "hypothesis>=6.112",
     "jsonschema>=4.26.0",
     "pre-commit>=4.0",
+    "pyinstaller>=6.22.3",
     "pyright>=1.1.390",
     "pytest>=8.3",
     "pytest-asyncio>=0.24",

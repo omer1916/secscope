@@ -8,6 +8,7 @@ from __future__ import annotations
 import subprocess
 import sys
 from collections.abc import AsyncIterator, Mapping
+from pathlib import Path
 
 from pydantic import ValidationError
 
@@ -18,7 +19,10 @@ from secscope.core.process import ManagedProcess
 def worker_command() -> list[str]:
     """How to launch the worker: frozen builds re-enter the same executable."""
     if getattr(sys, "frozen", False):
-        return [sys.executable, "worker"]
+        # The windowed UI exe has no console streams: use the console sibling for the worker.
+        exe = Path(sys.executable)
+        console = exe.with_name("secscope.exe" if sys.platform == "win32" else "secscope")
+        return [str(console if console.exists() else exe), "worker"]
     return [sys.executable, "-m", "secscope.worker"]
 
 

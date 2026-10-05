@@ -259,7 +259,15 @@ class SandboxRunner:
 
     async def start_static(self, root: Path, *, timeout: float = 30) -> TargetInfo:
         if getattr(sys, "frozen", False):
-            argv = [sys.executable, "static-server", str(root), "--port", "{port}"]
+            exe = Path(sys.executable)
+            console = exe.with_name("secscope.exe" if sys.platform == "win32" else "secscope")
+            argv = [
+                str(console if console.exists() else exe),
+                "static-server",
+                str(root),
+                "--port",
+                "{port}",
+            ]
         else:
             argv = [
                 sys.executable,

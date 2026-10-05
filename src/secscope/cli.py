@@ -392,10 +392,39 @@ def _utf8_stdio() -> None:
             reconfigure(encoding="utf-8", errors="replace")
 
 
+# Internal sub-programs of a frozen build: the bundled executable re-enters itself instead
+# of relying on a Python interpreter (``sys.executable`` is secscope.exe there).
+INTERNAL = ("static-server", "run-python-tool", "gui")
+
+
+def _internal(name: str, rest: list[str]) -> int:
+    if name == "static-server":
+        from secscope.core.static_server import main as static_main  # noqa: PLC0415
+
+        return static_main(rest)
+    if name == "gui":
+        from secscope.ui.app import main as gui_main  # noqa: PLC0415
+
+        return gui_main()
+    # run-python-tool <module> [args...]: run a bundled Python tool (bandit) as __main__.
+    import runpy  # noqa: PLC0415
+
+    module, *tool_args = rest
+    sys.argv = [module, *tool_args]
+    try:
+        runpy.run_module(module, run_name="__main__", alter_sys=True)
+    except SystemExit as exc:
+        return exc.code if isinstance(exc.code, int) else 0
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
+    args_list = list(sys.argv[1:] if argv is None else argv)
+    if args_list and args_list[0] in INTERNAL:
+        return _internal(args_list[0], args_list[1:])
     _utf8_stdio()
     parser = build_parser()
-    args = parser.parse_args(argv)
+    args = parser.parse_args(args_list)
     match args.command:
         case "schema":
             json.dump(_schema(args.kind), sys.stdout, indent=2, ensure_ascii=True)
