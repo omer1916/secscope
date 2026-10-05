@@ -1,0 +1,68 @@
+# External tools SecScope can use (SPEC §2, §13).
+#
+# kind:            "binary" (downloadable, pinned by version + SHA-256), "pip" (Python
+#                  package in our env or on PATH), "system" (user installs: Java, Node, Docker)
+# commands:        executable names to look for, in order
+# version_args:    arguments that print the version; output is matched with version_regex
+# min_version:     oldest version we have verified against (docs/tool-notes/<tool>.md)
+# [tools.X.downloads."<os>-<arch>"]: url + sha256 + archive + binary path inside the archive.
+#   Only HTTPS URLs on hosts listed in [download_hosts] are ever fetched.
+
+schema = 1
+
+[download_hosts]
+allowed = ["github.com", "objects.githubusercontent.com", "release-assets.githubusercontent.com"]
+
+[tools.java]
+kind = "system"
+commands = ["java"]
+version_args = ["-version"]
+version_regex = 'version "(\d+(?:\.\d+)*)'
+min_version = "17"
+homepage = "https://adoptium.net/"
+install_hint = { tr = "Java 17+ kurun (ör. Eclipse Temurin: https://adoptium.net/). OWASP ZAP için gereklidir.", en = "Install Java 17+ (e.g. Eclipse Temurin: https://adoptium.net/). Required by OWASP ZAP." }
+
+[tools.node]
+kind = "system"
+commands = ["node"]
+version_args = ["--version"]
+version_regex = 'v(\d+\.\d+\.\d+)'
+min_version = "20.0.0"
+homepage = "https://nodejs.org/"
+install_hint = { tr = "Node.js 20+ kurun: https://nodejs.org/ (Lighthouse ve npm audit için).", en = "Install Node.js 20+: https://nodejs.org/ (for Lighthouse and npm audit)." }
+
+[tools.npm]
+kind = "system"
+commands = ["npm"]
+version_args = ["--version"]
+version_regex = '(\d+\.\d+\.\d+)'
+min_version = "9.0.0"
+homepage = "https://nodejs.org/"
+install_hint = { tr = "npm, Node.js ile birlikte gelir: https://nodejs.org/", en = "npm ships with Node.js: https://nodejs.org/" }
+
+[tools.docker]
+kind = "system"
+commands = ["docker"]
+version_args = ["--version"]
+version_regex = 'version (\d+\.\d+\.\d+)'
+min_version = "20.10.0"
+homepage = "https://docs.docker.com/get-docker/"
+install_hint = { tr = "İsteğe bağlı: Docker kurun (hedefi konteynerde izole çalıştırmak için).", en = "Optional: install Docker (to run the target isolated in a container)." }
+
+[tools.php]
+kind = "system"
+commands = ["php"]
+version_args = ["--version"]
+version_regex = 'PHP (\d+\.\d+\.\d+)'
+min_version = "8.0.0"
+homepage = "https://www.php.net/downloads"
+install_hint = { tr = "PHP projelerini çalıştırmak için PHP 8+ kurun.", en = "Install PHP 8+ to run PHP projects." }
+
+[tools.semgrep]
+kind = "pip"
+commands = ["semgrep"]
+version_args = ["--version"]
+version_regex = '(\d+\.\d+\.\d+)'
+min_version = "1.100.0"
+homepage = "https://semgrep.dev/docs/getting-started/cli"
+install_hint = { tr = "Semgrep kurun: 'uv tool install semgrep' veya 'pipx install semgrep'.", en = "Install Semgrep: 'uv tool install semgrep' or 'pipx install semgrep'." }
