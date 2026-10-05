@@ -24,7 +24,21 @@ the UI down.
 | Logging | `core/logging.py` | Rotating file; the formatter masks secrets in the final text, tracebacks included. |
 | Storage | `storage/db.py`, `storage/repo.py` | SQLite, WAL, FK on; migrations are `storage/migrations/NNNN_name.sql`, applied atomically, tracked with `PRAGMA user_version`. |
 | Scope Guard | `core/scope_guard.py` | URL decision, DNS pinning, redirect re-checks, `ScopedHttpClient`, scoped raw TCP. See ADR-001. |
-| CLI | `cli.py` | `--version`, `schema <kind>`. |
+| CLI | `cli.py` | `scan`, `tools list`, `modules`, `schema <kind>`, hidden `worker`. Exit codes 0/1/2/3 (`--fail-on`). |
+
+## Implemented (M1)
+
+| Area | Module | Notes |
+|---|---|---|
+| Module contract | `modules/base.py` | `BaseModule`, `Requirements`, `PreflightResult` (localized), `ScanContext` (`checkpoint()`, `http_client()`), `ModuleResult`. Guide: [adding-a-module.md](adding-a-module.md). |
+| Registry | `modules/registry.py` | One `"pkg.mod:Class"` line per module; profiles per module. |
+| Orchestrator | `core/orchestrator.py` | Dependency layers, bounded parallelism, exclusive modules, timeouts, pause/resume/cancel, kill_target, scope violations attributed to the module, persistence hooks. |
+| Processes | `core/process.py` | `ManagedProcess`: Windows Job Objects / POSIX process groups + psutil sweep. ADR-004. |
+| Archives | `core/archive.py` | Safe zip/tar extraction (slip, links, devices, bombs, lying headers). |
+| Tools | `core/toolmgr.py`, `tools/manifest.toml` | Detection (managed copy, then PATH), min versions, localized install hints. |
+| Session | `core/session.py` | Scan id, work dir, DB, guard (LAN policy), context. |
+| Worker | `worker/main.py`, `worker/client.py` | JSON-Lines over stdio, journal `events.jsonl`, exits on stdin EOF. |
+| UI | `ui/main_window.py`, `ui/worker_bridge.py`, `ui/i18n/` | Minimal window (QProcess), tr/en catalogs. Full UI in M9. |
 
 ## Network rule
 
