@@ -1,0 +1,47 @@
+rule_id: SCA-VULN-001
+title:
+  tr: Bilinen güvenlik açığı olan bağımlılık
+  en: Dependency with a known vulnerability
+severity: high
+category: security
+confidence: high
+why:
+  tr: Kullanılan paket sürümü yayımlanmış bir güvenlik duyurusundan (CVE/GHSA/PYSEC) etkileniyor.
+  en: The package version in use is affected by a published advisory (CVE/GHSA/PYSEC).
+impact:
+  tr: 'Duyuruya göre değişir: kod çalıştırma, veri sızıntısı, hizmet kesintisi.'
+  en: 'Depends on the advisory: code execution, data leaks, denial of service.'
+fix_steps:
+  tr:
+  - Paketi duyuruda belirtilen düzeltilmiş sürüme yükseltin.
+  - Dolaylı bağımlılıksa üst paketi güncelleyin veya sürümü zorlayın (overrides / constraints).
+  - Lock dosyasını yeniden oluşturup testleri çalıştırın.
+  en:
+  - Upgrade the package to the fixed version named in the advisory.
+  - For transitive dependencies, update the parent or force the version (overrides / constraints).
+  - Regenerate the lockfile and run your tests.
+snippets:
+  express:
+    lang: shell
+    code: |-
+      npm install <package>@<fixed-version>
+      # transitive: "overrides": { "<package>": "<fixed-version>" } in package.json
+  flask:
+    lang: shell
+    code: 'pip install ''<package>>=<fixed-version>''  # then update requirements.txt'
+  php:
+    lang: shell
+    code: composer require <vendor/package>:^<fixed-version>
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 1395
+- type: owasp
+  id: A03:2025
+- type: asvs
+  id: 5.0-V15
+- type: url
+  href: https://osv.dev/
+effort: S

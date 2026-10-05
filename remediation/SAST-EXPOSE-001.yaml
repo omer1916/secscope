@@ -1,0 +1,33 @@
+rule_id: SAST-EXPOSE-001
+title:
+  tr: Proje kök dizini statik dosya olarak sunuluyor
+  en: Project root served as static files
+severity: high
+category: security
+confidence: medium
+why:
+  tr: 'static_folder proje köküne ayarlı: kaynak kod, .env ve yedek dosyalar indirilebilir.'
+  en: 'static_folder points at the project root: source code, .env and backups become downloadable.'
+impact:
+  tr: Gizli anahtarların ve kaynak kodun sızması.
+  en: Leak of secrets and source code.
+fix_steps:
+  tr:
+  - Statik dosyaları yalnızca ayrı bir static/ klasöründen sunun.
+  en:
+  - Serve static files from a dedicated static/ folder only.
+snippets:
+  flask:
+    lang: python
+    code: 'app = Flask(__name__)  # default static_folder="static"'
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 538
+- type: owasp
+  id: A02:2025
+- type: asvs
+  id: 5.0-V13
+effort: S

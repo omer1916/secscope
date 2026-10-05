@@ -1,0 +1,29 @@
+rule_id: SAST-PHPINFO-001
+title:
+  tr: phpinfo() herkese açık
+  en: phpinfo() exposed
+severity: medium
+category: security
+confidence: medium
+why:
+  tr: phpinfo() sunucu yapılandırmasını, ortam değişkenlerini ve sürümleri gösterir.
+  en: phpinfo() shows server configuration, environment variables and versions.
+impact:
+  tr: Gizli değerlerin ve saldırı yüzeyinin ifşası.
+  en: Disclosure of secrets and of the attack surface.
+fix_steps:
+  tr:
+  - phpinfo() içeren dosyaları kaldırın.
+  en:
+  - Remove files that call phpinfo().
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 200
+- type: owasp
+  id: A02:2025
+- type: asvs
+  id: 5.0-V13
+effort: S

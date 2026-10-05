@@ -1,0 +1,35 @@
+rule_id: SAST-SSTI-001
+title:
+  tr: Şablon kullanıcı girdisinden oluşturuluyor (SSTI)
+  en: Template built from user input (SSTI)
+severity: critical
+category: security
+confidence: medium
+why:
+  tr: Şablon metni girdiyle oluşturuluyor; {{ ... }} ifadeleri sunucuda çalışır.
+  en: The template source is built from input; {{ ... }} expressions run on the server.
+impact:
+  tr: Sunucu tarafında kod çalıştırma, gizli bilgilerin okunması.
+  en: Server-side code execution, disclosure of secrets.
+fix_steps:
+  tr:
+  - Kullanıcı girdisini şablona değil, şablon değişkeni (context) olarak verin.
+  - render_template_string yerine dosya tabanlı şablon kullanın.
+  en:
+  - Pass user input as a template variable (context), never as template source.
+  - Use file-based templates instead of render_template_string.
+snippets:
+  flask:
+    lang: python
+    code: 'return render_template("hello.html", name=name)  # {{ name }} is auto-escaped'
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 1336
+- type: owasp
+  id: A05:2025
+- type: asvs
+  id: 5.0-V1
+effort: S

@@ -1,0 +1,26 @@
+rule_id: SCA-LICENSE-001
+title:
+  tr: Güçlü copyleft lisanslı bağımlılık
+  en: Dependency under a strong copyleft licence
+severity: info
+category: quality
+confidence: medium
+why:
+  tr: GPL/AGPL lisanslı paketler dağıtım veya ağ üzerinden sunum durumunda kaynak paylaşım yükümlülüğü
+    getirebilir.
+  en: GPL/AGPL packages can impose source-sharing obligations when distributing or serving over a network.
+impact:
+  tr: Lisans uyumsuzluğu (hukuki risk; güvenlik açığı değildir).
+  en: Licence non-compliance (legal risk, not a vulnerability).
+fix_steps:
+  tr:
+  - Lisansın ürününüzle uyumunu değerlendirin; gerekirse alternatif paket seçin.
+  en:
+  - Check the licence against your product's terms; pick an alternative if needed.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: url
+  href: https://choosealicense.com/licenses/
+effort: M

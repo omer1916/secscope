@@ -1,0 +1,48 @@
+rule_id: SAST-HARDCODED-001
+title:
+  tr: Kodda sabit kimlik bilgisi veya uygulama sırrı
+  en: Hardcoded credential or application secret
+severity: high
+category: security
+confidence: medium
+why:
+  tr: Parola, API anahtarı veya SECRET_KEY kaynak koda gömülü; kodu gören herkes erişir.
+  en: A password, API key or SECRET_KEY is embedded in source code; anyone with the code has it.
+impact:
+  tr: Oturum imzalarının sahtelenmesi, harici servislere yetkisiz erişim.
+  en: Forged session signatures, unauthorised access to external services.
+fix_steps:
+  tr:
+  - Değeri ortam değişkeni veya sır yöneticisinden okuyun.
+  - Sırrı döndürün (rotate) — kodda göründüyse sızmış kabul edin.
+  - Git geçmişinden temizleyin (git filter-repo).
+  en:
+  - Read the value from an environment variable or a secret manager.
+  - Rotate the secret — treat it as leaked once it was in code.
+  - Purge it from git history (git filter-repo).
+snippets:
+  flask:
+    lang: python
+    code: app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
+  django:
+    lang: python
+    code: SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
+  express:
+    lang: js
+    code: const apiKey = process.env.PAYMENT_API_KEY;
+  php:
+    lang: php
+    code: $dbPass = getenv('DB_PASSWORD');
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 798
+- type: owasp
+  id: A07:2025
+- type: asvs
+  id: 5.0-V13
+- type: url
+  href: https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html
+effort: S

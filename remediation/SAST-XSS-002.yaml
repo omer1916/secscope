@@ -1,0 +1,36 @@
+rule_id: SAST-XSS-002
+title:
+  tr: Çerçevenin XSS korumasını atlayan HTML ekleme
+  en: Framework XSS protection bypassed with raw HTML
+severity: medium
+category: security
+confidence: medium
+why:
+  tr: dangerouslySetInnerHTML / v-html / [innerHTML] / bypassSecurityTrust* otomatik kaçışlamayı devre
+    dışı bırakır.
+  en: dangerouslySetInnerHTML / v-html / [innerHTML] / bypassSecurityTrust* disable automatic escaping.
+impact:
+  tr: İçerik kullanıcıdan geliyorsa XSS.
+  en: XSS if the content comes from users.
+fix_steps:
+  tr:
+  - Mümkünse düz metin bağlama kullanın.
+  - HTML gerekiyorsa DOMPurify ile temizleyin ve kaynağı belgeleyin.
+  en:
+  - Use plain text binding where possible.
+  - If HTML is required, sanitise it with DOMPurify and document the source.
+snippets:
+  javascript:
+    lang: jsx
+    code: '<div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }} />'
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 79
+- type: owasp
+  id: A05:2025
+- type: asvs
+  id: 5.0-V3
+effort: S

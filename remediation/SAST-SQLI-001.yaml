@@ -1,0 +1,56 @@
+rule_id: SAST-SQLI-001
+title:
+  tr: SQL sorgusu dize birleştirme ile kuruluyor
+  en: SQL query built by string concatenation
+severity: high
+category: security
+confidence: medium
+why:
+  tr: Kullanıcı girdisi SQL metnine doğrudan ekleniyor. Saldırgan sorgunun anlamını değiştirebilir (SQL
+    enjeksiyonu).
+  en: User input is concatenated into SQL text. An attacker can change the meaning of the query (SQL injection).
+impact:
+  tr: Veritabanındaki tüm verilerin okunması/değiştirilmesi, kimlik doğrulamanın atlatılması.
+  en: Reading or modifying all data in the database, bypassing authentication.
+fix_steps:
+  tr:
+  - Sorguyu parametreli (hazırlanmış) sorguya çevirin; değerleri ayrı parametre olarak verin.
+  - ORM kullanıyorsanız ham SQL yerine ORM sorgu API'sini kullanın.
+  - Tablo/kolon adı gibi parametrelenemeyen kısımları beyaz liste ile doğrulayın.
+  en:
+  - Use parameterised (prepared) queries and pass values as separate parameters.
+  - With an ORM, prefer its query API over raw SQL.
+  - Validate parts that cannot be parameterised (table/column names) against an allow-list.
+snippets:
+  flask:
+    lang: python
+    code: |-
+      rows = conn.execute(
+          "SELECT name, price FROM products WHERE name LIKE ?", (f"%{q}%",)
+      ).fetchall()
+  django:
+    lang: python
+    code: |-
+      Product.objects.filter(name__icontains=q)
+      # raw SQL: cursor.execute("SELECT ... WHERE name LIKE %s", [f"%{q}%"])
+  express:
+    lang: js
+    code: const [rows] = await db.query("SELECT name FROM products WHERE name LIKE ?", [`%${q}%`]);
+  php:
+    lang: php
+    code: |-
+      $stmt = $pdo->prepare("SELECT name, email FROM users WHERE id = ?");
+      $stmt->execute([$_GET["id"]]);
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 89
+- type: owasp
+  id: A05:2025
+- type: asvs
+  id: 5.0-V1
+- type: url
+  href: https://cheatsheetseries.owasp.org/cheatsheets/Query_Parameterization_Cheat_Sheet.html
+effort: S

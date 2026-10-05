@@ -1,0 +1,33 @@
+rule_id: SAST-PROTO-001
+title:
+  tr: Prototip kirletme (prototype pollution) riski
+  en: Prototype pollution sink
+severity: high
+category: security
+confidence: medium
+why:
+  tr: Derin birleştirme işlevlerine istek gövdesi veriliyor; __proto__ anahtarı tüm nesneleri etkileyebilir.
+  en: Request data reaches deep-merge helpers; a __proto__ key can affect every object.
+impact:
+  tr: Yetki kontrollerinin atlatılması, hizmet kesintisi, bazen kod çalıştırma.
+  en: Authorisation bypass, denial of service, sometimes code execution.
+fix_steps:
+  tr:
+  - Girdiyi şema ile doğrulayın ve yalnızca bilinen alanları kopyalayın.
+  - __proto__, constructor, prototype anahtarlarını reddedin.
+  - lodash'ı güncel sürüme yükseltin.
+  en:
+  - Validate input with a schema and copy known fields only.
+  - Reject __proto__, constructor and prototype keys.
+  - Upgrade lodash.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 1321
+- type: owasp
+  id: A08:2025
+- type: asvs
+  id: 5.0-V15
+effort: M

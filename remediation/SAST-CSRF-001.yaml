@@ -1,0 +1,33 @@
+rule_id: SAST-CSRF-001
+title:
+  tr: CSRF koruması kapatılmış
+  en: CSRF protection disabled
+severity: high
+category: security
+confidence: medium
+why:
+  tr: csrf_exempt veya WTF_CSRF_ENABLED=False ile durum değiştiren isteklerde CSRF token'ı aranmıyor.
+  en: csrf_exempt or WTF_CSRF_ENABLED=False removes CSRF token checks on state-changing requests.
+impact:
+  tr: Kullanıcının bilgisi olmadan işlem yaptırılması.
+  en: Actions performed without the user's consent.
+fix_steps:
+  tr:
+  - CSRF korumasını yeniden açın.
+  - Çerezlerde SameSite=Lax/Strict kullanın; API'lerde Origin doğrulayın.
+  en:
+  - Re-enable CSRF protection.
+  - Use SameSite=Lax/Strict cookies; validate Origin on APIs.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 352
+- type: owasp
+  id: A01:2025
+- type: asvs
+  id: 5.0-V3
+- type: url
+  href: https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
+effort: S

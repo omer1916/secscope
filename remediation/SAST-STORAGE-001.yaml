@@ -1,0 +1,31 @@
+rule_id: SAST-STORAGE-001
+title:
+  tr: Kimlik bilgisi tarayıcı depolamasında tutuluyor
+  en: Credential kept in browser storage
+severity: medium
+category: security
+confidence: medium
+why:
+  tr: localStorage/sessionStorage'daki değerler sayfadaki her betik tarafından okunabilir.
+  en: Values in localStorage/sessionStorage are readable by any script on the page.
+impact:
+  tr: Herhangi bir XSS açığı oturum token'ının çalınmasına yol açar.
+  en: Any XSS leads to theft of the session token.
+fix_steps:
+  tr:
+  - Oturum token'larını HttpOnly, Secure, SameSite çerezlerde tutun.
+  en:
+  - Keep session tokens in HttpOnly, Secure, SameSite cookies.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 922
+- type: owasp
+  id: A07:2025
+- type: asvs
+  id: 5.0-V3
+- type: url
+  href: https://cheatsheetseries.owasp.org/cheatsheets/HTML5_Security_Cheat_Sheet.html
+effort: M

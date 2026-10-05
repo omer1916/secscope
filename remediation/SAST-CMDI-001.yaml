@@ -1,0 +1,50 @@
+rule_id: SAST-CMDI-001
+title:
+  tr: İşletim sistemi komutu değişken girdiyle çalıştırılıyor
+  en: OS command built from variable input
+severity: critical
+category: security
+confidence: medium
+why:
+  tr: Komut, kabuk üzerinden dışarıdan gelen değerle oluşturuluyor; ; | && gibi karakterlerle ek komut
+    çalıştırılabilir.
+  en: A shell command is built from external input; characters like ; | && let an attacker run extra commands.
+impact:
+  tr: Sunucuda uzaktan kod çalıştırma.
+  en: Remote code execution on the server.
+fix_steps:
+  tr:
+  - Mümkünse komut çalıştırmak yerine bir kütüphane fonksiyonu kullanın.
+  - 'Kabuk kullanmayın: argümanları liste olarak verin (shell=False / execFile).'
+  - Girdiyi sıkı bir beyaz liste ile doğrulayın.
+  en:
+  - Prefer a library function over running a command.
+  - 'Do not use a shell: pass arguments as a list (shell=False / execFile).'
+  - Validate input against a strict allow-list.
+snippets:
+  python:
+    lang: python
+    code: |-
+      import subprocess
+      subprocess.run(["ping", "-c", "1", host], check=True, timeout=5)  # no shell
+  express:
+    lang: js
+    code: |-
+      const { execFile } = require("child_process");
+      execFile("ping", ["-c", "1", host], { timeout: 5000 }, cb);
+  php:
+    lang: php
+    code: $out = shell_exec("ping -c 1 " . escapeshellarg($host));
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 78
+- type: owasp
+  id: A05:2025
+- type: asvs
+  id: 5.0-V1
+- type: url
+  href: https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html
+effort: S

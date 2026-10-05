@@ -1,0 +1,44 @@
+rule_id: SAST-XSS-001
+title:
+  tr: DOM'a güvenilmeyen HTML yazılıyor (innerHTML/document.write)
+  en: Untrusted HTML written to the DOM (innerHTML/document.write)
+severity: high
+category: security
+confidence: medium
+why:
+  tr: Sabit olmayan bir değer innerHTML/outerHTML/document.write ile HTML olarak yorumlanıyor (DOM tabanlı
+    XSS).
+  en: A non-constant value is interpreted as HTML through innerHTML/outerHTML/document.write (DOM-based
+    XSS).
+impact:
+  tr: 'Kullanıcının tarayıcısında saldırganın betiği çalışır: oturum çalma, sahte işlem.'
+  en: 'Attacker script runs in the victim''s browser: session theft, actions on their behalf.'
+fix_steps:
+  tr:
+  - Metin için textContent / innerText kullanın.
+  - HTML gerekiyorsa DOMPurify ile temizleyin.
+  - Content-Security-Policy ile satır içi betikleri engelleyin; Trusted Types'ı değerlendirin.
+  en:
+  - Use textContent / innerText for text.
+  - If HTML is required, sanitise it with DOMPurify.
+  - Block inline scripts with a Content-Security-Policy; consider Trusted Types.
+snippets:
+  javascript:
+    lang: js
+    code: |-
+      el.textContent = "Hello " + name;
+      // or, when markup is really needed:
+      el.innerHTML = DOMPurify.sanitize(html);
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 79
+- type: owasp
+  id: A05:2025
+- type: asvs
+  id: 5.0-V3
+- type: url
+  href: https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html
+effort: S

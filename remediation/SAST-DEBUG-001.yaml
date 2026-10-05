@@ -1,0 +1,43 @@
+rule_id: SAST-DEBUG-001
+title:
+  tr: Hata ayıklama modu açık
+  en: Debug mode enabled
+severity: high
+category: security
+confidence: medium
+why:
+  tr: Debug modu ayrıntılı hata sayfaları ve bazı çatılarda etkileşimli konsol açar.
+  en: Debug mode exposes detailed error pages and, in some frameworks, an interactive console.
+impact:
+  tr: Kaynak kodu ve yapılandırma sızıntısı; Werkzeug konsolu ile kod çalıştırma.
+  en: Source and configuration disclosure; code execution through the Werkzeug console.
+fix_steps:
+  tr:
+  - Debug ayarını ortam değişkeninden okuyun ve üretimde kapalı tutun.
+  - Üretimde gunicorn/uvicorn gibi bir uygulama sunucusu kullanın.
+  en:
+  - Read the debug flag from the environment and keep it off in production.
+  - Use an application server such as gunicorn/uvicorn in production.
+snippets:
+  flask:
+    lang: python
+    code: app.run(debug=os.environ.get("FLASK_DEBUG") == "1")
+  django:
+    lang: python
+    code: DEBUG = os.environ.get("DJANGO_DEBUG") == "1"
+  php:
+    lang: php
+    code: |-
+      ini_set('display_errors', '0');
+      ini_set('log_errors', '1');
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 489
+- type: owasp
+  id: A02:2025
+- type: asvs
+  id: 5.0-V13
+effort: S

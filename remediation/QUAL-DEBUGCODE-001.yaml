@@ -1,0 +1,27 @@
+rule_id: QUAL-DEBUGCODE-001
+title:
+  tr: Unutulmuş hata ayıklama kodu
+  en: Leftover debugging code
+severity: low
+category: quality
+confidence: high
+why:
+  tr: debugger, pdb.set_trace(), var_dump gibi kodlar üretimde çalışmayı durdurabilir veya veri sızdırabilir.
+  en: debugger, pdb.set_trace(), var_dump and similar can halt production or leak data.
+impact:
+  tr: Hizmet kesintisi, bilgi sızıntısı.
+  en: Outages, information disclosure.
+fix_steps:
+  tr:
+  - Hata ayıklama kodunu kaldırın; lint kuralı ekleyin (no-debugger, T100).
+  en:
+  - Remove debugging code; add a lint rule (no-debugger, T100).
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 489
+- type: owasp
+  id: A02:2025
+effort: S

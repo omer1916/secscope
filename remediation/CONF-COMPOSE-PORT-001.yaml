@@ -1,0 +1,33 @@
+rule_id: CONF-COMPOSE-PORT-001
+title:
+  tr: Port tüm arayüzlere yayınlanıyor
+  en: Port published on all interfaces
+severity: low
+category: security
+confidence: medium
+why:
+  tr: '''8080:80'' biçimi portu 0.0.0.0''a açar; yerel geliştirmede ağdaki herkes erişebilir.'
+  en: The '8080:80' form binds to 0.0.0.0; during local development everyone on the network can connect.
+impact:
+  tr: Geliştirme servislerinin (DB, yönetim panelleri) ağa açılması.
+  en: Development services (databases, admin panels) exposed to the network.
+fix_steps:
+  tr:
+  - Yerelde '127.0.0.1:8080:80' biçimini kullanın.
+  en:
+  - Use '127.0.0.1:8080:80' for local setups.
+snippets:
+  docker:
+    lang: yaml
+    code: |-
+      ports:
+        - "127.0.0.1:8080:80"
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 1327
+- type: owasp
+  id: A02:2025
+effort: S

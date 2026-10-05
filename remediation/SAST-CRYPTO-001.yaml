@@ -1,0 +1,49 @@
+rule_id: SAST-CRYPTO-001
+title:
+  tr: Zayıf karma algoritması (MD5/SHA-1)
+  en: Weak hash algorithm (MD5/SHA-1)
+severity: medium
+category: security
+confidence: medium
+why:
+  tr: MD5/SHA-1 çakışmalara açıktır; parolalar için ise hızlı karmalar kaba kuvvete dayanıksızdır.
+  en: MD5/SHA-1 are collision-prone; fast hashes are also unsuitable for passwords.
+impact:
+  tr: Parola karmalarının kırılması, bütünlük kontrollerinin atlatılması.
+  en: Cracked password hashes, bypassed integrity checks.
+fix_steps:
+  tr:
+  - Parolalar için Argon2id, scrypt veya bcrypt kullanın.
+  - Bütünlük için SHA-256 veya üstü kullanın.
+  - Güvenlik amaçlı değilse usedforsecurity=False ile belirtin.
+  en:
+  - Use Argon2id, scrypt or bcrypt for passwords.
+  - Use SHA-256 or stronger for integrity.
+  - If not security-related, state it with usedforsecurity=False.
+snippets:
+  python:
+    lang: python
+    code: |-
+      from argon2 import PasswordHasher
+      hashed = PasswordHasher().hash(password)
+  express:
+    lang: js
+    code: |-
+      const bcrypt = require("bcrypt");
+      const hash = await bcrypt.hash(password, 12);
+  php:
+    lang: php
+    code: $hash = password_hash($password, PASSWORD_ARGON2ID);
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 328
+- type: owasp
+  id: A04:2025
+- type: asvs
+  id: 5.0-V11
+- type: url
+  href: https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+effort: S

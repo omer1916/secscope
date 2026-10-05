@@ -1,0 +1,43 @@
+rule_id: SAST-ERRLEAK-001
+title:
+  tr: Yığın izi (stack trace) yanıtla dönüyor
+  en: Stack trace returned in a response
+severity: medium
+category: security
+confidence: medium
+why:
+  tr: Hata ayrıntıları (dosya yolları, kod satırları, sürümler) istemciye gönderiliyor.
+  en: Error details (file paths, code lines, versions) are sent to the client.
+impact:
+  tr: Saldırgana iç yapı hakkında bilgi verir, diğer saldırıları kolaylaştırır.
+  en: Reveals internals to attackers and eases further attacks.
+fix_steps:
+  tr:
+  - İstemciye genel bir hata mesajı ve bir hata kimliği döndürün.
+  - Ayrıntıyı yalnızca sunucu tarafında loglayın.
+  en:
+  - Return a generic message and an error id to the client.
+  - Log the details server-side only.
+snippets:
+  flask:
+    lang: python
+    code: |-
+      @app.errorhandler(Exception)
+      def handle(e):
+          app.logger.exception("unhandled error")
+          return {"error": "internal error"}, 500
+  express:
+    lang: js
+    code: 'app.use((err, req, res, next) => { console.error(err); res.status(500).json({ error: "internal
+      error" }); });'
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 209
+- type: owasp
+  id: A10:2025
+- type: asvs
+  id: 5.0-V16
+effort: S

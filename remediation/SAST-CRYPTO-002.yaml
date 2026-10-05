@@ -1,0 +1,38 @@
+rule_id: SAST-CRYPTO-002
+title:
+  tr: ECB modu veya eski şifreleme API'si
+  en: ECB mode or legacy cipher API
+severity: high
+category: security
+confidence: medium
+why:
+  tr: ECB aynı düz metin bloklarını aynı şifreli bloklara çevirir; createCipher anahtarı zayıf türetir.
+  en: ECB maps identical plaintext blocks to identical ciphertext; createCipher derives keys weakly.
+impact:
+  tr: Şifreli verinin örüntülerinin ortaya çıkması, veri sızıntısı.
+  en: Patterns of encrypted data are revealed, data leakage.
+fix_steps:
+  tr:
+  - AES-GCM gibi kimlik doğrulamalı bir mod kullanın.
+  - Her şifreleme için rastgele IV/nonce üretin.
+  en:
+  - Use an authenticated mode such as AES-GCM.
+  - Generate a random IV/nonce per encryption.
+snippets:
+  python:
+    lang: python
+    code: |-
+      from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+      nonce = os.urandom(12)
+      ct = AESGCM(key).encrypt(nonce, data, None)
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 327
+- type: owasp
+  id: A04:2025
+- type: asvs
+  id: 5.0-V11
+effort: M

@@ -1,0 +1,38 @@
+rule_id: SAST-JWT-002
+title:
+  tr: JWT doğrulaması 'none' algoritmasını veya imzasız token'ı kabul ediyor
+  en: JWT verification accepts 'none' or unsigned tokens
+severity: critical
+category: security
+confidence: medium
+why:
+  tr: alg=none veya imza doğrulaması kapalıysa token içeriği serbestçe değiştirilebilir.
+  en: With alg=none or signature checks disabled, token contents can be altered freely.
+impact:
+  tr: Kimlik doğrulama ve yetkilendirmenin tamamen atlatılması.
+  en: Complete bypass of authentication and authorisation.
+fix_steps:
+  tr:
+  - Doğrulamada izinli algoritmaları açıkça tek bir güçlü algoritmayla sınırlayın.
+  - Kendi JWT doğrulamanızı yazmayın; bakımı yapılan bir kütüphane kullanın.
+  en:
+  - Pin the accepted algorithms to one strong algorithm when verifying.
+  - Do not hand-roll JWT verification; use a maintained library.
+snippets:
+  python:
+    lang: python
+    code: claims = jwt.decode(token, key, algorithms=["HS256"])
+  express:
+    lang: js
+    code: 'const claims = jwt.verify(token, secret, { algorithms: ["HS256"] });'
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 347
+- type: owasp
+  id: A07:2025
+- type: asvs
+  id: 5.0-V9
+effort: S

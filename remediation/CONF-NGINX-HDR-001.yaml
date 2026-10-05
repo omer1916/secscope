@@ -1,0 +1,39 @@
+rule_id: CONF-NGINX-HDR-001
+title:
+  tr: Nginx güvenlik başlıkları eksik
+  en: Nginx security headers missing
+severity: medium
+category: security
+confidence: medium
+why:
+  tr: Yapılandırmada CSP, X-Content-Type-Options veya X-Frame-Options için add_header yok.
+  en: The configuration lacks add_header for CSP, X-Content-Type-Options or X-Frame-Options.
+impact:
+  tr: XSS, clickjacking ve MIME karışıklığına karşı tarayıcı korumalarının eksik kalması.
+  en: Browser protections against XSS, clickjacking and MIME confusion are missing.
+fix_steps:
+  tr:
+  - Başlıkları 'always' ile ekleyin (hata yanıtlarında da gönderilsin).
+  en:
+  - Add the headers with 'always' so error responses carry them too.
+snippets:
+  nginx:
+    lang: nginx
+    code: |-
+      add_header Content-Security-Policy "default-src 'self'; object-src 'none'; frame-ancestors 'none'" always;
+      add_header X-Content-Type-Options nosniff always;
+      add_header X-Frame-Options DENY always;
+      add_header Referrer-Policy strict-origin-when-cross-origin always;
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 693
+- type: owasp
+  id: A02:2025
+- type: asvs
+  id: 5.0-V3
+- type: url
+  href: https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html
+effort: S

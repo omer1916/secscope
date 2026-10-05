@@ -1,0 +1,33 @@
+rule_id: CONF-NGINX-AUTOINDEX-001
+title:
+  tr: Nginx dizin listeleme açık
+  en: Nginx directory listing enabled
+severity: medium
+category: security
+confidence: high
+why:
+  tr: autoindex on, dosya listelerini herkese gösterir.
+  en: autoindex on shows file listings to everyone.
+impact:
+  tr: Yedek ve gizli dosyaların keşfi.
+  en: Discovery of backups and hidden files.
+fix_steps:
+  tr:
+  - autoindex off kullanın.
+  en:
+  - Use autoindex off.
+snippets:
+  nginx:
+    lang: nginx
+    code: autoindex off;
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 548
+- type: owasp
+  id: A02:2025
+- type: asvs
+  id: 5.0-V13
+effort: S

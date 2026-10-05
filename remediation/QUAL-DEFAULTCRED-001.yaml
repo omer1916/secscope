@@ -1,0 +1,31 @@
+rule_id: QUAL-DEFAULTCRED-001
+title:
+  tr: Varsayılan veya tahmin edilebilir kimlik bilgisi
+  en: Default or guessable credentials
+severity: medium
+category: security
+confidence: low
+why:
+  tr: admin/admin gibi kimlik bilgileri kodda veya tohum verisinde bulunuyor.
+  en: Credentials like admin/admin appear in code or seed data.
+impact:
+  tr: Yönetici hesabının ele geçirilmesi.
+  en: Takeover of the admin account.
+fix_steps:
+  tr:
+  - İlk kurulumda rastgele parola üretin veya parola değişimini zorunlu tutun.
+  - Tohum verisini üretimde çalıştırmayın.
+  en:
+  - Generate a random password at setup or force a change on first login.
+  - Do not run seed data in production.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 1392
+- type: owasp
+  id: A07:2025
+- type: asvs
+  id: 5.0-V6
+effort: S

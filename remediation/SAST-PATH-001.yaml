@@ -1,0 +1,48 @@
+rule_id: SAST-PATH-001
+title:
+  tr: Dosya yolu kullanıcı girdisinden oluşturuluyor (path traversal)
+  en: File path built from user input (path traversal)
+severity: high
+category: security
+confidence: medium
+why:
+  tr: İstekten gelen ad dosya yoluna ekleniyor; ../ ile izin verilen klasörün dışına çıkılabilir.
+  en: A name from the request is joined into a file path; ../ can escape the intended folder.
+impact:
+  tr: Kaynak kodu, yapılandırma ve gizli dosyaların okunması veya silinmesi.
+  en: Reading or deleting source code, configuration and secret files.
+fix_steps:
+  tr:
+  - Dosyayı kimlik (ID) ile seçin, adı istemciden almayın.
+  - Flask'ta send_from_directory / werkzeug.utils.safe_join kullanın.
+  - Çözümlenmiş yolun izinli kök altında olduğunu doğrulayın.
+  en:
+  - Select files by ID instead of client-supplied names.
+  - In Flask use send_from_directory / werkzeug.utils.safe_join.
+  - Verify the resolved path is inside the allowed root.
+snippets:
+  flask:
+    lang: python
+    code: |-
+      from flask import send_from_directory
+      return send_from_directory(FILES_DIR, filename)  # rejects ../
+  express:
+    lang: js
+    code: |-
+      const base = path.resolve(__dirname, "files");
+      const target = path.resolve(base, req.query.file);
+      if (!target.startsWith(base + path.sep)) return res.sendStatus(400);
+      res.sendFile(target);
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 22
+- type: owasp
+  id: A01:2025
+- type: asvs
+  id: 5.0-V5
+- type: url
+  href: https://owasp.org/www-community/attacks/Path_Traversal
+effort: S

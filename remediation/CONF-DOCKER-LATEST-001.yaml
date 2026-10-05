@@ -1,0 +1,31 @@
+rule_id: CONF-DOCKER-LATEST-001
+title:
+  tr: Taban imaj sabitlenmemiş (latest/etiketsiz)
+  en: Base image not pinned (latest/untagged)
+severity: low
+category: security
+confidence: high
+why:
+  tr: FROM etiketsiz veya :latest; her derleme farklı (ve doğrulanmamış) bir imaj kullanabilir.
+  en: FROM uses no tag or :latest; every build may pull a different, unreviewed image.
+impact:
+  tr: Tekrarlanamayan derlemeler, tedarik zinciri riski.
+  en: Irreproducible builds, supply-chain risk.
+fix_steps:
+  tr:
+  - Belirli bir sürüm etiketi ve tercihen @sha256 özeti kullanın.
+  en:
+  - Use a specific version tag, ideally with an @sha256 digest.
+snippets:
+  docker:
+    lang: dockerfile
+    code: FROM python:3.12.7-slim@sha256:<digest>
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 1357
+- type: owasp
+  id: A03:2025
+effort: S

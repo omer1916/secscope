@@ -1,0 +1,42 @@
+rule_id: SAST-MASSASSIGN-001
+title:
+  tr: Toplu atama (mass assignment)
+  en: Mass assignment
+severity: medium
+category: security
+confidence: medium
+why:
+  tr: İstek gövdesindeki tüm alanlar modele aktarılıyor; isAdmin gibi alanlar da değiştirilebilir.
+  en: Every field of the request body is copied into a model; fields like isAdmin can be set too.
+impact:
+  tr: Yetki yükseltme, başka kullanıcıların verisini değiştirme.
+  en: Privilege escalation, modifying other users' data.
+fix_steps:
+  tr:
+  - İzinli alanları açıkça seçin (DTO / şema).
+  - Rol, sahiplik gibi alanları asla istekten almayın.
+  en:
+  - Pick allowed fields explicitly (DTO / schema).
+  - Never take role or ownership fields from the request.
+snippets:
+  flask:
+    lang: python
+    code: |-
+      data = {k: payload[k] for k in ("name", "email") if k in payload}
+      user = User(**data)
+  express:
+    lang: js
+    code: |-
+      const { name, email } = req.body;
+      await User.create({ name, email });
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 915
+- type: owasp
+  id: A08:2025
+- type: asvs
+  id: 5.0-V2
+effort: S

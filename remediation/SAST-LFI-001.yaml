@@ -1,0 +1,38 @@
+rule_id: SAST-LFI-001
+title:
+  tr: include/require yolu değişkenden geliyor (LFI)
+  en: include/require path comes from a variable (LFI)
+severity: critical
+category: security
+confidence: medium
+why:
+  tr: PHP include/require ile yüklenen dosya kullanıcı girdisinden belirleniyor.
+  en: The file loaded by PHP include/require is chosen by user input.
+impact:
+  tr: Yerel dosya okuma; log zehirleme ile kod çalıştırma.
+  en: Local file disclosure; code execution via log poisoning.
+fix_steps:
+  tr:
+  - Sayfa adını beyaz listeden seçin.
+  - Girdiyi asla doğrudan include'a vermeyin.
+  en:
+  - Pick the page from an allow-list.
+  - Never pass input directly to include.
+snippets:
+  php:
+    lang: php
+    code: |-
+      $pages = ['about' => 'about.php', 'contact' => 'contact.php'];
+      $page = $pages[$_GET['page'] ?? 'about'] ?? 'about.php';
+      include __DIR__ . '/pages/' . $page;
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 98
+- type: owasp
+  id: A01:2025
+- type: asvs
+  id: 5.0-V5
+effort: S

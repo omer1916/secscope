@@ -1,0 +1,31 @@
+rule_id: CONF-NGINX-TOKENS-001
+title:
+  tr: Nginx sürüm bilgisi gizlenmemiş
+  en: Nginx version not hidden
+severity: low
+category: security
+confidence: medium
+why:
+  tr: server_tokens off olmadan Server başlığı ve hata sayfaları sürümü gösterir.
+  en: Without server_tokens off, the Server header and error pages reveal the version.
+impact:
+  tr: Bilinen açıkların hedeflenmesini kolaylaştırır.
+  en: Makes targeting known vulnerabilities easier.
+fix_steps:
+  tr:
+  - http bloğuna server_tokens off; ekleyin.
+  en:
+  - Add server_tokens off; to the http block.
+snippets:
+  nginx:
+    lang: nginx
+    code: server_tokens off;
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 200
+- type: owasp
+  id: A02:2025
+effort: S

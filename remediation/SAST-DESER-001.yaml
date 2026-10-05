@@ -1,0 +1,40 @@
+rule_id: SAST-DESER-001
+title:
+  tr: Güvensiz serileştirme çözme (deserialization)
+  en: Insecure deserialization
+severity: high
+category: security
+confidence: medium
+why:
+  tr: pickle, yaml.load, unserialize gibi işlevler veri çözerken nesne oluşturup kod çalıştırabilir.
+  en: pickle, yaml.load, unserialize and similar can instantiate objects and run code while decoding.
+impact:
+  tr: Veri saldırgandan geliyorsa uzaktan kod çalıştırma.
+  en: Remote code execution if the data is attacker-controlled.
+fix_steps:
+  tr:
+  - Güvenilmeyen veri için JSON kullanın.
+  - YAML için yaml.safe_load; PHP'de json_decode veya unserialize($x, ['allowed_classes' => false]).
+  en:
+  - Use JSON for untrusted data.
+  - Use yaml.safe_load for YAML; in PHP json_decode or unserialize($x, ['allowed_classes' => false]).
+snippets:
+  python:
+    lang: python
+    code: 'data = yaml.safe_load(text)   # or json.loads(text)'
+  php:
+    lang: php
+    code: $prefs = json_decode($_COOKIE['prefs'] ?? '{}', true);
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 502
+- type: owasp
+  id: A08:2025
+- type: asvs
+  id: 5.0-V15
+- type: url
+  href: https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html
+effort: M

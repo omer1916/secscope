@@ -1,0 +1,29 @@
+rule_id: CONF-COMPOSE-PRIV-001
+title:
+  tr: Konteyner ayrıcalıklı / host erişimli
+  en: Container privileged or host-level access
+severity: high
+category: security
+confidence: high
+why:
+  tr: 'privileged: true, network_mode: host veya docker.sock bağlaması konteynere host üzerinde geniş
+    yetki verir.'
+  en: 'privileged: true, network_mode: host or a mounted docker.sock gives the container broad power over
+    the host.'
+impact:
+  tr: Konteynerden host'a kaçış.
+  en: Escape from the container to the host.
+fix_steps:
+  tr:
+  - Bu ayarları kaldırın; gerekli olan yetkiyi cap_add ile tek tek verin.
+  en:
+  - Remove these settings; grant only the needed capability with cap_add.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 250
+- type: owasp
+  id: A02:2025
+effort: S

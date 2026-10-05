@@ -1,0 +1,27 @@
+rule_id: SCA-TYPO-001
+title:
+  tr: Olası typosquatting paketi
+  en: Possible typosquatting package
+severity: medium
+category: security
+confidence: low
+why:
+  tr: Paket adı popüler bir pakete çok benziyor (1–2 karakter farkı).
+  en: The package name is very close to a popular package (1–2 characters apart).
+impact:
+  tr: 'Kötü amaçlı paket kurulumu: sır çalma, arka kapı.'
+  en: 'Installing a malicious package: secret theft, backdoors.'
+fix_steps:
+  tr:
+  - Paket adını, yayıncısını ve indirme sayısını doğrulayın; yanlışsa kaldırın.
+  en:
+  - Verify the package name, publisher and download count; remove it if it is wrong.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 1357
+- type: owasp
+  id: A03:2025
+effort: S

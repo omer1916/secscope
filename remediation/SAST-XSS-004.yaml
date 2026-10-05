@@ -1,0 +1,40 @@
+rule_id: SAST-XSS-004
+title:
+  tr: HTML yanıtı kullanıcı girdisiyle elle oluşturuluyor
+  en: HTML response built by hand from user input
+severity: high
+category: security
+confidence: high
+why:
+  tr: İstekten gelen değer kaçışlanmadan HTML dizesine ekleniyor ve yanıt olarak dönüyor (yansıyan XSS).
+  en: A request value is inserted into an HTML string without escaping and returned (reflected XSS).
+impact:
+  tr: Bağlantıya tıklayan kullanıcının oturumu ele geçirilebilir.
+  en: Anyone following a crafted link can have their session hijacked.
+fix_steps:
+  tr:
+  - Şablon motoru kullanın (otomatik kaçışlama).
+  - Elle oluşturmanız gerekiyorsa html.escape / markupsafe.escape uygulayın.
+  - CSP başlığı ekleyin.
+  en:
+  - Use a template engine (auto-escaping).
+  - If you must build HTML by hand, apply html.escape / markupsafe.escape.
+  - Add a CSP header.
+snippets:
+  flask:
+    lang: python
+    code: |-
+      from markupsafe import escape
+      return f"<h1>Hello {escape(name)}!</h1>"
+      # better: return render_template("hello.html", name=name)
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 79
+- type: owasp
+  id: A05:2025
+- type: asvs
+  id: 5.0-V1
+effort: S

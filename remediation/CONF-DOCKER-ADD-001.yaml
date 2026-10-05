@@ -1,0 +1,33 @@
+rule_id: CONF-DOCKER-ADD-001
+title:
+  tr: ADD ile uzak URL indiriliyor
+  en: ADD downloads a remote URL
+severity: medium
+category: security
+confidence: high
+why:
+  tr: ADD URL, bütünlük doğrulaması olmadan dosya indirir.
+  en: ADD with a URL downloads files without integrity verification.
+impact:
+  tr: Değiştirilmiş bir dosyanın imaja girmesi.
+  en: A tampered file ends up in the image.
+fix_steps:
+  tr:
+  - RUN curl ile indirip sha256sum ile doğrulayın veya COPY kullanın.
+  en:
+  - Download with RUN curl and verify with sha256sum, or use COPY.
+snippets:
+  docker:
+    lang: dockerfile
+    code: |-
+      RUN curl -fsSLo /tmp/tool.tgz https://example.com/tool.tgz \
+       && echo "<sha256>  /tmp/tool.tgz" | sha256sum -c -
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 494
+- type: owasp
+  id: A08:2025
+effort: S

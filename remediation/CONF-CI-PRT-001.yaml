@@ -1,0 +1,31 @@
+rule_id: CONF-CI-PRT-001
+title:
+  tr: pull_request_target ile güvenilmeyen kod çalıştırılıyor
+  en: pull_request_target checks out untrusted code
+severity: critical
+category: security
+confidence: high
+why:
+  tr: pull_request_target, fork'tan gelen PR kodunu depo sırlarına erişimi olan bağlamda çalıştırıyor.
+  en: pull_request_target runs code from a forked PR in a context that can access repository secrets.
+impact:
+  tr: Depo sırlarının çalınması, yayın hattının ele geçirilmesi.
+  en: Theft of repository secrets, compromise of the release pipeline.
+fix_steps:
+  tr:
+  - Güvenilmeyen kodu 'pull_request' tetikleyicisiyle çalıştırın.
+  - pull_request_target gerekiyorsa PR kodunu checkout etmeyin.
+  en:
+  - Run untrusted code with the 'pull_request' trigger.
+  - If pull_request_target is required, do not check out the PR code.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 829
+- type: owasp
+  id: A03:2025
+- type: url
+  href: https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/
+effort: M

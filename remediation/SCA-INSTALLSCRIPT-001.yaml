@@ -1,0 +1,27 @@
+rule_id: SCA-INSTALLSCRIPT-001
+title:
+  tr: Kurulum betiği çalıştıran bağımlılık
+  en: Dependency runs an install script
+severity: info
+category: security
+confidence: high
+why:
+  tr: preinstall/install/postinstall betikleri npm install sırasında makinenizde kod çalıştırır.
+  en: preinstall/install/postinstall scripts run code on your machine during npm install.
+impact:
+  tr: Ele geçirilmiş bir paket kurulumda geliştirici makinesini veya CI'ı etkileyebilir.
+  en: A compromised package can attack the developer machine or CI during install.
+fix_steps:
+  tr:
+  - Betiğin gerekliliğini inceleyin; CI'da npm ci --ignore-scripts değerlendirin.
+  en:
+  - Review whether the script is needed; consider npm ci --ignore-scripts in CI.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 829
+- type: owasp
+  id: A03:2025
+effort: S

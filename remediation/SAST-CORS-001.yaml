@@ -1,0 +1,42 @@
+rule_id: SAST-CORS-001
+title:
+  tr: Gevşek CORS yapılandırması
+  en: Permissive CORS configuration
+severity: high
+category: security
+confidence: medium
+why:
+  tr: Gelen Origin yansıtılıyor veya '*' kimlik bilgileriyle birlikte izinli; her site oturum açmış kullanıcı
+    adına istek okuyabilir.
+  en: The request Origin is reflected or '*' is allowed together with credentials; any site can read responses
+    as the logged-in user.
+impact:
+  tr: Kullanıcı verisinin üçüncü taraf sitelerden çalınması.
+  en: Theft of user data by third-party sites.
+fix_steps:
+  tr:
+  - İzinli origin'leri sabit bir listeyle belirtin.
+  - Kimlik bilgisi gerekiyorsa '*' veya yansıtma kullanmayın.
+  en:
+  - List allowed origins explicitly.
+  - Never combine credentials with '*' or reflection.
+snippets:
+  express:
+    lang: js
+    code: 'app.use(require("cors")({ origin: ["https://app.example.com"], credentials: true }));'
+  flask:
+    lang: python
+    code: CORS(app, origins=["https://app.example.com"], supports_credentials=True)
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 942
+- type: owasp
+  id: A02:2025
+- type: asvs
+  id: 5.0-V3
+- type: url
+  href: https://developer.mozilla.org/docs/Web/HTTP/CORS
+effort: S

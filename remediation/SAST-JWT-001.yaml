@@ -1,0 +1,44 @@
+rule_id: SAST-JWT-001
+title:
+  tr: JWT imza anahtarı kodda sabit veya zayıf
+  en: JWT signing secret hardcoded or weak
+severity: high
+category: security
+confidence: medium
+why:
+  tr: Kodda duran veya kısa/tahmin edilebilir bir sır ile imzalanan token'lar sahte üretilebilir.
+  en: Tokens signed with a hardcoded or short/guessable secret can be forged.
+impact:
+  tr: Herhangi bir kullanıcı (yönetici dahil) adına token üretilmesi.
+  en: Forging tokens for any user, including admins.
+fix_steps:
+  tr:
+  - En az 32 baytlık rastgele bir sır üretip ortam değişkeni/sır kasasından okuyun.
+  - Sırrı döndürün (rotate); eski token'ları geçersiz kılın.
+  - Mümkünse asimetrik algoritma (RS256/EdDSA) kullanın.
+  en:
+  - Generate a random secret of at least 32 bytes and read it from the environment or a secret store.
+  - Rotate the secret and invalidate old tokens.
+  - Prefer asymmetric algorithms (RS256/EdDSA).
+snippets:
+  python:
+    lang: python
+    code: 'JWT_SECRET = os.environ["JWT_SECRET"]  # generate: python -c "import secrets;print(secrets.token_hex(32))"'
+  express:
+    lang: js
+    code: const secret = process.env.JWT_SECRET;  // >= 32 random bytes
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 798
+- type: cwe
+  id: 321
+- type: owasp
+  id: A04:2025
+- type: asvs
+  id: 5.0-V9
+- type: url
+  href: https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html
+effort: S

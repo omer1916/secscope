@@ -1,0 +1,38 @@
+rule_id: SAST-TLS-001
+title:
+  tr: TLS sertifika doğrulaması kapatılmış
+  en: TLS certificate verification disabled
+severity: high
+category: security
+confidence: medium
+why:
+  tr: verify=False / rejectUnauthorized:false ile sunucunun kimliği doğrulanmaz.
+  en: verify=False / rejectUnauthorized:false skip server identity checks.
+impact:
+  tr: Ortadaki adam saldırısıyla trafiğin okunması/değiştirilmesi.
+  en: Man-in-the-middle can read or change traffic.
+fix_steps:
+  tr:
+  - Doğrulamayı açık bırakın; özel CA için CA dosyasını belirtin.
+  - Yalnızca test ortamı için gerekiyorsa koşula bağlayın.
+  en:
+  - Keep verification on; point to a CA bundle for private CAs.
+  - If needed for tests only, guard it behind a test-only flag.
+snippets:
+  python:
+    lang: python
+    code: requests.get(url, verify="/etc/ssl/certs/internal-ca.pem", timeout=10)
+  express:
+    lang: js
+    code: 'https.get(url, { ca: fs.readFileSync(''internal-ca.pem'') }, cb);'
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 295
+- type: owasp
+  id: A04:2025
+- type: asvs
+  id: 5.0-V12
+effort: S

@@ -1,0 +1,27 @@
+rule_id: CONF-BACKUP-001
+title:
+  tr: Yedek / geçici dosya projede
+  en: Backup or temporary file in the project
+severity: low
+category: security
+confidence: high
+why:
+  tr: .bak, .old, ~, .swp gibi dosyalar sunulursa kaynak kodu veya veriyi açığa çıkarır.
+  en: Files like .bak, .old, ~ or .swp disclose source code or data when served.
+impact:
+  tr: Kaynak kodu ve sırların indirilmesi.
+  en: Download of source code and secrets.
+fix_steps:
+  tr:
+  - Dosyaları silin ve .gitignore'a ekleyin; dağıtım paketine girmediğini doğrulayın.
+  en:
+  - Delete the files, add them to .gitignore and make sure they are not deployed.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 530
+- type: owasp
+  id: A02:2025
+effort: S

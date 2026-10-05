@@ -1,0 +1,47 @@
+rule_id: SAST-REDIRECT-001
+title:
+  tr: Açık yönlendirme (open redirect)
+  en: Open redirect
+severity: medium
+category: security
+confidence: medium
+why:
+  tr: Yönlendirme hedefi doğrudan istekten alınıyor; saldırgan kullanıcıları kendi sitesine gönderebilir.
+  en: The redirect target comes straight from the request; attackers can send users to their own site.
+impact:
+  tr: Kimlik avı, OAuth token sızıntısı.
+  en: Phishing, OAuth token leakage.
+fix_steps:
+  tr:
+  - Yalnızca göreli yolları kabul edin veya hedefi beyaz listeden seçin.
+  - '''//'' veya şema içeren hedefleri reddedin.'
+  en:
+  - Accept only relative paths or pick the target from an allow-list.
+  - Reject targets containing '//' or a scheme.
+snippets:
+  flask:
+    lang: python
+    code: |-
+      from urllib.parse import urlsplit
+      nxt = request.args.get("next", "/")
+      if urlsplit(nxt).netloc or urlsplit(nxt).scheme or not nxt.startswith("/") or nxt.startswith("//"):
+          nxt = "/"
+      return redirect(nxt)
+  express:
+    lang: js
+    code: |-
+      const next = String(req.query.next || "/");
+      res.redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/");
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 601
+- type: owasp
+  id: A01:2025
+- type: asvs
+  id: 5.0-V2
+- type: url
+  href: https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html
+effort: S

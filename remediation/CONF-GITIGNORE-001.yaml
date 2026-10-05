@@ -1,0 +1,36 @@
+rule_id: CONF-GITIGNORE-001
+title:
+  tr: Sır dosyası .gitignore'da değil
+  en: Secret file not covered by .gitignore
+severity: medium
+category: security
+confidence: high
+why:
+  tr: .env veya anahtar dosyası var ama .gitignore onu dışlamıyor.
+  en: A .env or key file exists but .gitignore does not exclude it.
+impact:
+  tr: Bir sonraki commit'te sırların depoya girmesi.
+  en: Secrets end up in the repository with the next commit.
+fix_steps:
+  tr:
+  - .gitignore'a .env, .env.*, *.pem, *.key ekleyin (.env.example hariç).
+  en:
+  - Add .env, .env.*, *.pem, *.key to .gitignore (except .env.example).
+snippets:
+  git:
+    lang: gitignore
+    code: |-
+      .env
+      .env.*
+      !.env.example
+      *.pem
+      *.key
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 538
+- type: owasp
+  id: A02:2025
+effort: S

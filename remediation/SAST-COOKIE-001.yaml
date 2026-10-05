@@ -1,0 +1,43 @@
+rule_id: SAST-COOKIE-001
+title:
+  tr: Çerez güvenlik bayrakları eksik (kod)
+  en: Cookie set without security flags (code)
+severity: medium
+category: security
+confidence: medium
+why:
+  tr: Çerez HttpOnly/Secure/SameSite olmadan ayarlanıyor.
+  en: A cookie is set without HttpOnly/Secure/SameSite.
+impact:
+  tr: XSS ile çerez çalınması, şifresiz bağlantıda sızma, CSRF.
+  en: Cookie theft via XSS, leakage over plain HTTP, CSRF.
+fix_steps:
+  tr:
+  - Oturum çerezlerinde HttpOnly, Secure ve SameSite=Lax/Strict kullanın.
+  - Mümkünse __Host- öneki kullanın.
+  en:
+  - Use HttpOnly, Secure and SameSite=Lax/Strict on session cookies.
+  - Use the __Host- prefix where possible.
+snippets:
+  flask:
+    lang: python
+    code: resp.set_cookie("session_id", sid, httponly=True, secure=True, samesite="Lax")
+  express:
+    lang: js
+    code: 'res.cookie("__Host-sid", sid, { httpOnly: true, secure: true, sameSite: "lax", path: "/" });'
+  php:
+    lang: php
+    code: setcookie('sid', $sid, ['httponly' => true, 'secure' => true, 'samesite' => 'Lax']);
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 1004
+- type: cwe
+  id: 614
+- type: owasp
+  id: A02:2025
+- type: asvs
+  id: 5.0-V7
+effort: S

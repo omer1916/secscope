@@ -1,0 +1,37 @@
+rule_id: SAST-XXE-001
+title:
+  tr: XML ayrıştırıcıda dış varlıklar (XXE) açık
+  en: XML parser resolves external entities (XXE)
+severity: high
+category: security
+confidence: medium
+why:
+  tr: Dış varlık çözümlemesi açık bir XML ayrıştırıcı yerel dosyaları okuyabilir veya ağ isteği yapabilir.
+  en: An XML parser resolving external entities can read local files or make network requests.
+impact:
+  tr: Dosya okuma, SSRF, hizmet kesintisi.
+  en: File disclosure, SSRF, denial of service.
+fix_steps:
+  tr:
+  - Dış varlıkları ve DTD'leri kapatın; Python'da defusedxml kullanın.
+  en:
+  - Disable external entities and DTDs; use defusedxml in Python.
+snippets:
+  python:
+    lang: python
+    code: |-
+      import defusedxml.ElementTree as ET
+      tree = ET.fromstring(xml_text)
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 611
+- type: owasp
+  id: A02:2025
+- type: asvs
+  id: 5.0-V1
+- type: url
+  href: https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
+effort: S

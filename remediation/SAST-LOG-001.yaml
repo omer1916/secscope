@@ -1,0 +1,31 @@
+rule_id: SAST-LOG-001
+title:
+  tr: Hassas veri günlüğe yazılıyor
+  en: Sensitive data written to logs
+severity: low
+category: security
+confidence: medium
+why:
+  tr: Parola/token gibi değerler log veya konsola yazılıyor.
+  en: Values such as passwords or tokens are written to logs or the console.
+impact:
+  tr: Log erişimi olan herkesin kimlik bilgilerine ulaşması.
+  en: Anyone with log access obtains credentials.
+fix_steps:
+  tr:
+  - Hassas alanları loglamayın veya maskeleyin.
+  - Yapılandırılmış log ile alan bazında filtre uygulayın.
+  en:
+  - Do not log sensitive fields, or mask them.
+  - Use structured logging with field-level redaction.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 532
+- type: owasp
+  id: A09:2025
+- type: asvs
+  id: 5.0-V16
+effort: S

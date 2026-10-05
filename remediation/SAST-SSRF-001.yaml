@@ -1,0 +1,35 @@
+rule_id: SAST-SSRF-001
+title:
+  tr: Sunucu, kullanıcının verdiği adrese istek atıyor (SSRF)
+  en: Server fetches a user-supplied URL (SSRF)
+severity: high
+category: security
+confidence: medium
+why:
+  tr: İstek atılan adres girdiden geliyor; iç ağdaki servislere veya bulut metadata uç noktasına erişilebilir.
+  en: The fetched URL comes from input; internal services or the cloud metadata endpoint become reachable.
+impact:
+  tr: İç ağ taraması, bulut kimlik bilgilerinin çalınması.
+  en: Internal network scanning, theft of cloud credentials.
+fix_steps:
+  tr:
+  - Hedef host'u beyaz listeden seçin.
+  - DNS çözümlemesinden sonra özel/loopback/link-local IP'leri engelleyin.
+  - Yönlendirmeleri takip etmeyin veya her adımı yeniden doğrulayın.
+  en:
+  - Pick the target host from an allow-list.
+  - Block private/loopback/link-local IPs after DNS resolution.
+  - Do not follow redirects, or re-validate every hop.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 918
+- type: owasp
+  id: A01:2025
+- type: asvs
+  id: 5.0-V12
+- type: url
+  href: https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html
+effort: M

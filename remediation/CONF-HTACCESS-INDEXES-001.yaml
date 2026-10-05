@@ -1,0 +1,31 @@
+rule_id: CONF-HTACCESS-INDEXES-001
+title:
+  tr: Apache dizin listeleme açık
+  en: Apache directory listing enabled
+severity: medium
+category: security
+confidence: high
+why:
+  tr: Options +Indexes, index dosyası olmayan klasörlerin içeriğini listeler.
+  en: Options +Indexes lists the contents of folders without an index file.
+impact:
+  tr: Yüklenen veya yedek dosyaların keşfi.
+  en: Discovery of uploaded or backup files.
+fix_steps:
+  tr:
+  - Options -Indexes kullanın.
+  en:
+  - Use Options -Indexes.
+snippets:
+  apache:
+    lang: apache
+    code: Options -Indexes
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 548
+- type: owasp
+  id: A02:2025
+effort: S

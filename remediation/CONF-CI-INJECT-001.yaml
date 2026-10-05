@@ -1,0 +1,34 @@
+rule_id: CONF-CI-INJECT-001
+title:
+  tr: CI betiğinde ifade enjeksiyonu
+  en: Expression injection in a CI script
+severity: high
+category: security
+confidence: medium
+why:
+  tr: ${{ github.event...title/body }} gibi saldırgan kontrollü değerler doğrudan run betiğine gömülüyor.
+  en: Attacker-controlled values like ${{ github.event...title/body }} are inlined into a run script.
+impact:
+  tr: CI ortamında komut çalıştırma ve sır sızdırma.
+  en: Command execution and secret exfiltration in CI.
+fix_steps:
+  tr:
+  - 'Değeri env: ile ara değişkene aktarıp betikte "$VAR" olarak kullanın.'
+  en:
+  - 'Pass the value through env: and use it as "$VAR" in the script.'
+snippets:
+  github:
+    lang: yaml
+    code: |-
+      env:
+        TITLE: ${{ github.event.pull_request.title }}
+      run: echo "$TITLE"
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 78
+- type: owasp
+  id: A03:2025
+effort: S

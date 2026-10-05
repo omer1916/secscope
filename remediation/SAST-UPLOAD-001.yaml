@@ -1,0 +1,42 @@
+rule_id: SAST-UPLOAD-001
+title:
+  tr: Yüklenen dosya istemcinin verdiği adla kaydediliyor
+  en: Uploaded file saved under the client-supplied name
+severity: medium
+category: security
+confidence: medium
+why:
+  tr: Dosya adı istemciden alınıyor; ../ veya .php gibi uzantılarla kötü niyetli dosya yazılabilir.
+  en: The client chooses the file name; ../ or extensions like .php let attackers write harmful files.
+impact:
+  tr: Dosyaların üzerine yazma, web kabuğu yükleme.
+  en: Overwriting files, uploading a web shell.
+fix_steps:
+  tr:
+  - secure_filename veya rastgele bir ad kullanın.
+  - Uzantıyı ve içerik tipini beyaz listeyle doğrulayın, boyutu sınırlayın.
+  - Yüklemeleri web kökü dışında saklayın.
+  en:
+  - Use secure_filename or a random name.
+  - Validate extension and content type against an allow-list; limit size.
+  - Store uploads outside the web root.
+snippets:
+  flask:
+    lang: python
+    code: |-
+      from werkzeug.utils import secure_filename
+      name = f"{uuid.uuid4().hex}{Path(secure_filename(f.filename)).suffix}"
+      f.save(UPLOAD_DIR / name)
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 434
+- type: owasp
+  id: A06:2025
+- type: asvs
+  id: 5.0-V5
+- type: url
+  href: https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html
+effort: M

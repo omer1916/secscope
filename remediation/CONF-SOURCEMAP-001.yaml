@@ -1,0 +1,33 @@
+rule_id: CONF-SOURCEMAP-001
+title:
+  tr: Source map dosyaları yayında
+  en: Source maps shipped
+severity: low
+category: security
+confidence: high
+why:
+  tr: .map dosyaları derlenmiş koddan orijinal kaynak kodu (yorumlar dahil) geri getirir.
+  en: .map files restore the original source (including comments) from built code.
+impact:
+  tr: İç API'lerin, yorumlardaki bilgilerin ve mantığın ifşası.
+  en: Disclosure of internal APIs, information in comments and logic.
+fix_steps:
+  tr:
+  - Üretim derlemesinde source map'leri kapatın veya yalnızca hata izleme servisine yükleyin.
+  en:
+  - Disable source maps in production builds or upload them only to your error tracker.
+snippets:
+  javascript:
+    lang: js
+    code: |-
+      // vite.config.js
+      export default { build: { sourcemap: false } };
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 540
+- type: owasp
+  id: A02:2025
+effort: S

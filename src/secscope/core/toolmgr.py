@@ -21,6 +21,7 @@ from typing import Any, Literal
 
 from secscope.core.models import LocalizedStr
 from secscope.core.process import decode_output
+from secscope.core.resources import data_path
 
 ToolKind = Literal["binary", "pip", "system"]
 VERSION_TIMEOUT_S = 20
@@ -105,15 +106,7 @@ class Manifest:
 
 
 def default_manifest_path() -> Path:
-    # Source checkout: <repo>/tools/manifest.toml. Frozen builds ship it next to the package.
-    here = Path(__file__).resolve()
-    for candidate in (
-        here.parents[3] / "tools" / "manifest.toml",
-        here.parents[1] / "_data" / "manifest.toml",
-    ):
-        if candidate.exists():
-            return candidate
-    raise FileNotFoundError("tools/manifest.toml not found")
+    return data_path("tools") / "manifest.toml"
 
 
 @dataclass(frozen=True, slots=True)

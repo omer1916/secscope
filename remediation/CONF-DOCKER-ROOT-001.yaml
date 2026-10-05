@@ -1,0 +1,35 @@
+rule_id: CONF-DOCKER-ROOT-001
+title:
+  tr: Konteyner root kullanıcısıyla çalışıyor
+  en: Container runs as root
+severity: medium
+category: security
+confidence: high
+why:
+  tr: Dockerfile USER içermiyor (veya root'a dönüyor).
+  en: The Dockerfile has no USER instruction (or switches back to root).
+impact:
+  tr: Uygulamadaki bir açık konteyner içinde tam yetki verir; kaçış riski artar.
+  en: A flaw in the app grants full privileges inside the container and raises escape risk.
+fix_steps:
+  tr:
+  - Ayrıcalıksız bir kullanıcı oluşturup USER ile ona geçin.
+  en:
+  - Create an unprivileged user and switch to it with USER.
+snippets:
+  docker:
+    lang: dockerfile
+    code: |-
+      RUN useradd --create-home --uid 10001 app
+      USER app
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 250
+- type: owasp
+  id: A02:2025
+- type: asvs
+  id: 5.0-V13
+effort: S

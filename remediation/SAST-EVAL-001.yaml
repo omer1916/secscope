@@ -1,0 +1,42 @@
+rule_id: SAST-EVAL-001
+title:
+  tr: Dinamik kod çalıştırma (eval/exec)
+  en: Dynamic code evaluation (eval/exec)
+severity: high
+category: security
+confidence: medium
+why:
+  tr: eval/exec/new Function sabit olmayan bir değeri kod olarak çalıştırıyor.
+  en: eval/exec/new Function runs a non-constant value as code.
+impact:
+  tr: Girdi kontrol edilebiliyorsa uzaktan kod çalıştırma.
+  en: Remote code execution if the input is attacker-controlled.
+fix_steps:
+  tr:
+  - eval kullanımını kaldırın; JSON için JSON.parse / json.loads kullanın.
+  - Matematik ifadeleri için güvenli bir ayrıştırıcı kullanın.
+  - Dinamik davranış için sabit bir eşleme (dict/map) tercih edin.
+  en:
+  - Remove eval; use JSON.parse / json.loads for data.
+  - Use a safe parser for arithmetic expressions.
+  - Use a fixed lookup table (dict/map) for dynamic behaviour.
+snippets:
+  python:
+    lang: python
+    code: |-
+      import ast
+      value = ast.literal_eval(text)  # literals only, no code
+  express:
+    lang: js
+    code: const data = JSON.parse(req.query.expr);  // data, never code
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 95
+- type: owasp
+  id: A05:2025
+- type: asvs
+  id: 5.0-V1
+effort: M

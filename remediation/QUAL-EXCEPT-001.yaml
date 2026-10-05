@@ -1,0 +1,29 @@
+rule_id: QUAL-EXCEPT-001
+title:
+  tr: Geniş istisna sessizce yutuluyor
+  en: Broad exception silently swallowed
+severity: low
+category: quality
+confidence: high
+why:
+  tr: 'except: / except Exception: pass hataları gizler; güvenlik kontrolleri sessizce başarısız olabilir.'
+  en: 'except: / except Exception: pass hides errors; security checks can fail silently.'
+impact:
+  tr: Hataların ve saldırıların fark edilmemesi.
+  en: Errors and attacks go unnoticed.
+fix_steps:
+  tr:
+  - Beklenen istisnayı daraltın ve loglayın.
+  en:
+  - Catch the specific exception you expect and log it.
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 396
+- type: owasp
+  id: A10:2025
+- type: asvs
+  id: 5.0-V16
+effort: S

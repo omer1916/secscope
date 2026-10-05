@@ -1,0 +1,38 @@
+rule_id: SAST-RAND-001
+title:
+  tr: Güvenlik değeri için tahmin edilebilir rastgelelik
+  en: Predictable randomness for a security value
+severity: medium
+category: security
+confidence: medium
+why:
+  tr: Math.random / random modülü kriptografik değildir; token ve parolalar tahmin edilebilir.
+  en: Math.random / the random module are not cryptographic; tokens and passwords become predictable.
+impact:
+  tr: Oturum, parola sıfırlama veya doğrulama kodlarının tahmin edilmesi.
+  en: Guessing session, password-reset or verification codes.
+fix_steps:
+  tr:
+  - Python'da secrets modülünü, Node'da crypto.randomBytes / randomUUID kullanın.
+  en:
+  - Use the secrets module in Python, crypto.randomBytes / randomUUID in Node.
+snippets:
+  python:
+    lang: python
+    code: |-
+      import secrets
+      token = secrets.token_urlsafe(32)
+  express:
+    lang: js
+    code: const token = require("crypto").randomBytes(32).toString("hex");
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 338
+- type: owasp
+  id: A04:2025
+- type: asvs
+  id: 5.0-V11
+effort: S

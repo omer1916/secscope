@@ -1,0 +1,45 @@
+rule_id: SAST-NOSQLI-001
+title:
+  tr: NoSQL sorgusuna istek gövdesi doğrudan veriliyor
+  en: Request data passed straight into a NoSQL query
+severity: high
+category: security
+confidence: medium
+why:
+  tr: 'İstekten gelen nesneler sorgu filtresine olduğu gibi konuyor; {"$ne": null} gibi operatörler filtreyi
+    değiştirebilir.'
+  en: 'Objects from the request go into the query filter as-is; operators such as {"$ne": null} can change
+    the filter.'
+impact:
+  tr: Parolasız giriş, yetkisiz veri okuma.
+  en: Login without a password, unauthorised data access.
+fix_steps:
+  tr:
+  - Girdiyi tip olarak doğrulayın (ör. yalnızca string kabul edin).
+  - Kullanıcı girdisindeki $ ile başlayan anahtarları reddedin (ör. express-mongo-sanitize).
+  - Şema doğrulaması (Joi/Zod) uygulayın.
+  en:
+  - Validate input types (e.g. accept strings only).
+  - Reject keys starting with $ in user input (e.g. express-mongo-sanitize).
+  - Apply schema validation (Joi/Zod).
+snippets:
+  express:
+    lang: js
+    code: |-
+      const user = typeof req.body.user === "string" ? req.body.user : null;
+      const pass = typeof req.body.pass === "string" ? req.body.pass : null;
+      if (!user || !pass) return res.status(400).end();
+      const found = await Users.findOne({ user });  // then compare a password hash
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 943
+- type: owasp
+  id: A05:2025
+- type: asvs
+  id: 5.0-V1
+- type: url
+  href: https://cheatsheetseries.owasp.org/cheatsheets/Injection_Prevention_Cheat_Sheet.html
+effort: S
