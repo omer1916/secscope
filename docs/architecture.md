@@ -40,6 +40,18 @@ the UI down.
 | Worker | `worker/main.py`, `worker/client.py` | JSON-Lines over stdio, journal `events.jsonl`, exits on stdin EOF. |
 | UI | `ui/main_window.py`, `ui/worker_bridge.py`, `ui/i18n/` | Minimal window (QProcess), tr/en catalogs. Full UI in M9. |
 
+## Implemented (M2)
+
+| Area | Module | Notes |
+|---|---|---|
+| Scan flow | `core/scan.py` | `prepare` phase (copy/extract, fingerprint, start target) → modules → `cleanup` phase (stop target, restore SQLite). Used by worker and CLI. ADR-005. |
+| Intake | `core/intake.py` | Read-only `src` copy, writable `run` copy, symlinks skipped, size/count limits. |
+| Fingerprint | `core/fingerprint.py` | Static / Express / Next / Vite / Fastify / Flask / Django / FastAPI / PHP / Laravel; run + install commands with `{port}` `{host}` `{python}`. |
+| Runner | `core/sandbox.py` | Free loopback port, env whitelist, opt-in install (venv / npm ci), readiness via scope guard, psutil metrics, listen-address check, clean stop. |
+| Static server | `core/static_server.py` | Loopback-only, no listings, `404.html`, `_redirects`. |
+| Snapshots | `core/snapshot.py` | SQLite backup/restore of the run copy. |
+| Fixtures | `fixtures/` | vuln-flask, vuln-express, vuln-php, clean-flask, clean-express, static-seo-bad/good, slow-app. |
+
 ## Network rule
 
 Only `core/scope_guard.py` may use raw network primitives. Enforced by ruff `TID251`

@@ -55,7 +55,6 @@ def open_session(
     work_dir.mkdir(parents=True, exist_ok=False)
     guard = ScopeGuard(policy=ScopePolicy.from_strings(settings.allowed_lan_networks))
 
-    source_dir: Path | None = None
     target_url: str | None = None
     match config.target.kind:
         case TargetKind.URL:
@@ -66,13 +65,14 @@ def open_session(
                     f"({decision.reason}); only localhost/127.0.0.1/::1 are allowed"
                 )
             target_url = config.target.value
+        # The "prepare" phase copies/extracts these into the work dir and sets source_dir;
+        # modules never see the user's original files.
         case TargetKind.FOLDER:
-            source_dir = Path(config.target.value)
-            if not source_dir.is_dir():
-                raise InvalidTargetError(f"not a directory: {source_dir}")
+            if not Path(config.target.value).is_dir():
+                raise InvalidTargetError(f"not a directory: {config.target.value}")
         case TargetKind.ARCHIVE:
-            # Extracted by the intake step (M2); until then the archive is not readable.
-            pass
+            if not Path(config.target.value).is_file():
+                raise InvalidTargetError(f"no such archive: {config.target.value}")
 
     conn = db.connect(database_path(settings))
     repo = ScanRepository(conn)
@@ -84,7 +84,6 @@ def open_session(
         work_dir=work_dir,
         guard=guard,
         tools=tools or tool_manager(settings),
-        source_dir=source_dir,
         target_url=target_url,
     )
     return ScanSession(ctx=ctx, conn=conn, repo=repo)

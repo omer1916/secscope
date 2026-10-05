@@ -37,6 +37,7 @@ from secscope.core.events import (
 from secscope.core.logging import setup_logging
 from secscope.core.orchestrator import Orchestrator
 from secscope.core.redact import redact
+from secscope.core.scan import run_scan
 from secscope.core.session import InvalidTargetError, open_session
 from secscope.modules.registry import load_builtin
 
@@ -134,7 +135,7 @@ async def serve(writer: EventWriter) -> int:  # noqa: PLR0915 - linear protocol 
         store_module_run=session.repo.record_module_run,
     )
     modules = list(first.modules) or registry.for_profile(config.profile)
-    scan = asyncio.create_task(orchestrator.run(ctx, modules))
+    scan = asyncio.create_task(run_scan(orchestrator, ctx, modules))
 
     async def pump_commands() -> None:
         while True:

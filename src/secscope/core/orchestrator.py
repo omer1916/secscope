@@ -13,8 +13,9 @@ import contextvars
 import logging
 import time
 import traceback
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Coroutine, Sequence
 from dataclasses import dataclass, field
+from typing import Any
 
 from secscope.core.events import (
     ErrorEvent,
@@ -38,6 +39,7 @@ from secscope.core.redact import redact
 from secscope.core.scope_guard import ScopeDecision
 from secscope.modules.base import (
     BaseModule,
+    Emitter,
     ModuleResult,
     PreflightResult,
     ScanCancelledError,
@@ -50,6 +52,9 @@ log = logging.getLogger(__name__)
 EventSink = Callable[[Event], None]
 FindingStore = Callable[[str, list[Finding]], object]
 ModuleRunStore = Callable[[str, str, str, str | None, float], object]
+
+# A scan phase that is not a scanner (preparing the project, starting/stopping the target).
+Phase = Callable[[ScanContext, Emitter], Coroutine[Any, Any, None]]
 
 _current_module: contextvars.ContextVar[str | None] = contextvars.ContextVar(
     "secscope_current_module", default=None
@@ -177,7 +182,14 @@ class Orchestrator:
             )
         )
 
-    async def run(self, ctx: ScanContext, module_ids: Sequence[str]) -> ScanOutcome:
+    async def run(
+        self,
+        ctx: ScanContext,
+        module_ids: Sequence[str],
+        *,
+        setup: Phase | None = None,
+        teardown: Phase | None = None,
+    ) -> ScanOutcome:
         self._ctx = ctx
         if ctx.guard.on_violation is None:
             ctx.guard.on_violation = self._on_violation
@@ -193,6 +205,8 @@ class Orchestrator:
             )
         )
         try:
+            if setup is not None:
+                await self._run_phase(ctx, "prepare", setup, outcome)
             for layer in dependency_layers(modules):
                 if ctx.control.cancelled:
                     break
@@ -211,6 +225,9 @@ class Orchestrator:
                 )
             )
             outcome.status = "failed"
+        finally:
+            if teardown is not None:
+                await self._run_phase(ctx, "cleanup", teardown, outcome, always=True)
         if ctx.control.cancelled and outcome.status == "completed":
             outcome.status = "cancelled"
         outcome.duration_s = time.monotonic() - started
@@ -219,6 +236,55 @@ class Orchestrator:
         )
         self._ctx = None
         return outcome
+
+    async def _run_phase(
+        self,
+        ctx: ScanContext,
+        name: str,
+        phase: Phase,
+        outcome: ScanOutcome,
+        *,
+        always: bool = False,
+    ) -> None:
+        if ctx.control.cancelled and not always:
+            return
+        emitter = _ModuleEmitter(self, ctx.scan_id, name)
+        status: ModuleStatus = "ok"
+        t0 = time.monotonic()
+        self.emit(ModuleStarted(scan_id=ctx.scan_id, module=name))
+        task = asyncio.create_task(phase(ctx, emitter), name=f"phase:{name}")
+        if not always:
+            self._tasks.add(task)  # cancellable; cleanup must always run to completion
+        try:
+            await task
+        except (ScanCancelledError, asyncio.CancelledError):
+            status = "cancelled"
+        except Exception as exc:
+            status = "failed"
+            log.exception("phase %s failed", name)
+            self.emit(
+                ErrorEvent(
+                    scan_id=ctx.scan_id,
+                    module=name,
+                    message=redact(str(exc)),
+                    detail=redact(traceback.format_exc()),
+                )
+            )
+        finally:
+            self._tasks.discard(task)
+        outcome.module_status[name] = status
+        outcome.findings.extend(emitter.findings)
+        if emitter.findings and self._store_findings is not None:
+            self._store_findings(ctx.scan_id, emitter.findings)
+        self.emit(
+            ModuleFinished(
+                scan_id=ctx.scan_id,
+                module=name,
+                status=status,
+                duration_s=time.monotonic() - t0,
+                finding_count=len(emitter.findings),
+            )
+        )
 
     async def _run_group(
         self, ctx: ScanContext, modules: list[BaseModule], outcome: ScanOutcome

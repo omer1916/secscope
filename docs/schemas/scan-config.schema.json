@@ -19,6 +19,26 @@
           "default": null,
           "title": "Command"
         },
+        "install": {
+          "default": false,
+          "title": "Install",
+          "type": "boolean"
+        },
+        "install_command": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Install Command"
+        },
         "port": {
           "anyOf": [
             {

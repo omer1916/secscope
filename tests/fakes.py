@@ -147,7 +147,29 @@ class SourceModule(BaseModule):
         return ModuleResult()
 
 
+class ProbeModule(BaseModule):
+    """Fetches the target's home page through the scope guard."""
+
+    id: ClassVar[str] = "fake_probe"
+    title: ClassVar[LocalizedStr] = LocalizedStr(tr="Yokla", en="Probe")
+    category: ClassVar[Category] = Category.SECURITY
+    requires: ClassVar[Requirements] = Requirements(target_running=True)
+
+    async def run(self, ctx: ScanContext, emit: Emitter) -> ModuleResult:
+        assert ctx.target_url is not None
+        async with ctx.http_client() as client:
+            response = await client.get(ctx.target_url)
+        return ModuleResult(
+            data={
+                "status": response.status_code,
+                "url": ctx.target_url,
+                "body": response.text[:500],
+            }
+        )
+
+
 ALL_FAKES: tuple[type[BaseModule], ...] = (
+    ProbeModule,
     FastModule,
     DependentModule,
     SlowModule,

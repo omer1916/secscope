@@ -16,17 +16,17 @@ class HeadersModule(BaseModule):
     title: ClassVar[LocalizedStr] = LocalizedStr(tr="Güvenlik başlıkları", en="Security headers")
     category: ClassVar[Category] = Category.SECURITY
     requires: ClassVar[Requirements] = Requirements(target_running=True)
-    depends_on: ClassVar[tuple[str, ...]] = ()   # e.g. ("intake",)
-    exclusive: ClassVar[bool] = False             # True for load tests / ZAP
+    depends_on: ClassVar[tuple[str, ...]] = ()  # e.g. ("intake",)
+    exclusive: ClassVar[bool] = False  # True for load tests / ZAP
     timeout_s: ClassVar[float] = 300
 
     async def run(self, ctx: ScanContext, emit: Emitter) -> ModuleResult:
-        async with ctx.http_client() as client:     # the ONLY way to reach the network
+        async with ctx.http_client() as client:  # the ONLY way to reach the network
             response = await client.get(ctx.target_url)
-            await ctx.checkpoint()                    # honours pause/cancel
+            await ctx.checkpoint()  # honours pause/cancel
             ...
-            emit.finding(...)                         # findings stream to the UI immediately
-        return ModuleResult(data={"urls": [...]})     # visible to dependants via ctx.results
+            emit.finding(...)  # findings stream to the UI immediately
+        return ModuleResult(data={"urls": [...]})  # visible to dependants via ctx.results
 ```
 
 2. Register it in `src/secscope/modules/registry.py`:

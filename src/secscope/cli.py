@@ -134,6 +134,7 @@ def _cmd_scan(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
     )
     from secscope.core.models import SEVERITY_ORDER  # noqa: PLC0415
     from secscope.core.orchestrator import Orchestrator  # noqa: PLC0415
+    from secscope.core.scan import run_scan  # noqa: PLC0415
     from secscope.core.session import InvalidTargetError, open_session  # noqa: PLC0415
     from secscope.modules.registry import load_builtin  # noqa: PLC0415
     from secscope.reporting.console import ConsoleReporter  # noqa: PLC0415
@@ -178,7 +179,7 @@ def _cmd_scan(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
         store_module_run=session.repo.record_module_run,
     )
     try:
-        outcome = asyncio.run(orchestrator.run(session.ctx, module_ids))
+        outcome = asyncio.run(run_scan(orchestrator, session.ctx, module_ids))
     except KeyboardInterrupt:
         err.write("interrupted\n")
         session.repo.finish_scan(session.ctx.scan_id, "interrupted")

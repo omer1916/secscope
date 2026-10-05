@@ -66,3 +66,30 @@ version_regex = '(\d+\.\d+\.\d+)'
 min_version = "1.100.0"
 homepage = "https://semgrep.dev/docs/getting-started/cli"
 install_hint = { tr = "Semgrep kurun: 'uv tool install semgrep' veya 'pipx install semgrep'.", en = "Install Semgrep: 'uv tool install semgrep' or 'pipx install semgrep'." }
+
+[tools.python]
+kind = "system"
+commands = ["python3", "python", "py"]
+version_args = ["--version"]
+version_regex = 'Python (\d+\.\d+\.\d+)'
+min_version = "3.8.0"
+homepage = "https://www.python.org/downloads/"
+install_hint = { tr = "Python projelerini çalıştırmak için Python 3 kurun: https://www.python.org/downloads/", en = "Install Python 3 to run Python projects: https://www.python.org/downloads/" }
+
+[tools.uv]
+kind = "system"
+commands = ["uv"]
+version_args = ["--version"]
+version_regex = 'uv (\d+\.\d+\.\d+)'
+min_version = "0.4.0"
+homepage = "https://docs.astral.sh/uv/"
+install_hint = { tr = "İsteğe bağlı: uv, Python bağımlılık kurulumunu hızlandırır.", en = "Optional: uv makes Python dependency installs much faster." }
+
+[tools.composer]
+kind = "system"
+commands = ["composer"]
+version_args = ["--version"]
+version_regex = 'Composer (?:version )?(\d+\.\d+\.\d+)'
+min_version = "2.0.0"
+homepage = "https://getcomposer.org/"
+install_hint = { tr = "PHP bağımlılıkları için Composer kurun: https://getcomposer.org/", en = "Install Composer for PHP dependencies: https://getcomposer.org/" }

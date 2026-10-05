@@ -145,7 +145,12 @@ class Target(_Model):
 class RunConfig(_Model):
     """How to start the target app (editable in the wizard, SPEC §6.1)."""
 
+    # None = use the detected command (fingerprint). Placeholders: {port} {host} {python}.
     command: list[str] | None = None
+    # Install dependencies first (npm ci / pip install -r ...). Runs the project's own
+    # install scripts and needs network access to package registries.
+    install: bool = False
+    install_command: list[str] | None = None
     port: int | None = Field(default=None, ge=1, le=65535)
     workdir: str | None = None
     env: dict[str, str] = Field(default_factory=dict[str, str])

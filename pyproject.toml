@@ -58,6 +58,8 @@ packages = ["src/secscope"]
 line-length = 100
 target-version = "py312"
 src = ["src", "tests"]
+# Fixtures are deliberately insecure test targets: never lint, format or "fix" them.
+extend-exclude = ["fixtures"]
 
 [tool.ruff.lint]
 select = [
@@ -101,7 +103,8 @@ ban-relative-imports = "all"
 
 # ------------------------------------------------------------------------- pyright
 [tool.pyright]
-include = ["src", "tests"]
+include = ["src", "tests", "scripts"]
+exclude = ["fixtures", "**/node_modules", "**/__pycache__", ".venv"]
 pythonVersion = "3.12"
 typeCheckingMode = "strict"
 venvPath = "."
@@ -118,6 +121,7 @@ qt_api = "pyside6"
 markers = [
     "integration: needs real external tools or a running fixture app",
     "e2e: drives the CLI or UI end to end",
+    "network: needs internet access (package registries)",
 ]
 
 [tool.coverage.run]

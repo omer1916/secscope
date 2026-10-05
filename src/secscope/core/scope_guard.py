@@ -287,6 +287,27 @@ class ScopeGuard:
         raise last_exc
 
 
+def allocate_loopback_port(host: str = "127.0.0.1") -> int:
+    """Ask the OS for a free TCP port on a loopback address (for the target app)."""
+    if not ipaddress.ip_address(host).is_loopback:
+        raise ValueError("only loopback addresses can be allocated")
+    family = socket.AF_INET6 if ":" in host else socket.AF_INET
+    with socket.socket(family, socket.SOCK_STREAM) as s:
+        s.bind((host, 0))
+        return int(s.getsockname()[1])
+
+
+def loopback_port_free(port: int, host: str = "127.0.0.1") -> bool:
+    """True when nothing listens on ``host:port`` (checked by binding it)."""
+    family = socket.AF_INET6 if ":" in host else socket.AF_INET
+    with socket.socket(family, socket.SOCK_STREAM) as s:
+        try:
+            s.bind((host, port))
+        except OSError:
+            return False
+        return True
+
+
 # ------------------------------------------------------------------- HTTP
 
 

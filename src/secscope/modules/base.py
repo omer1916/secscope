@@ -15,7 +15,9 @@ from typing import Any, ClassVar, Protocol
 
 from secscope.core.config import ScanConfig, ScanProfile, Settings
 from secscope.core.events import LogLevel
+from secscope.core.fingerprint import Fingerprint
 from secscope.core.models import Category, Finding, LocalizedStr
+from secscope.core.sandbox import SandboxRunner, TargetInfo
 from secscope.core.scope_guard import ScopedHttpClient, ScopeGuard
 from secscope.core.toolmgr import ToolManager
 
@@ -114,6 +116,10 @@ class ScanContext:
     source_dir: Path | None = None
     target_url: str | None = None
     control: ScanControl = field(default_factory=ScanControl)
+    fingerprint: Fingerprint | None = None
+    # Set when SecScope started the target itself (None for an already running URL).
+    target: TargetInfo | None = None
+    runner: SandboxRunner | None = None
     # Results of modules that ran earlier, keyed by module id.
     results: dict[str, ModuleResult] = field(default_factory=dict[str, ModuleResult])
     # Called by modules that start the target, so "kill_target" can reach it.
