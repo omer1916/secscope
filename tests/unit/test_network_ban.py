@@ -12,7 +12,8 @@ from pathlib import Path
 import pytest
 
 SRC = Path(__file__).resolve().parents[2] / "src" / "secscope"
-ALLOWED_FILES = {SRC / "core" / "scope_guard.py"}
+# scope_guard: all target traffic. downloader: user-initiated tool/advisory-DB downloads (ADR-006).
+ALLOWED_FILES = {SRC / "core" / "scope_guard.py", SRC / "core" / "downloader.py"}
 
 BANNED_MODULES = {
     "socket",

@@ -1,0 +1,21 @@
+# Popular package names used for typosquatting detection (SCA-TYPO-001).
+# A dependency whose name is 1 edit away from one of these (and is not itself listed) is flagged.
+npm: [express, react, react-dom, lodash, axios, request, chalk, commander, moment, debug, dotenv,
+  mongoose, mongodb, mysql, mysql2, pg, redis, jsonwebtoken, bcrypt, bcryptjs, cors, helmet,
+  body-parser, cookie-parser, multer, nodemon, typescript, webpack, vite, next, nuxt, vue, svelte,
+  angular, jquery, underscore, async, uuid, yargs, minimist, glob, rimraf, mkdirp, semver, fs-extra,
+  cross-env, eslint, prettier, jest, mocha, chai, sinon, babel-core, core-js, rxjs, socket.io,
+  ws, passport, sequelize, prisma, knex, nodemailer, sharp, dayjs, date-fns, ramda, immutable,
+  classnames, styled-components, tailwindcss, postcss, autoprefixer, sass, less, colors, inquirer,
+  ora, figlet, node-fetch, got, superagent, cheerio, puppeteer, playwright, electron, coffee-script,
+  event-stream, ua-parser-js, cross-spawn, http-proxy, express-session, connect, koa, fastify, hapi]
+pypi: [requests, django, flask, numpy, pandas, urllib3, boto3, botocore, setuptools, six, certifi,
+  idna, charset-normalizer, python-dateutil, pyyaml, jinja2, markupsafe, werkzeug, click, itsdangerous,
+  sqlalchemy, psycopg2, psycopg2-binary, pymysql, redis, celery, pillow, matplotlib, scipy, scikit-learn,
+  tensorflow, torch, fastapi, uvicorn, gunicorn, pydantic, httpx, aiohttp, beautifulsoup4, lxml,
+  cryptography, pyjwt, bcrypt, paramiko, pytest, coverage, black, flake8, mypy, ruff, rich, tqdm,
+  colorama, openpyxl, xlrd, selenium, scrapy, boto, awscli, google-cloud-storage, python-dotenv,
+  djangorestframework, flask-login, flask-sqlalchemy, wtforms, marshmallow, attrs, toml, tomli,
+  docker, kubernetes, pymongo, elasticsearch, openai, anthropic, transformers]
+composer: [laravel/framework, symfony/symfony, guzzlehttp/guzzle, monolog/monolog, phpunit/phpunit,
+  doctrine/orm, twig/twig, vlucas/phpdotenv, nesbot/carbon, league/flysystem]
