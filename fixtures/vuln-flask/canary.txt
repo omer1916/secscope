@@ -1,0 +1,1 @@
+SECSCOPE-CANARY-7f3a: if you can read this through /download, path traversal works.

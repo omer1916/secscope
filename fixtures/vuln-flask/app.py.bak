@@ -1,0 +1,2 @@
+# old version kept around by accident
+SECRET = "backup-file-should-not-be-public"

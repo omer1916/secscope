@@ -1,0 +1,1 @@
+{"version":3,"file":"app.js","sources":["../src/app.ts"],"sourcesContent":["// internal source: API_BASE=https://internal.example.test\nconst name = decodeURIComponent(location.hash.slice(1));\n"],"names":[],"mappings":"AAAA"}

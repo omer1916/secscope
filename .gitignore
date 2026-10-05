@@ -33,3 +33,10 @@ patches/
 Thumbs.db
 .idea/
 .vscode/
+
+# Fixtures deliberately commit fake secrets and .env files (scanner test data).
+!fixtures/**/.env
+!fixtures/**/*.key
+!fixtures/**/*.pem
+node_modules/
+shop.db

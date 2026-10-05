@@ -1,0 +1,4 @@
+# Deliberately outdated pins with known vulnerabilities (SCA test data).
+flask==2.2.2
+werkzeug==2.2.3
+pyjwt==2.4.0

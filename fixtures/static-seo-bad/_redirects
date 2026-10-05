@@ -1,0 +1,7 @@
+# Netlify-style redirects (served by SecScope's built-in static server)
+# A 3-hop chain that mixes temporary and permanent redirects:
+/old        /old2         302
+/old2       /old3         301
+/old3       /about.html   302
+# Soft 404: a missing page answered with 200 and "not found" content.
+/gone-page  /soft404.html 200
