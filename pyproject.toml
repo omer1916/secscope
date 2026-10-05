@@ -1,0 +1,118 @@
+[project]
+name = "secscope"
+dynamic = ["version"]
+description = "Local-only desktop security, SEO and resilience testing platform for your own web projects."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+authors = [{ name = "Ömer Daştan" }]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+]
+dependencies = [
+    "httpx>=0.28",
+    "platformdirs>=4.3",
+    "pydantic>=2.9",
+]
+
+[project.scripts]
+secscope = "secscope.cli:main"
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.112",
+    "pre-commit>=4.0",
+    "pyright>=1.1.390",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=6.0",
+    "ruff>=0.8",
+]
+
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/secscope/__about__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/secscope"]
+
+# --------------------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W", "F", "I", "B", "UP", "SIM", "RUF", "N", "S", "PT", "PTH", "TID", "C4", "PL",
+]
+ignore = [
+    "PLR0911",  # many returns: guard-clause decision functions read best that way
+    "PLR0912",  # many branches: same
+    "PLR0913",  # too many arguments: models/CLI legitimately take many
+    "PLR2004",  # magic values in comparisons: thresholds are documented in SPEC
+    "S101",     # assert is fine outside of runtime-critical paths; tests rely on it
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "PLR", "N802", "TID251"]
+# The only place allowed to touch raw network primitives.
+"src/secscope/core/scope_guard.py" = ["TID251"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+# Scope Guard rule (SPEC §4.1): network primitives are only allowed inside
+# secscope.core.scope_guard. Everything else must use ScopedHttpClient.
+# `tests/unit/test_network_ban.py` enforces the same rule via AST scanning so it
+# cannot be silenced with a `noqa`.
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"socket".msg = "Use secscope.core.scope_guard (ScopedHttpClient / scoped sockets) instead."
+"urllib.request".msg = "Use secscope.core.scope_guard.ScopedHttpClient instead."
+"http.client".msg = "Use secscope.core.scope_guard.ScopedHttpClient instead."
+"httpx.Client".msg = "Use secscope.core.scope_guard.ScopedHttpClient instead."
+"httpx.AsyncClient".msg = "Use secscope.core.scope_guard.ScopedHttpClient instead."
+"httpx.get".msg = "Use secscope.core.scope_guard.ScopedHttpClient instead."
+"httpx.post".msg = "Use secscope.core.scope_guard.ScopedHttpClient instead."
+"httpx.request".msg = "Use secscope.core.scope_guard.ScopedHttpClient instead."
+"httpx.stream".msg = "Use secscope.core.scope_guard.ScopedHttpClient instead."
+"requests".msg = "Use secscope.core.scope_guard.ScopedHttpClient instead."
+"aiohttp".msg = "Use secscope.core.scope_guard.ScopedHttpClient instead."
+
+# ------------------------------------------------------------------------- pyright
+[tool.pyright]
+include = ["src", "tests"]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+venvPath = "."
+venv = ".venv"
+reportMissingTypeStubs = false
+
+# -------------------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-markers", "--strict-config"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "integration: needs real external tools or a running fixture app",
+    "e2e: drives the CLI or UI end to end",
+]
+
+[tool.coverage.run]
+source = ["secscope"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
