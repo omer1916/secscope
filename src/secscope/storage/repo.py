@@ -75,6 +75,21 @@ class ScanRepository:
             raise
         return len(rows)
 
+    def record_module_run(
+        self, scan_id: str, module: str, status: str, reason: str | None, duration_s: float
+    ) -> None:
+        self._conn.execute(
+            "INSERT OR REPLACE INTO module_runs (scan_id, module, status, reason, duration_s)"
+            " VALUES (?, ?, ?, ?, ?)",
+            (scan_id, module, status, reason, duration_s),
+        )
+
+    def module_runs(self, scan_id: str) -> dict[str, str]:
+        cur = self._conn.execute(
+            "SELECT module, status FROM module_runs WHERE scan_id = ?", (scan_id,)
+        )
+        return {row[0]: row[1] for row in cur}
+
     def list_findings(self, scan_id: str) -> list[Finding]:
         cur = self._conn.execute(
             "SELECT data_json FROM findings WHERE scan_id = ? ORDER BY rule_id, finding_id",

@@ -17,5 +17,5 @@ def test_schema_file_up_to_date(kind: str) -> None:
     path = SCHEMAS / f"{kind}.schema.json"
     assert path.exists(), f"missing {path.name}; run: uv run secscope schema {kind}"
     assert json.loads(path.read_text(encoding="utf-8")) == _schema(kind), (
-        f"{path.name} is stale; regenerate with: uv run secscope schema {kind} > {path}"
+        f"{path.name} is stale; regenerate with: uv run python scripts/regen_schemas.py"
     )

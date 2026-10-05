@@ -22,6 +22,7 @@ from secscope.core.events import (
     decode_event,
     encode,
 )
+from secscope.core.models import LocalizedStr
 from tests.unit.test_models import make_finding
 
 EVENTS: list[Event] = [
@@ -31,7 +32,12 @@ EVENTS: list[Event] = [
     ModuleLog(scan_id="s1", module="sast", level="warning", message="slow"),
     FindingEvent(scan_id="s1", finding=make_finding()),
     Metric(scan_id="s1", module="load", series="load", values={"rps": 120.0, "p95_ms": 340.0}),
-    ModuleSkipped(scan_id="s1", module="dast_zap", reason="java missing", install_hint="Java 17"),
+    ModuleSkipped(
+        scan_id="s1",
+        module="dast_zap",
+        reason=LocalizedStr(tr="Java yok", en="java missing"),
+        install_hint=LocalizedStr(tr="Java 17 kurun", en="Install Java 17"),
+    ),
     ModuleFinished(scan_id="s1", module="sast", status="ok", duration_s=1.5, finding_count=3),
     ScanFinished(scan_id="s1", status="completed", duration_s=9.0),
     ErrorEvent(scan_id="s1", message="boom"),

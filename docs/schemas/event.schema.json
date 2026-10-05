@@ -824,20 +824,18 @@
           "type": "string"
         },
         "reason": {
-          "title": "Reason",
-          "type": "string"
+          "$ref": "#/$defs/LocalizedStr"
         },
         "install_hint": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/LocalizedStr"
             },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Install Hint"
+          "default": null
         }
       },
       "required": [

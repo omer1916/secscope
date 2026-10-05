@@ -95,6 +95,45 @@
           "additionalProperties": true,
           "title": "Config",
           "type": "object"
+        },
+        "settings": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Settings"
+        },
+        "scan_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scan Id"
+        },
+        "modules": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Modules",
+          "type": "array"
+        },
+        "extra_modules": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Extra Modules",
+          "type": "array"
         }
       },
       "required": [

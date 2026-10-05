@@ -12,7 +12,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
-from secscope.core.models import Finding
+from secscope.core.models import Finding, LocalizedStr
 
 PROTOCOL_VERSION = 1
 
@@ -78,8 +78,8 @@ class Metric(_Event):
 class ModuleSkipped(_Event):
     type: Literal["module.skipped"] = "module.skipped"
     module: str
-    reason: str
-    install_hint: str | None = None
+    reason: LocalizedStr
+    install_hint: LocalizedStr | None = None
 
 
 ModuleStatus = Literal["ok", "failed", "cancelled", "timeout"]
@@ -140,9 +140,15 @@ Event = Annotated[
 
 class StartCommand(_Message):
     cmd: Literal["start"] = "start"
-    # Validated against ScanConfig by the worker; kept loose here so the
-    # protocol module does not depend on configuration models.
+    # Validated against ScanConfig / Settings by the worker; kept loose here so
+    # the protocol module does not depend on configuration models.
     config: dict[str, Any]
+    settings: dict[str, Any] | None = None
+    scan_id: str | None = None
+    # Empty = the profile's default module set.
+    modules: list[str] = Field(default_factory=list[str])
+    # "package.module:Class" refs; honoured only with SECSCOPE_ALLOW_EXTRA_MODULES=1 (tests).
+    extra_modules: list[str] = Field(default_factory=list[str])
 
 
 class PauseCommand(_Message):
