@@ -84,6 +84,20 @@ class ScanRepository:
         self._conn.execute("DELETE FROM findings WHERE scan_id = ?", (scan_id,))
         return self.add_findings(scan_id, findings)
 
+    def add_suppression(
+        self, reason: str, *, finding_id: str | None = None, rule_id: str | None = None
+    ) -> None:
+        self._conn.execute(
+            "INSERT INTO suppressions (finding_id, rule_id, reason, created_at) VALUES (?, ?, ?, ?)",
+            (finding_id, rule_id, reason.strip(), _now()),
+        )
+
+    def suppressions(self) -> list[sqlite3.Row]:
+        return list(self._conn.execute("SELECT * FROM suppressions ORDER BY id"))
+
+    def remove_suppression(self, suppression_id: int) -> None:
+        self._conn.execute("DELETE FROM suppressions WHERE id = ?", (suppression_id,))
+
     def record_module_run(
         self, scan_id: str, module: str, status: str, reason: str | None, duration_s: float
     ) -> None:

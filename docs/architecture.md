@@ -63,6 +63,21 @@ the UI down.
 | Scoring | `core/scoring.py` | SPEC §9, [scoring.md](scoring.md). |
 | Downloads | `core/downloader.py`, `core/advisories.py` | SHA-256 pinned tools, offline advisory DBs, telemetry off. ADR-006. |
 
+## Implemented (M6)
+
+| Area | Module | Notes |
+|---|---|---|
+| SEO | `analysis/seo.py`, `analysis/seo_generators.py`, `modules/seo.py` | Googlebot-like crawl through the scope guard; 33 SEO rules; robots/sitemap/JSON-LD/title drafts; SEO score with index-blocker cap. Lab Core Web Vitals deferred (ADR-007). |
+
+## Implemented (M8)
+
+| Area | Module | Notes |
+|---|---|---|
+| Report document | `reporting/json_export.py`, `reporting/finalize.py` | `report.json` per scan (suppressions applied, scores, fix plan, SEO data). ADR-008. |
+| Formats | `reporting/html.py` (+ `templates/report.html.j2`), `sarif.py`, `csv_export.py`, `writer.py` | Offline single-file HTML with CSP, SARIF 2.1.0 (schema-validated in tests), CSV, optional PDF, patch files. |
+| Diff / plan | `reporting/diff.py`, `reporting/plan.py` | new / fixed / persistent / regressed; quick-wins-first plan. |
+| CLI | `cli.py` | `scan --format html,json,sarif,csv,pdf`, `report`, `diff`, `suppress`. |
+
 ## Network rule
 
 Only `core/scope_guard.py` (target traffic) and `core/downloader.py` (user-initiated downloads, ADR-006) may use raw network primitives. Enforced by ruff `TID251`

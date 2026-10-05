@@ -40,6 +40,7 @@ from secscope.core.redact import redact
 from secscope.core.scan import run_scan
 from secscope.core.session import InvalidTargetError, open_session
 from secscope.modules.registry import load_builtin
+from secscope.reporting.finalize import finalize_scan
 
 log = logging.getLogger(__name__)
 
@@ -162,8 +163,7 @@ async def serve(writer: EventWriter) -> int:
         with contextlib.suppress(asyncio.CancelledError):
             await pump
         journal.close()
-    session.repo.replace_findings(ctx.scan_id, outcome.findings)
-    session.repo.finish_scan(ctx.scan_id, outcome.status, outcome.scores)
+    finalize_scan(session, outcome)
     session.close()
     return 0 if outcome.status in ("completed", "cancelled") else 1
 

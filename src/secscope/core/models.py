@@ -129,7 +129,17 @@ class HttpLocation(_Model):
         parts = urlsplit(self.url)
         names = sorted({k for k, _ in parse_qsl(parts.query, keep_blank_values=True)})
         path = parts.path or "/"
-        origin = f"{parts.scheme}://{parts.netloc.lower()}"
+        host = (parts.hostname or "").lower()
+        if (
+            host in {"localhost", "127.0.0.1", "::1"}
+            or host.endswith(".localhost")
+            or host.startswith("127.")
+        ):
+            # The target runs on a random loopback port per scan; the port must not change
+            # the identity, or every rescan would show all findings as "fixed + new".
+            origin = "local"
+        else:
+            origin = f"{parts.scheme}://{parts.netloc.lower()}"
         return f"http:{self.method} {origin}{path}?{'&'.join(names)}#{self.parameter or ''}"
 
     def display(self) -> str:

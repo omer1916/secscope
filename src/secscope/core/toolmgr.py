@@ -167,6 +167,10 @@ class ToolManager:
             self._cache[name] = self._detect(self.spec(name))
         return self._cache[name]
 
+    def detected(self) -> list[ToolStatus]:
+        """Tools that were looked up during this session (without probing the rest)."""
+        return [self._cache[n] for n in sorted(self._cache)]
+
     def statuses(self) -> list[ToolStatus]:
         return [self.status(name) for name in sorted(self.manifest.tools)]
 

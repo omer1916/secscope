@@ -87,6 +87,9 @@ class ScanOutcome:
     # Notes such as "reduced-coverage: ..." per module (from ModuleResult.notes).
     notes: dict[str, list[str]] = field(default_factory=dict[str, list[str]])
     scores: dict[str, object] = field(default_factory=dict[str, object])
+    # Per module: status, duration, and for skipped/failed modules the localized reason.
+    module_info: dict[str, dict[str, Any]] = field(default_factory=dict[str, dict[str, Any]])
+    tool_versions: dict[str, str] = field(default_factory=dict[str, str])
 
 
 class _ModuleEmitter:
@@ -360,6 +363,12 @@ class Orchestrator:
                 )
             )
             outcome.module_status[module.id] = "skipped"
+            outcome.module_info[module.id] = {
+                "status": "skipped",
+                "duration_s": 0.0,
+                "reason": pre.reason.model_dump(),
+                "install_hint": pre.install_hint.model_dump() if pre.install_hint else None,
+            }
             self._record_run(scan_id, module.id, "skipped", pre.reason.en, 0.0)
             return
 
@@ -399,6 +408,12 @@ class Orchestrator:
             duration = time.monotonic() - t0
             outcome.findings.extend(emitter.findings)
             outcome.module_status[module.id] = status
+            outcome.module_info[module.id] = {
+                "status": status,
+                "duration_s": round(duration, 2),
+                "reason": {"tr": reason, "en": reason} if reason else None,
+                "install_hint": None,
+            }
             if emitter.findings and self._store_findings is not None:
                 self._store_findings(scan_id, emitter.findings)
             self._record_run(scan_id, module.id, status, reason, duration)

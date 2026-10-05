@@ -157,3 +157,11 @@ def test_localized_get() -> None:
     text = LocalizedStr(tr="merhaba", en="hello")
     assert text.get("tr") == "merhaba"
     assert text.get("en") == "hello"
+
+
+def test_http_id_ignores_random_loopback_port() -> None:
+    a = make_finding(location=HttpLocation(url="http://127.0.0.1:55705/about"))
+    b = make_finding(location=HttpLocation(url="http://127.0.0.1:61234/about"))
+    c = make_finding(location=HttpLocation(url="http://localhost:3000/about"))
+    assert a.id == b.id == c.id
+    assert make_finding(location=HttpLocation(url="https://a.example/about")).id != a.id

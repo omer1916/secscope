@@ -242,7 +242,7 @@ class SeoModule(BaseModule):
             sitemap_pages=sitemap_pages,
         )
         issues = site_checks(facts)
-        findings = self._findings(issues)
+        findings = self._findings(issues, target)
         for f in findings:
             emit.finding(f)
         kb = default_kb()
@@ -289,7 +289,7 @@ class SeoModule(BaseModule):
         return _normalise(absolute)
 
     @staticmethod
-    def _findings(issues: list[SeoIssue]) -> list[Finding]:
+    def _findings(issues: list[SeoIssue], target: str) -> list[Finding]:
         kb = default_kb()
         out: list[Finding] = []
         seen: set[tuple[str, str, str]] = set()
@@ -303,7 +303,10 @@ class SeoModule(BaseModule):
                     issue.rule_id,
                     module="seo",
                     location=HttpLocation(url=issue.url),
-                    evidence=Evidence(snippet=issue.detail, extra={"count": str(issue.count)}),
+                    # Evidence uses paths, not the random port, so ids stay stable.
+                    evidence=Evidence(
+                        snippet=issue.detail.replace(target, ""), extra={"count": str(issue.count)}
+                    ),
                     severity=issue.severity,  # type: ignore[arg-type]
                     source_tool="native",
                 )

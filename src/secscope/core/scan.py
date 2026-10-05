@@ -134,10 +134,16 @@ async def run_scan(
     outcome = await orchestrator.run(ctx, module_ids, setup=prepare, teardown=cleanup)
     outcome.findings = deduplicate(outcome.findings)
     outcome.notes = {mid: list(res.notes) for mid, res in ctx.results.items() if res.notes}
+    score_outcome(ctx, outcome)
+    return outcome
+
+
+def score_outcome(ctx: ScanContext, outcome: ScanOutcome) -> None:
+    """(Re)compute scores, e.g. after suppressions were applied."""
     ran = [m for m, status in outcome.module_status.items() if status == "ok"]
+    outcome.tool_versions = {t.name: t.version or "?" for t in ctx.tools.detected() if t.available}
     seo = ctx.results.get("seo")
     seo_value = seo.data.get("seo_score", {}).get("score") if seo is not None else None
     outcome.scores = compute_scores(
         outcome.findings, weights=ctx.settings.weights, ran=ran, seo=seo_value
     ).as_dict()
-    return outcome

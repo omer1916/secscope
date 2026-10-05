@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; script-src '{{ script_hash }}'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>{{ t("report.title") }} – {{ report.scan_id }}</title>
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--fg:#1d2127;--muted:#5d6670;--line:#e3e5e8;--accent:#2457d6;
+--critical:#b3261e;--high:#d1501f;--medium:#b7791f;--low:#3c7a3c;--info:#5d6670;--code:#f1f2f4}
+@media (prefers-color-scheme:dark){:root{--bg:#14171b;--card:#1c2026;--fg:#e8eaed;--muted:#a2aab3;--line:#2c323a;
+--accent:#7aa2ff;--code:#11151a}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:1.6rem;margin:0 0 4px}h2{font-size:1.25rem;margin:36px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+h3{font-size:1rem;margin:18px 0 6px}
+.meta{color:var(--muted);font-size:.9rem;overflow-wrap:anywhere}.meta span{margin-right:16px;display:inline-block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.score{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.gauge text{font-weight:700}.sub .val{font-size:1.4rem;font-weight:700}.sub .lbl{color:var(--muted);font-size:.85rem}
+.bar{height:6px;border-radius:3px;background:var(--line);margin-top:6px;overflow:hidden}.bar>i{display:block;height:100%;background:var(--accent)}
+.badge{display:inline-block;min-width:64px;text-align:center;padding:1px 8px;border-radius:999px;font-size:.75rem;font-weight:700;color:#fff}
+.sev-critical{background:var(--critical)}.sev-high{background:var(--high)}.sev-medium{background:var(--medium)}.sev-low{background:var(--low)}.sev-info{background:var(--info)}
+table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600}.num{text-align:right;font-variant-numeric:tabular-nums}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.filters label{font-size:.85rem;color:var(--muted)}input[type=search],select{padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg)}
+details.finding{background:var(--card);border:1px solid var(--line);border-radius:8px;margin:6px 0}
+details.finding>summary{cursor:pointer;padding:10px 12px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;list-style:none}
+details.finding>summary::-webkit-details-marker{display:none}
+details.finding[open]>summary{border-bottom:1px solid var(--line)}
+.rule{font-family:ui-monospace,Consolas,monospace;font-size:.8rem;color:var(--muted)}.loc{font-family:ui-monospace,Consolas,monospace;font-size:.82rem;color:var(--muted);word-break:break-all}
+.body{padding:4px 16px 14px}pre{background:var(--code);border:1px solid var(--line);border-radius:6px;padding:10px;overflow:auto;font:13px/1.45 ui-monospace,Consolas,monospace;white-space:pre-wrap;word-break:break-word}
+.note{border-left:3px solid var(--accent);padding:8px 12px;background:var(--card);border-radius:4px;color:var(--muted);font-size:.9rem}
+ol.actions li{margin:6px 0}.muted{color:var(--muted)}a{color:var(--accent)}footer{margin-top:40px;color:var(--muted);font-size:.85rem}
+.sevbar{display:flex;height:14px;border-radius:7px;overflow:hidden;margin:10px 0}.sevbar>i{display:block}
+@media print{details.finding{break-inside:avoid}details.finding .body{display:block}.filters{display:none}body{background:#fff}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>{{ t("report.title") }}</h1>
+  <div class="meta">
+    <span>{{ t("report.target") }}: <b>{{ report.target.value }}</b></span>
+    {% if report.stack %}<span>{{ t("report.stack") }}: {{ report.stack.name }}</span>{% endif %}
+    <span>{{ t("report.profile") }}: {{ report.profile }}</span>
+    <span>{{ t("report.duration") }}: {{ "%.1f"|format(report.duration_s) }} s</span>
+    <span>{{ t("report.generated") }}: {{ report.generated_at[:19].replace("T", " ") }} UTC</span>
+    <span>{{ t("report.status") }}: {{ report.status }}</span>
+  </div>
+</header>
+
+<section aria-labelledby="summary">
+<h2 id="summary">{{ t("report.summary") }}</h2>
+<div class="card score">
+  {% set overall = scores.overall or 0 %}
+  <svg class="gauge" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="{{ t('report.overall') }} {{ overall }}">
+    <circle cx="64" cy="64" r="54" fill="none" stroke="var(--line)" stroke-width="12"/>
+    <circle cx="64" cy="64" r="54" fill="none" stroke="{{ grade_color }}" stroke-width="12" stroke-linecap="round"
+            stroke-dasharray="{{ '%.1f'|format(339.3 * overall / 100) }} 339.3" transform="rotate(-90 64 64)"/>
+    <text x="64" y="62" text-anchor="middle" font-size="30" fill="var(--fg)">{{ scores.grade }}</text>
+    <text x="64" y="86" text-anchor="middle" font-size="14" fill="var(--muted)">{{ overall }}</text>
+  </svg>
+  <div style="flex:1;min-width:260px">
+    <div class="grid">
+    {% for key in ["security", "seo", "resilience", "quality", "dependencies"] %}
+      <div class="sub">
+        <div class="lbl">{{ t("report.sub." ~ key) }}</div>
+        {% if scores[key] is not none %}
+          <div class="val">{{ scores[key] }}</div><div class="bar"><i style="width:{{ scores[key] }}%"></i></div>
+        {% else %}<div class="val muted">–</div><div class="lbl">{{ t("report.not_measured") }}</div>{% endif %}
+      </div>
+    {% endfor %}
+    </div>
+    {% if scores.grade_capped %}<p class="note">{{ t("report.grade_capped") }}</p>{% endif %}
+    {% if scores.effective_weights %}<p class="meta">{{ t("report.effective_weights") }}:
+      {% for k, w in scores.effective_weights.items() %}{{ t("report.sub." ~ k) }} {{ "%.0f"|format(w * 100) }}%{% if not loop.last %} · {% endif %}{% endfor %}</p>{% endif %}
+  </div>
+</div>
+{% if total %}
+<div class="sevbar" role="img" aria-label="{% for s, n in sev_counts %}{{ t('report.sev.' ~ s) }} {{ n }} {% endfor %}">
+  {% for s, n in sev_counts %}{% if n %}<i class="sev-{{ s }}" style="width:{{ '%.2f'|format(100 * n / total) }}%"></i>{% endif %}{% endfor %}
+</div>
+<p class="meta">{% for s, n in sev_counts %}<span><span class="badge sev-{{ s }}">{{ t("report.sev." ~ s) }}</span> {{ n }}</span>{% endfor %}</p>
+{% endif %}
+
+<h3>{{ t("report.top_actions") }}</h3>
+<ol class="actions">
+{% for item in plan[:5] %}
+  <li><span class="badge sev-{{ item.severity }}">{{ t("report.sev." ~ item.severity) }}</span>
+      <b>{{ item.title[lang] }}</b> <span class="rule">{{ item.rule_id }}</span>
+      <span class="muted">· {{ item.count }} {{ t("report.count") }} · {{ t("report.effort") }} {{ item.effort }}</span></li>
+{% else %}<li class="muted">{{ t("report.no_findings") }}</li>{% endfor %}
+</ol>
+</section>
+
+{% if seo %}
+<section aria-labelledby="seo">
+<h2 id="seo">{{ t("report.seo.title") }}</h2>
+<p class="note">{{ t("report.seo.honesty") }}</p>
+<div class="card">
+  <div class="grid">
+    <div class="sub"><div class="lbl">{{ t("report.seo.score") }}</div><div class="val">{{ seo.score.score }}</div><div class="bar"><i style="width:{{ seo.score.score }}%"></i></div></div>
+    {% for name, value in seo.score.subscores.items() %}
+      <div class="sub"><div class="lbl">{{ t("report.seo.sub." ~ name) }}</div><div class="val">{{ value }}</div><div class="bar"><i style="width:{{ value }}%"></i></div></div>
+    {% endfor %}
+  </div>
+  {% if seo.score.capped_by_index_blocker %}<p class="note">{{ t("report.seo.capped") }}</p>{% endif %}
+  <p class="meta">{{ t("report.seo.heuristic") }}</p>
+</div>
+<h3>{{ t("report.seo.prelaunch") }}</h3>
+<ol class="actions">
+{% for item in seo_plan %}<li><span class="badge sev-{{ item.severity }}">{{ t("report.sev." ~ item.severity) }}</span> {{ item.title[lang] }} <span class="rule">{{ item.rule_id }}</span> <span class="muted">· {{ item.count }} {{ t("report.count") }}</span></li>{% endfor %}
+</ol>
+{% if seo.generated %}
+<h3>{{ t("report.seo.generated") }}</h3>
+{% for name, content in seo.generated.items() %}
+<details class="finding"><summary><b>{{ name }}</b></summary><div class="body"><pre>{{ content }}</pre></div></details>
+{% endfor %}
+{% endif %}
+<h3>{{ t("report.seo.postlaunch") }}</h3>
+<ol class="actions">{% for i in range(1, 8) %}<li>{{ t("report.seo.post." ~ i) }}</li>{% endfor %}</ol>
+{% if seo.pages %}
+<h3>{{ t("report.seo.pages") }} ({{ seo.pages|length }})</h3>
+<div style="overflow-x:auto"><table>
+<thead><tr><th>URL</th><th class="num">HTTP</th><th>{{ t("report.col.title") }}</th><th class="num">{{ t("report.seo.words") }}</th><th>{{ t("report.seo.indexable") }}</th></tr></thead>
+<tbody>{% for p in seo.pages[:300] %}<tr><td class="loc">{{ p.url }}</td><td class="num">{{ p.status }}</td><td>{{ p.title or "–" }}</td><td class="num">{{ p.words }}</td><td>{{ "✓" if p.indexable else "✗" }}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% endif %}
+</section>
+{% endif %}
+
+<section aria-labelledby="findings">
+<h2 id="findings">{{ t("report.findings") }} ({{ total }})</h2>
+{% if total %}
+<div class="filters" role="search">
+  <input type="search" id="q" placeholder="{{ t('report.filter.search') }}" aria-label="{{ t('report.filter.search') }}">
+  <select id="mod" aria-label="{{ t('report.filter.all_modules') }}"><option value="">{{ t("report.filter.all_modules") }}</option>
+    {% for m in modules_with_findings %}<option value="{{ m }}">{{ m }}</option>{% endfor %}</select>
+  {% for s, n in sev_counts %}{% if n %}<label><input type="checkbox" class="sev" value="{{ s }}" checked> {{ t("report.sev." ~ s) }} ({{ n }})</label>{% endif %}{% endfor %}
+</div>
+{% for f in findings %}
+<details class="finding" data-sev="{{ f.severity }}" data-mod="{{ f.module }}" data-q="{{ (f.rule_id ~ ' ' ~ f.title.get(lang) ~ ' ' ~ f.location.display())|lower }}">
+  <summary><span class="badge sev-{{ f.severity }}">{{ t("report.sev." ~ f.severity) }}</span>
+    <b>{{ f.title.get(lang) }}</b> <span class="rule">{{ f.rule_id }}</span>
+    <span class="loc">{{ f.location.display() }}</span></summary>
+  <div class="body">
+    <p class="meta"><span>{{ t("report.col.confidence") }}: {{ f.confidence }}</span><span>{{ t("report.col.tools") }}: {{ f.source_tools|join(", ") }}</span>
+      <span>{{ t("report.effort") }}: {{ f.effort }}</span>{% if f.cwe %}<span>{% for c in f.cwe %}CWE-{{ c }} {% endfor %}</span>{% endif %}{% if f.owasp %}<span>{{ f.owasp|join(", ") }}</span>{% endif %}</p>
+    {% if f.description %}<h3>{{ t("report.detail.description") }}</h3><p>{{ f.description.get(lang) }}</p>{% endif %}
+    {% if f.impact %}<h3>{{ t("report.detail.impact") }}</h3><p>{{ f.impact.get(lang) }}</p>{% endif %}
+    {% if f.evidence.snippet or f.evidence.extra or f.evidence.notes %}
+      <h3>{{ t("report.detail.evidence") }}</h3>
+      {% if f.evidence.snippet %}<pre>{{ f.evidence.snippet }}</pre>{% endif %}
+      {% if f.evidence.notes %}<p class="muted">{{ f.evidence.notes }}</p>{% endif %}
+      {% if f.evidence.extra %}<table>{% for k, v in f.evidence.extra.items() %}<tr><th>{{ k }}</th><td>{{ v }}</td></tr>{% endfor %}</table>{% endif %}
+    {% endif %}
+    {% if f.remediation %}
+      <h3>{{ t("report.detail.fix") }}</h3>
+      <ol>{% for step in f.remediation.steps.get(lang) %}<li>{{ step }}</li>{% endfor %}</ol>
+      {% set snippets = f.remediation.snippets.items()|list %}
+      {% if snippets %}
+        <h3>{{ t("report.detail.snippets") }} — {{ snippets[0][0] }}</h3><pre>{{ snippets[0][1].code }}</pre>
+        {% if snippets|length > 1 %}<details><summary>{{ t("report.detail.other_stacks") }}</summary>
+          {% for stack, sn in snippets[1:] %}<h3>{{ stack }}</h3><pre>{{ sn.code }}</pre>{% endfor %}</details>{% endif %}
+      {% endif %}
+      {% if f.remediation.verify %}<p class="muted"><b>{{ t("report.detail.verify") }}:</b> {{ f.remediation.verify.get(lang) }}</p>{% endif %}
+    {% endif %}
+    {% if f.references %}<h3>{{ t("report.detail.references") }}</h3><ul>
+      {% for r in f.references %}<li>{% if r.href %}<a href="{{ r.href }}" rel="noopener noreferrer">{{ r.title or r.href }}</a>{% else %}{{ r.type|upper }} {{ r.id }}{% endif %}</li>{% endfor %}</ul>{% endif %}
+  </div>
+</details>
+{% endfor %}
+{% else %}<p class="muted">{{ t("report.no_findings") }}</p>{% endif %}
+</section>
+
+<section aria-labelledby="fixplan">
+<h2 id="fixplan">{{ t("report.fix_plan") }}</h2>
+<div style="overflow-x:auto"><table>
+<thead><tr><th>#</th><th>{{ t("report.col.severity") }}</th><th>{{ t("report.col.title") }}</th><th class="num">{{ t("report.count") }}</th><th>{{ t("report.effort") }}</th></tr></thead>
+<tbody>{% for item in plan %}<tr><td class="num">{{ loop.index }}</td><td><span class="badge sev-{{ item.severity }}">{{ t("report.sev." ~ item.severity) }}</span></td>
+<td>{{ item.title[lang] }} <span class="rule">{{ item.rule_id }}</span></td><td class="num">{{ item.count }}</td><td>{{ item.effort }}</td></tr>{% endfor %}</tbody>
+</table></div>
+</section>
+
+<section aria-labelledby="meta">
+<h2 id="meta">{{ t("report.meta.title") }}</h2>
+<p><b>{{ t("report.meta.scope") }}:</b> {{ t("report.meta.scope_yes") if report.scope_statement_accepted else t("report.meta.scope_no") }}</p>
+<h3>{{ t("report.meta.modules") }}</h3>
+<table><tbody>
+{% for name, info in report.modules.items() %}
+<tr><td class="rule">{{ name }}</td><td>{{ t("report.module." ~ info.status) }}</td><td class="num">{{ "%.1f"|format(info.duration_s or 0) }} s</td>
+<td>{% if info.reason %}{{ info.reason[lang] }}{% endif %}{% if info.install_hint %}<br><span class="muted">{{ info.install_hint[lang] }}</span>{% endif %}</td></tr>
+{% endfor %}
+</tbody></table>
+{% if report.notes %}<h3>{{ t("report.meta.notes") }}</h3><ul>{% for m, notes in report.notes.items() %}{% for n in notes %}<li><span class="rule">{{ m }}</span> {{ n }}</li>{% endfor %}{% endfor %}</ul>{% endif %}
+{% if report.tool_versions %}<h3>{{ t("report.meta.tools") }}</h3><p class="meta">{% for name, v in report.tool_versions.items() %}<span>{{ name }} {{ v }}</span>{% endfor %}<span>{{ report.tool.name }} {{ report.tool.version }}</span></p>{% endif %}
+{% if report.advisory_db %}<p class="meta">{{ t("report.meta.advisory_db") }}: {% for k, v in report.advisory_db.items() %}<span>{{ k.replace("_db_updated", "") }} {{ (v or "")[:10] }}</span>{% endfor %}</p>{% endif %}
+{% if report.sbom_path %}<p class="meta">{{ t("report.meta.sbom") }}: <span class="loc">{{ report.sbom_path }}</span></p>{% endif %}
+{% if report.suppressed %}<p class="meta">{{ t("report.meta.suppressed") }}: {{ report.suppressed }}</p>{% endif %}
+</section>
+<footer>{{ t("report.footer") }} · {{ report.tool.name }} {{ report.tool.version }} · {{ report.scan_id }}</footer>
+</main>
+<script>{{ script|safe }}</script>
+</body>
+</html>

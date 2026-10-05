@@ -63,7 +63,7 @@ def build_parser() -> argparse.ArgumentParser:
     scan.add_argument("--ready-path", default="/", help="path polled until the app is ready")
     scan.add_argument("--out", type=Path, default=Path("reports"), help="output directory")
     scan.add_argument(
-        "--format", default="json", help="comma-separated: json (more in later versions)"
+        "--format", default="html,json", help="comma-separated: html,json,sarif,csv,pdf"
     )
     scan.add_argument(
         "--fail-on", choices=SEVERITIES, help="exit 3 if a finding is at least this severe"
@@ -94,6 +94,23 @@ def build_parser() -> argparse.ArgumentParser:
 
     modules = sub.add_parser("modules", help="list available scan modules")
     modules.add_argument("--profile", choices=["quick", "standard", "deep"])
+
+    report = sub.add_parser("report", help="render a stored scan again")
+    report.add_argument("scan_id")
+    report.add_argument("--format", default="html", help="comma-separated: html,json,sarif,csv,pdf")
+    report.add_argument("--out", type=Path, default=Path("reports"))
+    report.add_argument("--lang", choices=["tr", "en"])
+
+    diff = sub.add_parser("diff", help="compare two scans (new / fixed / persistent / regressed)")
+    diff.add_argument("before", help="scan id or report.json path")
+    diff.add_argument("after", help="scan id or report.json path")
+    diff.add_argument("--json", action="store_true", help="machine-readable output")
+
+    suppress = sub.add_parser("suppress", help="mark a finding or a whole rule as a false positive")
+    target_group = suppress.add_mutually_exclusive_group(required=True)
+    target_group.add_argument("--finding", help="finding id")
+    target_group.add_argument("--rule", help="rule id, e.g. SEO-OG-001")
+    suppress.add_argument("--reason", required=True, help="why this is not a real problem")
 
     schema = sub.add_parser("schema", help="print the JSON schema of a data model")
     schema.add_argument("kind", choices=SCHEMA_KINDS)
@@ -197,7 +214,8 @@ def _cmd_scan(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
     from secscope.core.session import InvalidTargetError, open_session  # noqa: PLC0415
     from secscope.modules.registry import load_builtin  # noqa: PLC0415
     from secscope.reporting.console import ConsoleReporter  # noqa: PLC0415
-    from secscope.reporting.json_export import write_json_report  # noqa: PLC0415
+    from secscope.reporting.finalize import finalize_scan  # noqa: PLC0415
+    from secscope.reporting.writer import ReportFormatError, write_outputs  # noqa: PLC0415
 
     if args.path is not None:
         target = Target(kind=TargetKind.FOLDER, value=str(args.path.resolve()))
@@ -246,8 +264,7 @@ def _cmd_scan(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
         session.repo.finish_scan(session.ctx.scan_id, "interrupted")
         session.close()
         return EXIT_FAILED
-    session.repo.replace_findings(session.ctx.scan_id, outcome.findings)
-    session.repo.finish_scan(session.ctx.scan_id, outcome.status, outcome.scores)
+    report = finalize_scan(session, outcome)
 
     scores = outcome.scores
     if scores:
@@ -258,12 +275,15 @@ def _cmd_scan(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
     for module_id, notes in outcome.notes.items():
         for note in notes:
             err.write(f"[note] {module_id}: {note}\n")
-    formats = {f.strip() for f in args.format.split(",") if f.strip()}
-    args.out.mkdir(parents=True, exist_ok=True)
-    if "json" in formats:
-        path = write_json_report(args.out, session.ctx.scan_id, config, outcome)
-        out.write(f"{path}\n")
     session.close()
+    formats = [f.strip() for f in args.format.split(",") if f.strip()]
+    try:
+        written = write_outputs(report, args.out, formats, lang=settings.language)
+    except ReportFormatError as exc:
+        err.write(f"error: {exc}\n")
+        return EXIT_USAGE
+    for path in written.values():
+        out.write(f"{path}\n")
 
     if outcome.status == "failed":
         return EXIT_FAILED
@@ -271,6 +291,95 @@ def _cmd_scan(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
         threshold = SEVERITY_ORDER[args.fail_on]
         if any(SEVERITY_ORDER[f.severity] >= threshold for f in outcome.findings):
             return EXIT_FAIL_ON
+    return EXIT_OK
+
+
+def _report_path(ref: str) -> Path:
+    from secscope.core.config import Settings  # noqa: PLC0415
+    from secscope.reporting.json_export import REPORT_FILE  # noqa: PLC0415
+
+    direct = Path(ref)
+    if direct.is_file():
+        return direct
+    return Settings.load().data_dir / "scans" / ref / REPORT_FILE
+
+
+def _cmd_report(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
+    from secscope.reporting.json_export import load_report  # noqa: PLC0415
+    from secscope.reporting.writer import ReportFormatError, write_outputs  # noqa: PLC0415
+
+    path = _report_path(args.scan_id)
+    if not path.is_file():
+        err.write(f"error: no stored report for {args.scan_id} ({path})\n")
+        return EXIT_USAGE
+    formats = [f.strip() for f in args.format.split(",")]
+    try:
+        written = write_outputs(load_report(path), args.out, formats, lang=args.lang)
+    except (ReportFormatError, ValueError) as exc:
+        err.write(f"error: {exc}\n")
+        return EXIT_USAGE
+    for p in written.values():
+        out.write(f"{p}\n")
+    return EXIT_OK
+
+
+def _cmd_diff(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
+    from secscope.reporting.diff import diff_reports  # noqa: PLC0415
+    from secscope.reporting.json_export import load_report  # noqa: PLC0415
+
+    paths = [_report_path(args.before), _report_path(args.after)]
+    missing = [str(p) for p in paths if not p.is_file()]
+    if missing:
+        err.write(f"error: report not found: {', '.join(missing)}\n")
+        return EXIT_USAGE
+    d = diff_reports(load_report(paths[0]), load_report(paths[1]))
+    s = d.summary()
+    if args.json:
+        data = {
+            **s,
+            "new_ids": [f.id for f in d.new],
+            "fixed_ids": [f.id for f in d.fixed],
+            "regressed_ids": [after.id for _before, after in d.regressed],
+        }
+        json.dump(data, out, indent=2)
+        out.write("\n")
+        return EXIT_OK
+    out.write(
+        f"new {s['new']} (critical/high {s['new_critical_or_high']}) | fixed {s['fixed']} | "
+        f"persistent {s['persistent']} | regressed {s['regressed']}\n"
+    )
+    deltas = ", ".join(f"{k} {v:+}" for k, v in s["score_delta"].items() if v is not None)
+    if deltas:
+        out.write(f"score delta: {deltas}\n")
+    for label, items in (("NEW", d.new), ("FIXED", d.fixed)):
+        for f in items:
+            out.write(
+                f"  {label:<6} {f.severity.upper():<8} {f.rule_id:<20} {f.location.display()}\n"
+            )
+    for before, after in d.regressed:
+        out.write(
+            f"  WORSE  {before.severity}->{after.severity} {after.rule_id} {after.location.display()}\n"
+        )
+    return EXIT_OK
+
+
+def _cmd_suppress(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
+    from secscope.core.config import Settings  # noqa: PLC0415
+    from secscope.core.session import database_path  # noqa: PLC0415
+    from secscope.storage import db  # noqa: PLC0415
+    from secscope.storage.repo import ScanRepository  # noqa: PLC0415
+
+    if not args.reason.strip():
+        err.write("error: a reason is required\n")
+        return EXIT_USAGE
+    conn = db.connect(database_path(Settings.load()))
+    try:
+        ScanRepository(conn).add_suppression(
+            args.reason, finding_id=args.finding, rule_id=args.rule
+        )
+    finally:
+        conn.close()
+    out.write(f"suppressed {args.finding or args.rule}: {args.reason}\n")
     return EXIT_OK
 
 
@@ -304,6 +413,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _cmd_modules(args.profile, sys.stdout)
         case "scan":
             return _cmd_scan(args, sys.stdout, sys.stderr)
+        case "report":
+            return _cmd_report(args, sys.stdout, sys.stderr)
+        case "diff":
+            return _cmd_diff(args, sys.stdout, sys.stderr)
+        case "suppress":
+            return _cmd_suppress(args, sys.stdout, sys.stderr)
         case "worker":
             from secscope.worker.main import main as worker_main  # noqa: PLC0415
 

@@ -1,6 +1,7 @@
 # SecScope
 
-> **Status: pre-alpha (milestone M0 — foundations).** Not usable for scanning yet.
+> **Status: pre-alpha.** Static analysis, dependency analysis, SEO readiness and reporting work;
+> the full desktop UI, load testing and packaging are still in progress.
 
 SecScope is a desktop application that tests **your own** web site, web app or API
 **on your own machine**: static analysis, secret and dependency scanning, local
@@ -13,6 +14,20 @@ that turns this off. Do not point SecScope at systems you do not own.
 
 The full product and engineering specification lives in [SPEC.md](SPEC.md)
 (Turkish).
+
+## Quick start (CLI)
+
+```bash
+uv sync
+uv run secscope tools install gitleaks trivy osv-scanner   # optional, SHA-256 verified
+uv run secscope tools update-db                              # offline advisory databases
+uv run secscope scan --path ./my-project --accept-scope-statement --format html,json,sarif
+uv run secscope diff <old-scan-id> <new-scan-id>
+```
+
+The HTML report works offline and contains scores, a quick-wins-first fix plan, every finding
+with evidence (secrets masked), fixes with code for your stack, and a "Visibility in Google"
+section with generated `robots.txt`, `sitemap.xml` and JSON-LD drafts.
 
 ## Development
 
