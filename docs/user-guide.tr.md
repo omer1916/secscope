@@ -59,6 +59,10 @@ duraklatabilir veya iptal edebilirsiniz. Bitince **Sonuçlar** açılır.
 - **HTML raporu aç** çevrimdışı çalışan tek dosyalık raporu açar. **Dışa aktar** HTML, JSON,
   SARIF (IDE/CI için) ve CSV üretir.
 
+### Çalışan uygulama kontrolleri (dinamik)
+
+Uygulaman çalışırken (localhost'ta) ona bakıp yalnızca çalışma anında görünen açıkları bulur: eksik güvenlik başlıkları, korumasız çerezler, yanlış CORS, açıkta kalmış `.git`/`.env`/yedek dosyalar, hata sayfası sızıntısı, dizin listeleme. Saldırı yükü göndermez — normal istek atıp yanıta bakar. Yalnızca kapsam beyanını onayladığında ve yalnızca kendi localhost adresine çalışır.
+
 ### Google'da görünürlük bölümü
 
 Google yerel siteyi tarayamaz; bu bölüm yayına hazırlığı ölçer, sıralama garantisi vermez.

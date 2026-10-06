@@ -1,0 +1,33 @@
+rule_id: DAST-METHOD-001
+title:
+  tr: HTTP TRACE etkin
+  en: HTTP TRACE enabled
+severity: low
+category: security
+confidence: high
+why:
+  tr: Sunucu TRACE yöntemine yanıt veriyor. TRACE, bazı durumlarda başlık ve çerezlerin yansıtılmasına (Cross-Site Tracing)
+    yol açabilir ve gerekli değildir.
+  en: The server answers the TRACE method. TRACE can echo headers and cookies (Cross-Site Tracing) in some setups and is not
+    needed.
+fix_steps:
+  tr:
+  - Ters vekilde veya uygulamada TRACE yöntemini kapatın.
+  en:
+  - Disable the TRACE method at the reverse proxy or in the app.
+snippets:
+  nginx:
+    lang: nginx
+    code: if ($request_method = TRACE) { return 405; }
+  apache:
+    lang: apache
+    code: TraceEnable off
+verify:
+  tr: Düzeltip uygulamayı yeniden başlatın ve taramayı tekrarlayın; bu madde 'Düzeltildi' olmalı.
+  en: Fix it, restart the app and re-scan; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 16
+- type: owasp
+  id: A02:2025
+effort: S

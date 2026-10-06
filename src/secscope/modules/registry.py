@@ -16,6 +16,7 @@ BUILTIN_MODULES: tuple[str, ...] = (
     "secscope.modules.sca:ScaModule",
     "secscope.modules.config_audit:ConfigAuditModule",
     "secscope.modules.seo:SeoModule",
+    "secscope.modules.dast_http:DastHttpModule",
 )
 
 

@@ -1,0 +1,36 @@
+rule_id: DAST-SERVER-001
+title:
+  tr: Sunucu/çatı sürümü ifşa ediliyor
+  en: Server/framework version disclosed
+severity: low
+category: security
+confidence: high
+why:
+  tr: Server veya X-Powered-By başlığı kullanılan yazılımın sürümünü açıklıyor. Bu, saldırganın o sürüme ait bilinen açıkları
+    hedeflemesini kolaylaştırır.
+  en: The Server or X-Powered-By header reveals the software version, which helps an attacker target known vulnerabilities
+    for that version.
+fix_steps:
+  tr:
+  - 'Sürüm bilgisini gizleyin: Express app.disable(''x-powered-by''); nginx server_tokens off; PHP expose_php = Off.'
+  en:
+  - 'Hide version info: Express app.disable(''x-powered-by''); nginx server_tokens off; PHP expose_php = Off.'
+snippets:
+  express:
+    lang: js
+    code: app.disable('x-powered-by');
+  nginx:
+    lang: nginx
+    code: server_tokens off;
+  php:
+    lang: ini
+    code: expose_php = Off
+verify:
+  tr: Düzeltip uygulamayı yeniden başlatın ve taramayı tekrarlayın; bu madde 'Düzeltildi' olmalı.
+  en: Fix it, restart the app and re-scan; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 200
+- type: owasp
+  id: A02:2025
+effort: S

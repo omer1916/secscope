@@ -1,0 +1,53 @@
+rule_id: DAST-CSP-001
+title:
+  tr: Content-Security-Policy eksik veya zayıf
+  en: Content-Security-Policy missing or weak
+severity: medium
+category: security
+confidence: high
+why:
+  tr: Çalışan uygulama güçlü bir Content-Security-Policy başlığı göndermiyor. CSP, XSS'e karşı en önemli tarayıcı korumasıdır;
+    'unsafe-inline' veya '*' gibi değerler bu korumayı büyük ölçüde kaldırır.
+  en: The running app does not send a strong Content-Security-Policy header. CSP is the main browser defence against XSS;
+    values like 'unsafe-inline' or '*' largely remove that protection.
+impact:
+  tr: XSS açığı varsa saldırının tarayıcıda çalışması kolaylaşır.
+  en: If an XSS flaw exists, it is much easier for the attack to run in the browser.
+fix_steps:
+  tr:
+  - 'Sıkı bir CSP ekleyin: default-src ''self''; frame-ancestors ''none''; object-src ''none''.'
+  - '''unsafe-inline'' ve ''unsafe-eval'' kullanmayın; satır içi script yerine ayrı dosya kullanın.'
+  en:
+  - 'Add a strict CSP: default-src ''self''; frame-ancestors ''none''; object-src ''none''.'
+  - Avoid 'unsafe-inline' and 'unsafe-eval'; use external scripts instead of inline ones.
+snippets:
+  express:
+    lang: js
+    code: 'const helmet = require(''helmet'');
+
+      app.use(helmet());'
+  flask:
+    lang: python
+    code: 'from flask_talisman import Talisman
+
+      Talisman(app, content_security_policy={"default-src": "''self''"})'
+  nginx:
+    lang: nginx
+    code: 'add_header Content-Security-Policy "default-src ''self''; frame-ancestors ''none''; object-src ''none''" always;
+
+      add_header X-Content-Type-Options nosniff always;
+
+      add_header Referrer-Policy strict-origin-when-cross-origin always;
+
+      add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;'
+verify:
+  tr: Düzeltip uygulamayı yeniden başlatın ve taramayı tekrarlayın; bu madde 'Düzeltildi' olmalı.
+  en: Fix it, restart the app and re-scan; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 1021
+- type: owasp
+  id: A02:2025
+- type: url
+  href: https://developer.mozilla.org/docs/Web/HTTP/CSP
+effort: S

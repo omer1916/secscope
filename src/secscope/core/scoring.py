@@ -111,6 +111,7 @@ def compute_scores(
         "sast",
         "secrets",
         "config_audit",
+        "dast_http",
         "dast_native",
         "dast_zap",
         "dast_nuclei",

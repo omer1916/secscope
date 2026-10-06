@@ -1,0 +1,51 @@
+rule_id: DAST-HEADERS-001
+title:
+  tr: Güvenlik başlıkları eksik
+  en: Security headers missing
+severity: low
+category: security
+confidence: high
+why:
+  tr: Yanıtta bazı önerilen güvenlik başlıkları yok (X-Content-Type-Options, X-Frame-Options/frame-ancestors, Referrer-Policy,
+    Permissions-Policy, HTTPS'te HSTS). Bunlar tıklama hırsızlığı, MIME tahmini ve bilgi sızıntısına karşı koruma sağlar.
+  en: The response is missing some recommended security headers (X-Content-Type-Options, X-Frame-Options/frame-ancestors,
+    Referrer-Policy, Permissions-Policy, and HSTS on HTTPS). These protect against clickjacking, MIME sniffing and information
+    leaks.
+fix_steps:
+  tr:
+  - Eksik başlıkları ekleyin (kanıtta listelenmiştir).
+  - 'Mümkünse tek bir güvenlik ara katmanı/kütüphane kullanın (Express: helmet, Flask: flask-talisman).'
+  en:
+  - Add the missing headers (listed in the evidence).
+  - 'Prefer a single security middleware/library (Express: helmet, Flask: flask-talisman).'
+snippets:
+  express:
+    lang: js
+    code: 'const helmet = require(''helmet'');
+
+      app.use(helmet());'
+  flask:
+    lang: python
+    code: 'from flask_talisman import Talisman
+
+      Talisman(app, content_security_policy={"default-src": "''self''"})'
+  nginx:
+    lang: nginx
+    code: 'add_header Content-Security-Policy "default-src ''self''; frame-ancestors ''none''; object-src ''none''" always;
+
+      add_header X-Content-Type-Options nosniff always;
+
+      add_header Referrer-Policy strict-origin-when-cross-origin always;
+
+      add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;'
+verify:
+  tr: Düzeltip uygulamayı yeniden başlatın ve taramayı tekrarlayın; bu madde 'Düzeltildi' olmalı.
+  en: Fix it, restart the app and re-scan; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 693
+- type: owasp
+  id: A02:2025
+- type: url
+  href: https://owasp.org/www-project-secure-headers/
+effort: S

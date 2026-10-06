@@ -1,0 +1,44 @@
+rule_id: DAST-EXPOSED-001
+title:
+  tr: Hassas dosya dışarıdan erişilebilir
+  en: Sensitive file is reachable
+severity: high
+category: security
+confidence: high
+why:
+  tr: Dışarıdan erişilmemesi gereken bir dosya (ör. .git, .env, yedek veya veritabanı dosyası) tarayıcıdan okunabiliyor. Bu
+    dosyalar kaynak kod, parolalar ve API anahtarları içerebilir.
+  en: A file that should not be reachable (e.g. .git, .env, a backup or database file) can be read over the web. These files
+    may contain source code, passwords and API keys.
+impact:
+  tr: Kaynak kod, kimlik bilgisi ve sır sızıntısı.
+  en: Leak of source code, credentials and secrets.
+fix_steps:
+  tr:
+  - Bu dosyaları web kök dizininin dışına taşıyın.
+  - Ters vekilde gizli dosyalara erişimi engelleyin (nokta ile başlayan yollar, .git, .env, *.bak, *.sql).
+  - Sunucu yalnızca gereken statik klasörü sunsun.
+  en:
+  - Move these files outside the web root.
+  - Block access to hidden/sensitive files at the reverse proxy (dot paths, .git, .env, *.bak, *.sql).
+  - Serve only the intended static folder.
+snippets:
+  nginx:
+    lang: nginx
+    code: 'location ~ /\.(?!well-known) { deny all; }
+
+      location ~* \.(bak|sql|sqlite3|env)$ { deny all; }'
+  apache:
+    lang: apache
+    code: "<FilesMatch \"(^\\.|\\.(bak|sql|sqlite3|env)$)\">\n  Require all denied\n</FilesMatch>"
+verify:
+  tr: Düzeltip uygulamayı yeniden başlatın ve taramayı tekrarlayın; bu madde 'Düzeltildi' olmalı.
+  en: Fix it, restart the app and re-scan; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 538
+- type: cwe
+  id: 200
+- type: owasp
+  id: A01:2025
+effort: S

@@ -1,0 +1,39 @@
+rule_id: DAST-ERRLEAK-001
+title:
+  tr: Hata sayfası yığın izi sızdırıyor (çalışan uygulama)
+  en: Error page leaks a stack trace (running app)
+severity: medium
+category: security
+confidence: high
+why:
+  tr: Beklenmeyen bir istekte uygulama ayrıntılı bir hata sayfası (yığın izi, çatı hata ekranı) döndürüyor. Bu, iç dosya yolları,
+    sürümler ve kod yapısını açığa çıkarır; çoğu zaman debug modunun açık olduğunu gösterir.
+  en: On an unexpected request the app returns a detailed error page (stack trace, framework debug screen). This exposes internal
+    paths, versions and code structure, and usually means debug mode is on.
+fix_steps:
+  tr:
+  - Üretimde debug modunu kapatın (Flask debug=False, Django DEBUG=False, PHP display_errors=Off).
+  - Kullanıcıya genel bir hata sayfası gösterin; ayrıntıyı yalnızca günlüğe yazın.
+  en:
+  - Turn debug off in production (Flask debug=False, Django DEBUG=False, PHP display_errors=Off).
+  - Show a generic error page to users; log details only.
+snippets:
+  flask:
+    lang: python
+    code: 'app.run(debug=False)  # and register @app.errorhandler(500)'
+  php:
+    lang: ini
+    code: 'display_errors = Off
+
+      log_errors = On'
+verify:
+  tr: Düzeltip uygulamayı yeniden başlatın ve taramayı tekrarlayın; bu madde 'Düzeltildi' olmalı.
+  en: Fix it, restart the app and re-scan; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 209
+- type: owasp
+  id: A10:2025
+- type: asvs
+  id: 5.0-V16
+effort: S

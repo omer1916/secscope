@@ -1,0 +1,39 @@
+rule_id: DAST-COOKIE-001
+title:
+  tr: Çerez güvenlik bayrakları eksik (çalışan uygulama)
+  en: Insecure cookie flags (running app)
+severity: medium
+category: security
+confidence: high
+why:
+  tr: Uygulamanın gönderdiği bir çerezde Secure, HttpOnly veya SameSite bayrağı eksik. Oturum çerezlerinde bu bayraklar eksikse
+    çerez JavaScript ile çalınabilir veya CSRF'ye açık olur.
+  en: A cookie the app sets is missing Secure, HttpOnly or SameSite. On a session cookie this means it can be stolen via JavaScript
+    or is exposed to CSRF.
+fix_steps:
+  tr:
+  - Çerezleri Secure + HttpOnly + SameSite=Lax (veya Strict) ile ayarlayın.
+  - Oturum çerezinde hassas veri tutmayın; kimlik sunucuda saklansın.
+  en:
+  - Set cookies with Secure + HttpOnly + SameSite=Lax (or Strict).
+  - Do not store sensitive data in the cookie; keep identity server-side.
+snippets:
+  flask:
+    lang: python
+    code: resp.set_cookie('session_id', v, secure=True, httponly=True, samesite='Lax')
+  express:
+    lang: js
+    code: 'res.cookie(''sid'', v, { secure: true, httpOnly: true, sameSite: ''lax'' });'
+verify:
+  tr: Düzeltip uygulamayı yeniden başlatın ve taramayı tekrarlayın; bu madde 'Düzeltildi' olmalı.
+  en: Fix it, restart the app and re-scan; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 1004
+- type: cwe
+  id: 614
+- type: owasp
+  id: A02:2025
+- type: asvs
+  id: 5.0-V7
+effort: S

@@ -59,6 +59,10 @@ or cancel. When it finishes, **Results** opens.
 - **Open HTML report** opens the offline single-file report. **Export** writes HTML, JSON,
   SARIF (for IDEs/CI) and CSV.
 
+### Running-app checks (dynamic)
+
+While your app runs (on localhost) it inspects what only shows up at runtime: missing security headers, insecure cookies, wrong CORS, exposed `.git`/`.env`/backup files, error-page leakage, directory listing. It sends no attack payloads — just ordinary requests, inspecting the response. Runs only after you accept the scope statement, and only against your own localhost.
+
 ### Visibility in Google
 
 Google cannot crawl a local site; this section measures launch readiness and never guarantees

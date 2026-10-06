@@ -1,0 +1,35 @@
+rule_id: DAST-DIRLIST-001
+title:
+  tr: Dizin listeleme açık (çalışan uygulama)
+  en: Directory listing enabled (running app)
+severity: medium
+category: security
+confidence: high
+why:
+  tr: Bir dizine istek atıldığında sunucu içindeki dosyaları listeliyor. Bu, yedek dosyalar, kaynak kod ve yapılandırma gibi
+    görünmemesi gereken dosyaları açığa çıkarabilir.
+  en: Requesting a directory returns a listing of its files. This can expose backup files, source code and configuration that
+    should not be visible.
+fix_steps:
+  tr:
+  - Dizin listelemeyi kapatın (nginx autoindex off; Apache Options -Indexes).
+  - Statik dosyaları yalnızca gereken klasörden sunun.
+  en:
+  - Turn directory listing off (nginx autoindex off; Apache Options -Indexes).
+  - Serve static files only from the intended folder.
+snippets:
+  nginx:
+    lang: nginx
+    code: autoindex off;
+  apache:
+    lang: apache
+    code: Options -Indexes
+verify:
+  tr: Düzeltip uygulamayı yeniden başlatın ve taramayı tekrarlayın; bu madde 'Düzeltildi' olmalı.
+  en: Fix it, restart the app and re-scan; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 548
+- type: owasp
+  id: A02:2025
+effort: S

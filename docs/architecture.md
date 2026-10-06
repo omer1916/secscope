@@ -93,6 +93,12 @@ the UI down.
 | Packaging | `packaging/pyinstaller.spec`, `packaging/launcher.py` | One-folder build, `SecScopeApp` (windowed) + `secscope` (console, also runs the internal `worker`, `static-server`, `run-python-tool` sub-programs). [packaging/README.md](../packaging/README.md). |
 | Hardening | [threat-model.md](threat-model.md), `tests/integration/test_dogfood.py` | SecScope's own source must pass its own static analysis. |
 
+## Runtime checks (dynamic, benign)
+
+| Area | Module | Notes |
+|---|---|---|
+| Running-app checks | `modules/dast_http.py`, `analysis/http_checks.py` | Against the user's own local app only (scope guard + scope statement). Inspects responses for missing security headers, insecure cookies, permissive CORS, TRACE, directory listing, exposed .git/.env/backup files and stack-trace error pages. No attack payloads. |
+
 ## Coverage, background code, attack surface (ADR-010)
 
 | Area | Module | Notes |

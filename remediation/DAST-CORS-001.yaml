@@ -1,0 +1,40 @@
+rule_id: DAST-CORS-001
+title:
+  tr: Gevşek CORS (çalışan uygulama)
+  en: Permissive CORS (running app)
+severity: high
+category: security
+confidence: high
+why:
+  tr: Uygulama, gönderdiğimiz güvenilmeyen Origin başlığını olduğu gibi yansıtıyor (ve/veya kimlik bilgisine izin veriyor).
+    Böylece herhangi bir web sitesi, oturum açmış kullanıcı adına uygulamadan veri okuyabilir.
+  en: The app reflects the untrusted Origin we sent (and/or allows credentials). This lets any web site read data from the
+    app as the logged-in user.
+impact:
+  tr: Üçüncü taraf sitelerden kullanıcı verisinin çalınması.
+  en: Theft of user data from third-party sites.
+fix_steps:
+  tr:
+  - İzinli origin'leri sabit bir listeyle sınırlayın; gelen Origin'i yansıtmayın.
+  - Kimlik bilgisi gerekiyorsa asla '*' veya yansıtma kullanmayın.
+  en:
+  - Restrict allowed origins to a fixed allow-list; never reflect the incoming Origin.
+  - Never combine credentials with '*' or reflection.
+snippets:
+  express:
+    lang: js
+    code: 'app.use(require(''cors'')({ origin: [''https://app.example.com''], credentials: true }));'
+  flask:
+    lang: python
+    code: CORS(app, origins=['https://app.example.com'], supports_credentials=True)
+verify:
+  tr: Düzeltip uygulamayı yeniden başlatın ve taramayı tekrarlayın; bu madde 'Düzeltildi' olmalı.
+  en: Fix it, restart the app and re-scan; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 942
+- type: owasp
+  id: A02:2025
+- type: url
+  href: https://developer.mozilla.org/docs/Web/HTTP/CORS
+effort: S
