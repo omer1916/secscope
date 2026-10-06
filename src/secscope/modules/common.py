@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import textwrap
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -77,6 +78,29 @@ class ToolMap:
 
     def known(self, tool: str, external_id: str) -> bool:
         return external_id in self.mapping.get(tool, {})
+
+
+MAX_SNIPPET_LINES = 5
+
+
+def statement_text(lines: list[str], start: int, end: int | None = None) -> str:
+    """Lines ``start..end`` (1-based, inclusive, at most MAX_SNIPPET_LINES), dedented.
+
+    Multi-line statements (``conn.execute(\n "SELECT ..." + q)``) are evidence only as a
+    whole: the first line alone often does not show the problem.
+    """
+    if not 0 < start <= len(lines):
+        return ""
+    last = min(max(end or start, start), start + MAX_SNIPPET_LINES - 1, len(lines))
+    return textwrap.dedent("\n".join(x.rstrip() for x in lines[start - 1 : last])).strip()
+
+
+def read_statement(root: Path, rel: str, start: int, end: int | None = None) -> str:
+    try:
+        lines = (root / rel).read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return ""
+    return statement_text(lines, start, end)
 
 
 def read_line(root: Path, rel: str, line: int) -> str:

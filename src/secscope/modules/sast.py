@@ -19,7 +19,14 @@ from secscope.core.models import Category, Confidence, Finding, LocalizedStr
 from secscope.core.process import python_tool_command, run_capture
 from secscope.core.resources import data_path
 from secscope.modules.base import BaseModule, Emitter, ModuleResult, Requirements, ScanContext
-from secscope.modules.common import ToolMap, code_finding, project_root, read_line, stack_of
+from secscope.modules.common import (
+    ToolMap,
+    code_finding,
+    project_root,
+    read_statement,
+    stack_of,
+    statement_text,
+)
 
 SEMGREP_TIMEOUT_S = 15 * 60
 BANDIT_TIMEOUT_S = 10 * 60
@@ -48,7 +55,7 @@ def _file_findings(
         for issue in check_python(file):
             out.append(
                 code_finding(kb, issue.rule_id, module="sast", path=file.rel, line=issue.line, column=issue.column,
-                             snippet=file.line_text(issue.line).strip(), confidence=issue.confidence,
+                             snippet=statement_text(file.text.splitlines(), issue.line, issue.end_line), confidence=issue.confidence,
                              severity=issue.severity, stack=stack, notes=issue.note or None)
             )  # fmt: skip
     return out
@@ -64,9 +71,10 @@ def parse_semgrep(output: str, root: Path, kb: KnowledgeBase, stack: str | None)
             continue
         rel = Path(r["path"]).resolve().relative_to(root.resolve()).as_posix()
         line = int(r["start"]["line"])
+        end = int(r.get("end", {}).get("line", line))
         findings.append(
             code_finding(kb, rule_id, module="sast", path=rel, line=line, column=int(r["start"].get("col", 1)),
-                         snippet=read_line(root, rel, line), confidence=meta.get("confidence"),
+                         snippet=read_statement(root, rel, line, end), confidence=meta.get("confidence"),
                          tool="semgrep", stack=stack, extra={"semgrep_rule": r["check_id"]})
         )  # fmt: skip
     return findings
@@ -96,7 +104,7 @@ def parse_bandit(
         line = int(r["line_number"])
         findings.append(
             code_finding(kb, rule_id, module="sast", path=rel, line=line, column=int(r.get("col_offset", 0)) + 1,
-                         snippet=read_line(root, rel, line), confidence=conf or _BANDIT_CONF.get(r.get("issue_confidence", ""), "medium"),
+                         snippet=read_statement(root, rel, line, max(r.get("line_range") or [line])), confidence=conf or _BANDIT_CONF.get(r.get("issue_confidence", ""), "medium"),
                          tool="bandit", stack=stack, extra={"bandit_test": test_id})
         )  # fmt: skip
     return findings, unmapped
