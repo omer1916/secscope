@@ -8,11 +8,14 @@ import pyqtgraph as pg
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QHBoxLayout, QPushButton, QVBoxLayout, QWidget
 
+from secscope.core.scoring import DISPLAYED_SUBSCORES
 from secscope.reporting.json_export import report_findings
 from secscope.ui.state import AppState
 from secscope.ui.widgets import ScoreRing, card, label
 
-SUBS = ("security", "seo", "resilience", "quality", "dependencies")
+SUBS = DISPLAYED_SUBSCORES
+MAX_TREND_POINTS = 30
+MAX_TREND_LABELS = 8
 
 
 class DashboardPage(QWidget):
@@ -41,12 +44,13 @@ class DashboardPage(QWidget):
         self.trend.setYRange(0, 100)
         self.trend.showGrid(x=False, y=True, alpha=0.2)
         self.trend.setMinimumHeight(180)
-        self.trend.getAxis("bottom").setTickSpacing(1, 1)  # scans are whole numbers
+        self.trend.setMouseEnabled(x=False, y=False)
 
         rings = QHBoxLayout()
         box = QVBoxLayout()
         box.addWidget(self.overall)
-        box.addWidget(label(t("report.overall"), "muted"))
+        self.overall_label = label(t("report.overall"), "muted")
+        box.addWidget(self.overall_label)
         rings.addLayout(box)
         for key, ring in self.subs.items():
             b = QVBoxLayout()
@@ -85,18 +89,30 @@ class DashboardPage(QWidget):
         )
         report = self.state.report(last.scan_id)
         scores = (report or {}).get("scores") or {}
-        self.overall.set_score(scores.get("overall"), scores.get("grade"))
+        self.overall.set_score(scores.get("overall"))
+        grade = scores.get("grade")
+        self.overall_label.setText(
+            t("report.overall")
+            + (f" · {t('ui.dashboard.grade', grade=grade)}" if grade and grade != "–" else "")
+        )
         for key, ring in self.subs.items():
             ring.set_score(scores.get(key))
         findings = report_findings(report) if report else []
         crit = sum(1 for f in findings if f.severity == "critical")
         high = sum(1 for f in findings if f.severity == "high")
         self.open_counts.setText(t("ui.dashboard.open", critical=crit, high=high))
-        history = [s for s in reversed(scans) if s.overall is not None]
+        # Only scans of the same project: different projects' scores are not a trend.
+        history = [s for s in reversed(scans) if s.overall is not None and s.target == last.target]
+        history = history[-MAX_TREND_POINTS:]
         if history:
+            xs = list(range(1, len(history) + 1))
             self.trend.plot(
-                list(range(1, len(history) + 1)),
-                [s.overall for s in history],
-                pen=pg.mkPen("#2457d6", width=2),
-                symbol="o",
+                xs, [s.overall for s in history], pen=pg.mkPen("#2457d6", width=2), symbol="o"
             )
+            step = max(1, len(history) // MAX_TREND_LABELS)
+            ticks = [
+                (x, s.created_at[5:16].replace("T", " ").replace("-", "."))
+                for x, s in list(zip(xs, history, strict=True))[::step]
+            ]
+            self.trend.getAxis("bottom").setTicks([ticks])
+            self.trend.getViewBox().setXRange(0.5, len(history) + 0.5, padding=0)

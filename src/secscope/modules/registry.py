@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import importlib
 from collections.abc import Iterable
+from functools import cache
 
 from secscope.core.config import ScanProfile
+from secscope.core.models import LocalizedStr
 from secscope.modules.base import BaseModule
 
 BUILTIN_MODULES: tuple[str, ...] = (
@@ -48,6 +50,11 @@ class ModuleRegistry:
 
     def create(self, module_id: str) -> BaseModule:
         return self.get(module_id)()
+
+
+@cache
+def module_titles() -> dict[str, LocalizedStr]:
+    return {cls.id: cls.title for cls in load_builtin().classes()}
 
 
 def load_builtin(extra: Iterable[str] = ()) -> ModuleRegistry:

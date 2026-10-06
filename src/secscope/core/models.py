@@ -97,6 +97,9 @@ class CodeLocation(_Model):
         # normalised evidence snippet disambiguates findings within a file.
         return f"code:{self.path}"
 
+    def short(self) -> str:
+        return self.display()
+
     def display(self) -> str:
         parts = [self.path]
         if self.line is not None:
@@ -145,6 +148,13 @@ class HttpLocation(_Model):
     def display(self) -> str:
         suffix = f" [{self.parameter}]" if self.parameter else ""
         return f"{self.method} {self.url}{suffix}"
+
+    def short(self) -> str:
+        """Method and path only (the target's origin is a throwaway loopback port)."""
+        parts = urlsplit(self.url)
+        path = (parts.path or "/") + (f"?{parts.query}" if parts.query else "")
+        suffix = f" [{self.parameter}]" if self.parameter else ""
+        return f"{self.method} {path}{suffix}"
 
 
 Location = Annotated[CodeLocation | HttpLocation, Field(discriminator="kind")]

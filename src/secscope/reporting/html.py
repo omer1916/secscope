@@ -10,10 +10,12 @@ from __future__ import annotations
 import base64
 import hashlib
 from typing import Any
+from urllib.parse import urlsplit
 
 from jinja2 import Environment, PackageLoader, StrictUndefined
 
 from secscope.core.models import SEVERITY_ORDER, Language
+from secscope.core.scoring import DISPLAYED_SUBSCORES
 from secscope.reporting.json_export import report_findings
 from secscope.ui.i18n import Translator
 
@@ -43,14 +45,22 @@ FILTER_SCRIPT = """
 GRADE_COLORS = {"A": "#2e7d32", "B": "#558b2f", "C": "#b7791f", "D": "#d1501f", "F": "#b3261e"}
 
 
+def _urlpath(url: str) -> str:
+    """Path and query of a target URL: its loopback origin is a throwaway port."""
+    parts = urlsplit(url)
+    return (parts.path or "/") + (f"?{parts.query}" if parts.query else "")
+
+
 def _env() -> Environment:
-    return Environment(
+    env = Environment(
         loader=PackageLoader("secscope.reporting", "templates"),
         autoescape=True,
         undefined=StrictUndefined,
         trim_blocks=True,
         lstrip_blocks=True,
     )
+    env.filters["urlpath"] = _urlpath
+    return env
 
 
 def script_hash(script: str = FILTER_SCRIPT) -> str:
@@ -87,6 +97,7 @@ def render_html(report: dict[str, Any], *, lang: Language | None = None) -> str:
             seo_plan=seo_plan,
             seo=report.get("seo"),
             scores=scores,
+            subscores=DISPLAYED_SUBSCORES,
             grade_color=GRADE_COLORS.get(str(scores["grade"]), "#5d6670"),
             script=FILTER_SCRIPT,
             script_hash=script_hash(),

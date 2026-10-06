@@ -25,3 +25,32 @@ class Translator:
     def __call__(self, key: str, **params: object) -> str:
         text = catalog(self.lang).get(key) or catalog("en").get(key) or key
         return text.format(**params) if params else text
+
+    def note(self, text: str) -> str:
+        """A module note in this language; unknown notes are shown as they are."""
+        key = f"note.{text}"
+        return self(key) if key in catalog(self.lang) or key in catalog("en") else text
+
+    def status(self, value: str) -> str:
+        return self(f"scan.status.{value}")
+
+    def profile(self, value: str) -> str:
+        return self(f"ui.profile.{value}")
+
+    def confidence(self, value: str) -> str:
+        return self(f"report.conf.{value}")
+
+    def tools(self, names: list[str]) -> str:
+        """Tool names for display: the built-in engines show as "SecScope"."""
+        shown = [self("report.tool.native") if n == "native" else n for n in names]
+        return ", ".join(dict.fromkeys(shown))
+
+    def module(self, module_id: str) -> str:
+        """A module's title in this language (falls back to the id)."""
+        from secscope.modules.registry import module_titles  # noqa: PLC0415 - avoid import cycle
+
+        title = module_titles().get(module_id)
+        if title is not None:
+            return title.get(self.lang)
+        key = f"module.{module_id}"  # pseudo-modules: prepare, cleanup
+        return self(key) if key in catalog("en") else module_id

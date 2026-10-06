@@ -8,7 +8,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 
 from PySide6.QtCore import QByteArray, QSettings, Qt
-from PySide6.QtGui import QCloseEvent
+from PySide6.QtGui import QCloseEvent, QGuiApplication
 from PySide6.QtWidgets import QHBoxLayout, QListWidget, QMainWindow, QStackedWidget, QWidget
 
 from secscope.__about__ import __app_id__, __app_name__
@@ -84,6 +84,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(root)
         self.resize(1280, 820)
         self._restore_geometry()
+        self._fit_to_screen()
         self.go("dashboard")
 
     # -------------------------------------------------------------- navigation
@@ -123,6 +124,20 @@ class MainWindow(QMainWindow):
         geometry = self._qsettings().value("window/geometry")
         if isinstance(geometry, QByteArray):
             self.restoreGeometry(geometry)
+
+    def _fit_to_screen(self) -> None:
+        """Keep the window inside the usable screen area (above the taskbar), e.g. on
+        1366x768 or 125 % scaled laptop screens, or after a monitor was unplugged."""
+        avail = (self.screen() or QGuiApplication.primaryScreen()).availableGeometry()
+        margin = self.frameGeometry().height() - self.geometry().height()
+        width = min(self.width(), avail.width() - 16)
+        height = min(self.height(), avail.height() - margin - 16)
+        self.resize(max(width, self.minimumWidth()), max(height, self.minimumHeight()))
+        frame = self.frameGeometry()
+        if not avail.contains(frame):
+            frame.moveCenter(avail.center())
+            frame.moveTop(max(avail.top(), frame.top()))
+            self.move(frame.topLeft())
 
     def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802 - Qt override
         self._qsettings().setValue("window/geometry", self.saveGeometry())

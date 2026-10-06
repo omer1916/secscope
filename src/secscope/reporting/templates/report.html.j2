@@ -46,10 +46,10 @@ ol.actions li{margin:6px 0}.muted{color:var(--muted)}a{color:var(--accent)}foote
   <div class="meta">
     <span>{{ t("report.target") }}: <b>{{ report.target.value }}</b></span>
     {% if report.stack %}<span>{{ t("report.stack") }}: {{ report.stack.name }}</span>{% endif %}
-    <span>{{ t("report.profile") }}: {{ report.profile }}</span>
+    <span>{{ t("report.profile") }}: {{ t.profile(report.profile) }}</span>
     <span>{{ t("report.duration") }}: {{ "%.1f"|format(report.duration_s) }} s</span>
     <span>{{ t("report.generated") }}: {{ report.generated_at[:19].replace("T", " ") }} UTC</span>
-    <span>{{ t("report.status") }}: {{ report.status }}</span>
+    <span>{{ t("report.status") }}: {{ t.status(report.status) }}</span>
   </div>
 </header>
 
@@ -62,11 +62,11 @@ ol.actions li{margin:6px 0}.muted{color:var(--muted)}a{color:var(--accent)}foote
     <circle cx="64" cy="64" r="54" fill="none" stroke="{{ grade_color }}" stroke-width="12" stroke-linecap="round"
             stroke-dasharray="{{ '%.1f'|format(339.3 * overall / 100) }} 339.3" transform="rotate(-90 64 64)"/>
     <text x="64" y="62" text-anchor="middle" font-size="30" fill="var(--fg)">{{ scores.grade }}</text>
-    <text x="64" y="86" text-anchor="middle" font-size="14" fill="var(--muted)">{{ overall }}</text>
+    <text x="64" y="86" text-anchor="middle" font-size="14" fill="var(--muted)">{{ scores.overall if scores.overall is not none else "–" }}</text>
   </svg>
   <div style="flex:1;min-width:260px">
     <div class="grid">
-    {% for key in ["security", "seo", "resilience", "quality", "dependencies"] %}
+    {% for key in subscores %}
       <div class="sub">
         <div class="lbl">{{ t("report.sub." ~ key) }}</div>
         {% if scores[key] is not none %}
@@ -127,7 +127,7 @@ ol.actions li{margin:6px 0}.muted{color:var(--muted)}a{color:var(--accent)}foote
 <h3>{{ t("report.seo.pages") }} ({{ seo.pages|length }})</h3>
 <div style="overflow-x:auto"><table>
 <thead><tr><th>URL</th><th class="num">HTTP</th><th>{{ t("report.col.title") }}</th><th class="num">{{ t("report.seo.words") }}</th><th>{{ t("report.seo.indexable") }}</th></tr></thead>
-<tbody>{% for p in seo.pages[:300] %}<tr><td class="loc">{{ p.url }}</td><td class="num">{{ p.status }}</td><td>{{ p.title or "–" }}</td><td class="num">{{ p.words }}</td><td>{{ "✓" if p.indexable else "✗" }}</td></tr>{% endfor %}</tbody>
+<tbody>{% for p in seo.pages[:300] %}<tr><td class="loc">{{ p.url|urlpath }}</td><td class="num">{{ p.status }}</td><td>{{ p.title or "–" }}</td><td class="num">{{ p.words }}</td><td>{{ "✓" if p.indexable else "✗" }}</td></tr>{% endfor %}</tbody>
 </table></div>
 {% endif %}
 </section>
@@ -139,16 +139,16 @@ ol.actions li{margin:6px 0}.muted{color:var(--muted)}a{color:var(--accent)}foote
 <div class="filters" role="search">
   <input type="search" id="q" placeholder="{{ t('report.filter.search') }}" aria-label="{{ t('report.filter.search') }}">
   <select id="mod" aria-label="{{ t('report.filter.all_modules') }}"><option value="">{{ t("report.filter.all_modules") }}</option>
-    {% for m in modules_with_findings %}<option value="{{ m }}">{{ m }}</option>{% endfor %}</select>
+    {% for m in modules_with_findings %}<option value="{{ m }}">{{ t.module(m) }}</option>{% endfor %}</select>
   {% for s, n in sev_counts %}{% if n %}<label><input type="checkbox" class="sev" value="{{ s }}" checked> {{ t("report.sev." ~ s) }} ({{ n }})</label>{% endif %}{% endfor %}
 </div>
 {% for f in findings %}
-<details class="finding" data-sev="{{ f.severity }}" data-mod="{{ f.module }}" data-q="{{ (f.rule_id ~ ' ' ~ f.title.get(lang) ~ ' ' ~ f.location.display())|lower }}">
+<details class="finding" data-sev="{{ f.severity }}" data-mod="{{ f.module }}" data-q="{{ (f.rule_id ~ ' ' ~ f.title.get(lang) ~ ' ' ~ f.location.short())|lower }}">
   <summary><span class="badge sev-{{ f.severity }}">{{ t("report.sev." ~ f.severity) }}</span>
     <b>{{ f.title.get(lang) }}</b> <span class="rule">{{ f.rule_id }}</span>
-    <span class="loc">{{ f.location.display() }}</span></summary>
+    <span class="loc">{{ f.location.short() }}</span></summary>
   <div class="body">
-    <p class="meta"><span>{{ t("report.col.confidence") }}: {{ f.confidence }}</span><span>{{ t("report.col.tools") }}: {{ f.source_tools|join(", ") }}</span>
+    <p class="meta"><span>{{ t("report.col.confidence") }}: {{ t.confidence(f.confidence) }}</span><span>{{ t("report.col.tools") }}: {{ t.tools(f.source_tools) }}</span>
       <span>{{ t("report.effort") }}: {{ f.effort }}</span>{% if f.cwe %}<span>{% for c in f.cwe %}CWE-{{ c }} {% endfor %}</span>{% endif %}{% if f.owasp %}<span>{{ f.owasp|join(", ") }}</span>{% endif %}</p>
     {% if f.description %}<h3>{{ t("report.detail.description") }}</h3><p>{{ f.description.get(lang) }}</p>{% endif %}
     {% if f.impact %}<h3>{{ t("report.detail.impact") }}</h3><p>{{ f.impact.get(lang) }}</p>{% endif %}
@@ -192,11 +192,11 @@ ol.actions li{margin:6px 0}.muted{color:var(--muted)}a{color:var(--accent)}foote
 <h3>{{ t("report.meta.modules") }}</h3>
 <table><tbody>
 {% for name, info in report.modules.items() %}
-<tr><td class="rule">{{ name }}</td><td>{{ t("report.module." ~ info.status) }}</td><td class="num">{{ "%.1f"|format(info.duration_s or 0) }} s</td>
+<tr><td>{{ t.module(name) }}</td><td>{{ t("report.module." ~ info.status) }}</td><td class="num">{{ "%.1f"|format(info.duration_s or 0) }} s</td>
 <td>{% if info.reason %}{{ info.reason[lang] }}{% endif %}{% if info.install_hint %}<br><span class="muted">{{ info.install_hint[lang] }}</span>{% endif %}</td></tr>
 {% endfor %}
 </tbody></table>
-{% if report.notes %}<h3>{{ t("report.meta.notes") }}</h3><ul>{% for m, notes in report.notes.items() %}{% for n in notes %}<li><span class="rule">{{ m }}</span> {{ n }}</li>{% endfor %}{% endfor %}</ul>{% endif %}
+{% if report.notes %}<h3>{{ t("report.meta.notes") }}</h3><ul>{% for m, notes in report.notes.items() %}{% for n in notes %}<li><b>{{ t.module(m) }}</b>: {{ t.note(n) }}</li>{% endfor %}{% endfor %}</ul>{% endif %}
 {% if report.tool_versions %}<h3>{{ t("report.meta.tools") }}</h3><p class="meta">{% for name, v in report.tool_versions.items() %}<span>{{ name }} {{ v }}</span>{% endfor %}<span>{{ report.tool.name }} {{ report.tool.version }}</span></p>{% endif %}
 {% if report.advisory_db %}<p class="meta">{{ t("report.meta.advisory_db") }}: {% for k, v in report.advisory_db.items() %}<span>{{ k.replace("_db_updated", "") }} {{ (v or "")[:10] }}</span>{% endfor %}</p>{% endif %}
 {% if report.sbom_path %}<p class="meta">{{ t("report.meta.sbom") }}: <span class="loc">{{ report.sbom_path }}</span></p>{% endif %}

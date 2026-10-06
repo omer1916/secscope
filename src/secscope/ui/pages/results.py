@@ -28,16 +28,25 @@ from PySide6.QtWidgets import (
 )
 
 from secscope.core.models import SEVERITY_ORDER, Finding
+from secscope.core.scoring import DISPLAYED_SUBSCORES
 from secscope.reporting.json_export import report_findings
 from secscope.reporting.writer import ReportFormatError, write_outputs
 from secscope.ui.state import AppState
 from secscope.ui.theme import SEVERITY_COLORS
 from secscope.ui.widgets import FindingsFilter, FindingsModel, ScoreRing, label
 
-SUB_SCORES = ("security", "seo", "resilience", "quality", "dependencies")
+SUB_SCORES = DISPLAYED_SUBSCORES
 
 
-def finding_html(f: Finding, t: Any) -> str:
+def _code(text: str, background: str) -> str:
+    # A one-cell table is the reliable way to give a block a background in Qt rich text.
+    return (
+        f"<table width='100%' cellpadding='6' bgcolor='{background}'><tr><td>"
+        f"<pre style='font-family: Consolas, monospace'>{html.escape(text)}</pre></td></tr></table>"
+    )
+
+
+def finding_html(f: Finding, t: Any, code_background: str = "#eef1f5") -> str:
     """Detail panel HTML. Every value is escaped: findings carry text from the target."""
     e = html.escape
     lang = t.lang
@@ -45,8 +54,8 @@ def finding_html(f: Finding, t: Any) -> str:
     parts = [
         f"<h2>{e(f.title.get(lang))}</h2>",
         f"<p><b style='color:{color}'>{e(t(f'report.sev.{f.severity}'))}</b> · <code>{e(f.rule_id)}</code> · "
-        f"{e(t('report.col.confidence'))}: {e(f.confidence)} · {e(t('report.col.tools'))}: {e(', '.join(f.source_tools))}</p>",
-        f"<p><code>{e(f.location.display())}</code></p>",
+        f"{e(t('report.col.confidence'))}: {e(t.confidence(f.confidence))} · {e(t('report.col.tools'))}: {e(t.tools(f.source_tools))}</p>",
+        f"<p><code>{e(f.location.short())}</code></p>",
     ]
     if f.description:
         parts.append(
@@ -55,7 +64,9 @@ def finding_html(f: Finding, t: Any) -> str:
     if f.impact:
         parts.append(f"<h3>{e(t('report.detail.impact'))}</h3><p>{e(f.impact.get(lang))}</p>")
     if f.evidence.snippet:
-        parts.append(f"<h3>{e(t('report.detail.evidence'))}</h3><pre>{e(f.evidence.snippet)}</pre>")
+        parts.append(
+            f"<h3>{e(t('report.detail.evidence'))}</h3>{_code(f.evidence.snippet, code_background)}"
+        )
     if f.evidence.extra:
         rows = "".join(
             f"<tr><th align=left>{e(k)}</th><td>{e(v)}</td></tr>"
@@ -66,7 +77,7 @@ def finding_html(f: Finding, t: Any) -> str:
         steps = "".join(f"<li>{e(s)}</li>" for s in f.remediation.steps.get(lang))
         parts.append(f"<h3>{e(t('report.detail.fix'))}</h3><ol>{steps}</ol>")
         for stack, snippet in list(f.remediation.snippets.items())[:3]:
-            parts.append(f"<p><b>{e(stack)}</b></p><pre>{e(snippet.code)}</pre>")
+            parts.append(f"<p><b>{e(stack)}</b></p>{_code(snippet.code, code_background)}")
     if f.references:
         refs = "".join(
             f"<li><a href='{e(r.href)}'>{e(r.title or r.href)}</a></li>"
@@ -94,9 +105,12 @@ class ResultsPage(QWidget):
             ring = ScoreRing(t("report.overall") if key == "overall" else t(f"report.sub.{key}"))
             self.rings[key] = ring
             box.addWidget(ring)
-            box.addWidget(
-                label(t("report.overall") if key == "overall" else t(f"report.sub.{key}"), "muted")
+            caption = label(
+                t("report.overall") if key == "overall" else t(f"report.sub.{key}"), "muted"
             )
+            if key == "overall":
+                self.overall_label = caption
+            box.addWidget(caption)
             rings.addLayout(box)
         rings.addStretch(1)
 
@@ -201,7 +215,12 @@ class ResultsPage(QWidget):
         self.heading.setText(
             t("ui.results.heading", target=report["target"]["value"], count=len(findings))
         )
-        self.rings["overall"].set_score(scores.get("overall"), scores.get("grade"))
+        self.rings["overall"].set_score(scores.get("overall"))
+        grade = scores.get("grade")
+        self.overall_label.setText(
+            t("report.overall")
+            + (f" · {t('ui.dashboard.grade', grade=grade)}" if grade and grade != "–" else "")
+        )
         for key in SUB_SCORES:
             self.rings[key].set_score(scores.get(key))
         self._fill_tree(findings)
@@ -225,7 +244,7 @@ class ResultsPage(QWidget):
             item = QTreeWidgetItem([f"{t(f'ui.category.{cat}')} ({sum(modules.values())})"])
             item.setData(0, Qt.ItemDataRole.UserRole, cat)
             for module, n in sorted(modules.items()):
-                child = QTreeWidgetItem([f"{module} ({n})"])
+                child = QTreeWidgetItem([f"{t.module(module)} ({n})"])
                 child.setData(0, Qt.ItemDataRole.UserRole, module)
                 item.addChild(child)
             root.addChild(item)
@@ -248,7 +267,8 @@ class ResultsPage(QWidget):
         if not current.isValid():
             return
         f = self.model.finding(self.proxy.mapToSource(current).row())
-        self.detail.setHtml(finding_html(f, self.state.t))
+        background = self.detail.palette().alternateBase().color().name()
+        self.detail.setHtml(finding_html(f, self.state.t, background))
 
     def copy_fix(self) -> None:
         chosen = self.selected()

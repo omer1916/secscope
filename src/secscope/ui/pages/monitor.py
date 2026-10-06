@@ -173,7 +173,7 @@ class MonitorPage(QWidget):
         if module not in self._rows:
             row = self.modules.rowCount()
             self.modules.insertRow(row)
-            for col, text in enumerate((module, "", "0", "")):
+            for col, text in enumerate((self.state.t.module(module), "", "0", "")):
                 self.modules.setItem(row, col, QTableWidgetItem(text))
             self._rows[module] = row
         return self._rows[module]
@@ -211,7 +211,7 @@ class MonitorPage(QWidget):
                 self.breaker.setText(describe(event, t) or "")
             case ScanFinished():
                 self._status = event.status
-                self.heading.setText(t("status.finished", status=event.status))
+                self.heading.setText(t("status.finished", status=t.status(event.status)))
             case ModuleLog() | ErrorEvent():
                 pass
             case _:

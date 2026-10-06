@@ -140,11 +140,11 @@ class FindingsModel(QAbstractTableModel):
                 case "title":
                     return f.title.get(self._t.lang)
                 case "location":
-                    return f.location.display()
+                    return f.location.short()
                 case "confidence":
-                    return f.confidence
+                    return self._t.confidence(f.confidence)
                 case _:
-                    return ", ".join(f.source_tools)
+                    return self._t.tools(f.source_tools)
         if role == Qt.ItemDataRole.ForegroundRole and col == "severity":
             return QColor(SEVERITY_COLORS[f.severity])
         if role == Qt.ItemDataRole.UserRole:  # sort key
@@ -185,7 +185,7 @@ class FindingsFilter(QSortFilterProxyModel):
             return False
         if self._text:
             haystack = (
-                f"{f.rule_id} {f.title.tr} {f.title.en} {f.location.display()} {f.module}".lower()
+                f"{f.rule_id} {f.title.tr} {f.title.en} {f.location.short()} {f.module}".lower()
             )
             return self._text in haystack
         return True

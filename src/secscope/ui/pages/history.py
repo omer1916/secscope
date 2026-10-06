@@ -73,7 +73,7 @@ class HistoryPage(QWidget):
             values = (
                 r.created_at[:19].replace("T", " "),
                 r.target,
-                r.status,
+                self.state.t(f"scan.status.{r.status}"),
                 "" if r.overall is None else f"{r.overall:.1f}",
                 r.grade or "",
             )

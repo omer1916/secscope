@@ -100,17 +100,20 @@ def build_parser() -> argparse.ArgumentParser:
     report.add_argument("--format", default="html", help="comma-separated: html,json,sarif,csv,pdf")
     report.add_argument("--out", type=Path, default=Path("reports"))
     report.add_argument("--lang", choices=["tr", "en"])
+    report.add_argument("--data-dir", type=Path, help="data directory the scan was stored in")
 
     diff = sub.add_parser("diff", help="compare two scans (new / fixed / persistent / regressed)")
     diff.add_argument("before", help="scan id or report.json path")
     diff.add_argument("after", help="scan id or report.json path")
     diff.add_argument("--json", action="store_true", help="machine-readable output")
+    diff.add_argument("--data-dir", type=Path, help="data directory the scans were stored in")
 
     suppress = sub.add_parser("suppress", help="mark a finding or a whole rule as a false positive")
     target_group = suppress.add_mutually_exclusive_group(required=True)
     target_group.add_argument("--finding", help="finding id")
     target_group.add_argument("--rule", help="rule id, e.g. SEO-OG-001")
     suppress.add_argument("--reason", required=True, help="why this is not a real problem")
+    suppress.add_argument("--data-dir", type=Path, help="override the data directory")
 
     schema = sub.add_parser("schema", help="print the JSON schema of a data model")
     schema.add_argument("kind", choices=SCHEMA_KINDS)
@@ -268,9 +271,15 @@ def _cmd_scan(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
 
     scores = outcome.scores
     if scores:
+
+        def show(key: str) -> str:
+            value = scores.get(key)
+            return "–" if value is None else str(value)  # "–" = not measured
+
         err.write(
-            f"[score] overall {scores['overall']} ({scores['grade']}) | security {scores['security']}"
-            f" | dependencies {scores['dependencies']} | quality {scores['quality']}\n"
+            f"[score] overall {show('overall')} ({scores['grade']}) | security {show('security')}"
+            f" | seo {show('seo')} | dependencies {show('dependencies')}"
+            f" | quality {show('quality')}\n"
         )
     for module_id, notes in outcome.notes.items():
         for note in notes:
@@ -294,21 +303,26 @@ def _cmd_scan(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
     return EXIT_OK
 
 
-def _report_path(ref: str) -> Path:
+def _data_dir(override: Path | None) -> Path:
     from secscope.core.config import Settings  # noqa: PLC0415
+
+    return override if override is not None else Settings.load().data_dir
+
+
+def _report_path(ref: str, data_dir: Path | None = None) -> Path:
     from secscope.reporting.json_export import REPORT_FILE  # noqa: PLC0415
 
     direct = Path(ref)
     if direct.is_file():
         return direct
-    return Settings.load().data_dir / "scans" / ref / REPORT_FILE
+    return _data_dir(data_dir) / "scans" / ref / REPORT_FILE
 
 
 def _cmd_report(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
     from secscope.reporting.json_export import load_report  # noqa: PLC0415
     from secscope.reporting.writer import ReportFormatError, write_outputs  # noqa: PLC0415
 
-    path = _report_path(args.scan_id)
+    path = _report_path(args.scan_id, args.data_dir)
     if not path.is_file():
         err.write(f"error: no stored report for {args.scan_id} ({path})\n")
         return EXIT_USAGE
@@ -327,7 +341,7 @@ def _cmd_diff(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
     from secscope.reporting.diff import diff_reports  # noqa: PLC0415
     from secscope.reporting.json_export import load_report  # noqa: PLC0415
 
-    paths = [_report_path(args.before), _report_path(args.after)]
+    paths = [_report_path(args.before, args.data_dir), _report_path(args.after, args.data_dir)]
     missing = [str(p) for p in paths if not p.is_file()]
     if missing:
         err.write(f"error: report not found: {', '.join(missing)}\n")
@@ -372,7 +386,10 @@ def _cmd_suppress(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
     if not args.reason.strip():
         err.write("error: a reason is required\n")
         return EXIT_USAGE
-    conn = db.connect(database_path(Settings.load()))
+    settings = Settings.load()
+    if args.data_dir is not None:
+        settings = settings.model_copy(update={"data_dir": args.data_dir})
+    conn = db.connect(database_path(settings))
     try:
         ScanRepository(conn).add_suppression(
             args.reason, finding_id=args.finding, rule_id=args.rule

@@ -24,10 +24,11 @@ from PySide6.QtWidgets import (
 from secscope.core.advisories import osv_status, trivy_status, update_databases
 from secscope.core.config import RateLimits, ScoreWeights, Settings, Slo
 from secscope.core.downloader import install_tool
+from secscope.core.scoring import DISPLAYED_SUBSCORES
 from secscope.ui.state import AppState
 from secscope.ui.widgets import label, run_in_background
 
-WEIGHT_KEYS = ("security", "seo", "resilience", "quality", "dependencies")
+WEIGHT_KEYS = ("security", "seo", "resilience", "quality", "dependencies")  # all of ScoreWeights
 
 
 class SettingsPage(QWidget):
@@ -68,7 +69,10 @@ class SettingsPage(QWidget):
         limits.addRow(t("ui.settings.error_rate"), self.err_rate)
         weights = QFormLayout()
         for key, spin in self.weights.items():
-            weights.addRow(t(f"report.sub.{key}"), spin)
+            name = t(f"report.sub.{key}")
+            if key not in DISPLAYED_SUBSCORES:  # its weight is redistributed (ADR-009)
+                name = t("ui.settings.weights.unmeasured", name=name)
+            weights.addRow(name, spin)
         weights.addRow(reset)
 
         self.tools = QTableWidget(0, 4)
