@@ -17,6 +17,7 @@ from dataclasses import dataclass
 
 from secscope.analysis.regex_rules import suppressed
 from secscope.analysis.source import SourceFile
+from secscope.core.coverage import background_reason
 from secscope.core.models import Confidence, Severity
 
 
@@ -28,6 +29,8 @@ class SecretHit:
     column: int
     confidence: Confidence
     severity: Severity | None = None
+    # The value is a documented example or fake key (it says "EXAMPLE", "dummy", "fake"...).
+    example: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -138,6 +141,8 @@ _PLACEHOLDER = re.compile(
     r"\w+\(.*|[a-z_]+\.[a-z_]+.*|.*_here)$"
 )
 _IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_.]*$")
+# Markers of documentation / test keys inside an otherwise key-shaped value.
+_EXAMPLE_VALUE = re.compile(r"(?i)example|dummy|fake|sample|placeholder|not[-_]?real|x{6,}|0{10,}")
 _ENV_EXAMPLE = re.compile(r"(?i)\.(?:example|sample|template|dist|defaults?)$")
 _TEST_PATH = re.compile(
     r"(?i)(?:^|/)(?:tests?|__tests__|spec|specs|docs?|examples?|samples?|mocks?)/"
@@ -159,8 +164,20 @@ def is_env_file(rel: str) -> bool:
     ) and not _ENV_EXAMPLE.search(name)
 
 
+def _example(
+    value: str, test_like: bool, confidence: Confidence, severity: Severity | None
+) -> tuple[Confidence, Severity | None, bool]:
+    """Example keys in tests/docs are information; elsewhere they stay visible as low
+    severity, low confidence (someone may have replaced only part of a real key).
+    Real-looking keys keep their severity even in fixtures: a committed live key is a leak
+    wherever it sits."""
+    if not _EXAMPLE_VALUE.search(value):
+        return confidence, severity, False
+    return "low", ("info" if test_like else "low"), True
+
+
 def scan_secrets(file: SourceFile) -> Iterator[SecretHit]:
-    test_like = bool(_TEST_PATH.search(file.rel))
+    test_like = bool(_TEST_PATH.search(file.rel)) or background_reason(file.rel) is not None
     base_conf: Confidence = "medium" if test_like else "high"
     seen_lines: set[int] = set()
     for det in DETECTORS:
@@ -174,13 +191,15 @@ def scan_secrets(file: SourceFile) -> Iterator[SecretHit]:
             if det.rule_id == "SECRET-DBURL-001" and _PLACEHOLDER.match(value):
                 continue
             seen_lines.add(line)
+            conf, sev, example = _example(value, test_like, base_conf, det.severity)
             yield SecretHit(
                 det.rule_id,
                 det.kind,
                 line,
                 m.start() - file.text.rfind("\n", 0, m.start()),
-                base_conf,
-                det.severity,
+                conf,
+                sev,
+                example,
             )
     for m in _GENERIC.finditer(file.text):
         line = file.line_of(m.start())
@@ -202,10 +221,13 @@ def scan_secrets(file: SourceFile) -> Iterator[SecretHit]:
             continue
         seen_lines.add(line)
         conf: Confidence = "low" if test_like else ("high" if entropy >= 4.0 else "medium")
+        conf, sev, example = _example(value, test_like, conf, None)
         yield SecretHit(
             "SECRET-GENERIC-001",
             f"secret-like value in '{m.group('name')}'",
             line,
             m.start("value") - file.text.rfind("\n", 0, m.start()),
             conf,
+            sev,
+            example,
         )

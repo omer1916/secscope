@@ -40,7 +40,8 @@ def native_secret_findings(root: Path, kb: KnowledgeBase, stack: str | None) -> 
             findings.append(
                 code_finding(kb, hit.rule_id, module="secrets", path=file.rel, line=hit.line, column=hit.column,
                              snippet=file.line_text(hit.line).strip(), confidence=hit.confidence,
-                             severity=hit.severity, stack=stack, extra={"kind": hit.kind})
+                             severity=hit.severity, stack=stack,
+                             extra={"kind": hit.kind, **({"example_value": "yes"} if hit.example else {})})
             )  # fmt: skip
     for path in iter_source_files(root):
         rel = path.relative_to(root).as_posix()
