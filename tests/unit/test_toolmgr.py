@@ -36,7 +36,9 @@ def runner(output: str) -> VersionRunner:
 
 def test_real_manifest_loads() -> None:
     m = Manifest.load()
-    assert {"java", "node", "semgrep"} <= set(m.tools)
+    assert {"node", "semgrep", "gitleaks"} <= set(m.tools)
+    # Only tools a module of this build uses are offered (ADR-009).
+    assert not {"java", "nuclei"} & set(m.tools)
     for spec in m.tools.values():
         assert spec.install_hint.tr
         assert spec.install_hint.en

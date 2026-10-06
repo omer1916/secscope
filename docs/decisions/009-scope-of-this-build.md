@@ -18,5 +18,5 @@ It intentionally does **not** include:
 - **Lab Core Web Vitals** (needs the browser module; ADR-007).
 
 These were decided during development and are recorded here so that documentation, the
-threat model and the UI do not promise them. Nuclei is still listed in the tool manifest but no
-module uses it.
+threat model and the UI do not promise them. Tools only those parts would need (Java for ZAP,
+Nuclei) are not in the tool manifest, so the Tool Manager does not offer them.

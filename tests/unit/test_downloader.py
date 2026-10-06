@@ -168,4 +168,4 @@ def test_install_tool_end_to_end(tmp_path: Path) -> None:
 def test_install_without_pinned_download(tmp_path: Path) -> None:
     mgr = ToolManager(Manifest.load(), tmp_path)
     with pytest.raises(DownloadError, match="no pinned download"):
-        install_tool(mgr, "java")
+        install_tool(mgr, "node")

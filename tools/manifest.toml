@@ -1,7 +1,7 @@
 # External tools SecScope can use (SPEC §2, §13).
 #
 # kind:            "binary" (downloadable, pinned by version + SHA-256), "pip" (Python
-#                  package in our env or on PATH), "system" (user installs: Java, Node, Docker)
+#                  package in our env or on PATH), "system" (user installs: Node, Docker, PHP)
 # commands:        executable names to look for, in order
 # version_args:    arguments that print the version; output is matched with version_regex
 # min_version:     oldest version we have verified against (docs/tool-notes/<tool>.md)
@@ -12,15 +12,6 @@ schema = 1
 
 [download_hosts]
 allowed = ["github.com", "objects.githubusercontent.com", "release-assets.githubusercontent.com"]
-
-[tools.java]
-kind = "system"
-commands = ["java"]
-version_args = ["-version"]
-version_regex = 'version "(\d+(?:\.\d+)*)'
-min_version = "17"
-homepage = "https://adoptium.net/"
-install_hint = { tr = "Java 17+ kurun (ör. Eclipse Temurin: https://adoptium.net/). OWASP ZAP için gereklidir.", en = "Install Java 17+ (e.g. Eclipse Temurin: https://adoptium.net/). Required by OWASP ZAP." }
 
 [tools.node]
 kind = "system"
@@ -214,42 +205,3 @@ sha256 = "98c460dcd37de25819babd757d04542045b6243113e209edcd4d89fedb0256b4"
 archive = "none"
 binary = "osv-scanner"
 
-[tools.nuclei]
-kind = "binary"
-version = "3.11.1"
-commands = ["nuclei"]
-version_args = ["-version"]
-version_regex = 'Version: v?(\d+\.\d+\.\d+)'
-min_version = "3.0.0"
-homepage = "https://github.com/projectdiscovery/nuclei"
-install_hint = { tr = "Şablon tabanlı DAST için Nuclei'yi kurun: 'secscope tools install nuclei'.", en = "Install Nuclei for template-based DAST: 'secscope tools install nuclei'." }
-
-[tools.nuclei.downloads."windows-amd64"]
-url = "https://github.com/projectdiscovery/nuclei/releases/download/v3.11.1/nuclei_3.11.1_windows_amd64.zip"
-sha256 = "bb6cb9ff8939b753f6fcab06fd30a15f5bc61d8382a597871334c007a85ff9d2"
-archive = "zip"
-binary = "nuclei.exe"
-
-[tools.nuclei.downloads."linux-amd64"]
-url = "https://github.com/projectdiscovery/nuclei/releases/download/v3.11.1/nuclei_3.11.1_linux_amd64.zip"
-sha256 = "ea63d4ae232808cd7c6bc00d0142428e231fab59dae01042246097d195835ab6"
-archive = "zip"
-binary = "nuclei"
-
-[tools.nuclei.downloads."linux-arm64"]
-url = "https://github.com/projectdiscovery/nuclei/releases/download/v3.11.1/nuclei_3.11.1_linux_arm64.zip"
-sha256 = "8044e3d9768ba0a744b2872c1a87e813006f013da97ca9f50f7661a4203bec07"
-archive = "zip"
-binary = "nuclei"
-
-[tools.nuclei.downloads."darwin-amd64"]
-url = "https://github.com/projectdiscovery/nuclei/releases/download/v3.11.1/nuclei_3.11.1_macOS_amd64.zip"
-sha256 = "75c47ce11e9dbd4288a1c895ed85e3c4df9f4acb8237d6d178da6dccd1628f2a"
-archive = "zip"
-binary = "nuclei"
-
-[tools.nuclei.downloads."darwin-arm64"]
-url = "https://github.com/projectdiscovery/nuclei/releases/download/v3.11.1/nuclei_3.11.1_macOS_arm64.zip"
-sha256 = "7d7e291addd1fc29a9bf8d089afe878a9799b20229cbea2fb1693fc40fd4c5f0"
-archive = "zip"
-binary = "nuclei"
