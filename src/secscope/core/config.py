@@ -5,6 +5,7 @@ from __future__ import annotations
 import ipaddress
 import json
 import os
+import re
 import tempfile
 from enum import StrEnum
 from pathlib import Path
@@ -158,6 +159,9 @@ class RunConfig(_Model):
     startup_timeout_s: float = Field(default=60, gt=0, le=600)
 
 
+_GIT_REF = re.compile(r"^(?!-)[A-Za-z0-9._/~^@{}-]{1,200}$")
+
+
 class ScanConfig(_Model):
     """Everything a single scan needs; produced by the wizard or the CLI."""
 
@@ -171,3 +175,24 @@ class ScanConfig(_Model):
     # https://www.example.com — used by SEO checks and generated files. Never contacted.
     public_url: str | None = None
     snapshot_sqlite: bool = True
+    # Paths left out of the scan entirely (gitignore-like globs: "tests", "docs/*.md",
+    # "legacy/"). Excluded files are not copied, analysed or run; the report lists them.
+    exclude: list[str] = Field(default_factory=list[str])
+    # Only report code findings in files changed since this git reference (CI, PR reviews).
+    changed_since: str | None = None
+
+    @field_validator("changed_since")
+    @classmethod
+    def _git_ref(cls, v: str | None) -> str | None:
+        if v is not None and not _GIT_REF.match(v):
+            raise ValueError(f"not a valid git reference: {v!r}")
+        return v
+
+    @field_validator("exclude")
+    @classmethod
+    def _globs(cls, v: list[str]) -> list[str]:
+        cleaned = [p.strip() for p in v if p.strip()]
+        for p in cleaned:
+            if ".." in p.replace("\\", "/").split("/") or len(p) > 300:
+                raise ValueError(f"invalid exclusion pattern: {p!r}")
+        return cleaned

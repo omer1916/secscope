@@ -167,6 +167,25 @@
       "default": true,
       "title": "Snapshot Sqlite",
       "type": "boolean"
+    },
+    "exclude": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Exclude",
+      "type": "array"
+    },
+    "changed_since": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Changed Since"
     }
   },
   "required": [

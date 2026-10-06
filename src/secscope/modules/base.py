@@ -122,6 +122,11 @@ class ScanContext:
     runner: SandboxRunner | None = None
     # Results of modules that ran earlier, keyed by module id.
     results: dict[str, ModuleResult] = field(default_factory=dict[str, ModuleResult])
+    # What was scanned and what was set aside (secscope.core.coverage), git revision, and
+    # the files changed since config.changed_since (None = report everything).
+    coverage: dict[str, Any] = field(default_factory=dict[str, Any])
+    revision: dict[str, Any] | None = None
+    changed_files: set[str] | None = None
     # Called by modules that start the target, so "kill_target" can reach it.
     on_kill_target: list[Callable[[], Any]] = field(default_factory=list[Callable[[], Any]])
 

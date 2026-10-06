@@ -44,7 +44,15 @@ def write_outputs(
     unknown = set(formats) - set(FORMATS)
     if unknown:
         raise ReportFormatError(f"unknown format(s): {', '.join(sorted(unknown))}")
+    created = not out_dir.exists()
     out_dir.mkdir(parents=True, exist_ok=True)
+    if created:
+        # Only in a folder we created: reports quote code and must not be committed by a
+        # stray `git add .`. An existing folder (maybe the project itself) is left alone.
+        (out_dir / ".gitignore").write_text(
+            "# Created by SecScope: reports are not meant to be committed.\n*\n",
+            encoding="utf-8",
+        )
     base = out_dir / f"secscope-{report['scan_id']}"
     language: Language = lang or report.get("language") or "tr"  # type: ignore[assignment]
     written: dict[str, Path] = {}

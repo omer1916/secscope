@@ -75,6 +75,18 @@ def build_parser() -> argparse.ArgumentParser:
     )
     scan.add_argument("--data-dir", type=Path, help="override the data directory")
     scan.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        metavar="GLOB",
+        help="leave paths out of the scan (repeatable): tests, 'docs/*.md', legacy/",
+    )
+    scan.add_argument(
+        "--changed-since",
+        metavar="GIT_REF",
+        help="only report code findings in files changed since this git ref (e.g. origin/main)",
+    )
+    scan.add_argument(
         "--public-url", help="production address of the site (SEO), e.g. https://example.com"
     )
     scan.add_argument(
@@ -242,6 +254,8 @@ def _cmd_scan(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
         ),
         scope_statement_accepted=args.accept_scope_statement,
         public_url=args.public_url,
+        exclude=args.exclude,
+        changed_since=args.changed_since,
     )
     registry = load_builtin()
     module_ids = config.modules or registry.for_profile(config.profile)
@@ -251,6 +265,10 @@ def _cmd_scan(args: argparse.Namespace, out: TextIO, err: TextIO) -> int:
         session = open_session(config, settings)
     except (KeyError, InvalidTargetError) as exc:
         err.write(f"error: {exc}\n")
+        return EXIT_USAGE
+    if config.changed_since and target.kind != TargetKind.FOLDER:
+        err.write("error: --changed-since needs --path (a git work tree)\n")
+        session.close()
         return EXIT_USAGE
 
     reporter = ConsoleReporter(err, settings.language)

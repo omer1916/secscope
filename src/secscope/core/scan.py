@@ -11,14 +11,55 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from secscope.core.config import TargetKind
+from secscope.core.coverage import background_reason, build_coverage
 from secscope.core.dedup import deduplicate
 from secscope.core.fingerprint import fingerprint
+from secscope.core.gitinfo import changed_files, revision
 from secscope.core.intake import make_run_copy, prepare_source
+from secscope.core.models import CodeLocation, Finding
 from secscope.core.orchestrator import Orchestrator, ScanOutcome
 from secscope.core.sandbox import SandboxRunner, TargetStartError
 from secscope.core.scoring import compute_scores
 from secscope.core.snapshot import Snapshot
 from secscope.modules.base import Emitter, ScanContext
+
+
+def background_code(findings: Sequence[Finding]) -> list[Finding]:
+    """Code findings in tests, fixtures, examples or generated files are shown as "info"
+    (visible, not scored): they are not the application. Secrets are never demoted: a real
+    key committed in a fixture is still a leaked key."""
+    out: list[Finding] = []
+    for f in findings:
+        reason = (
+            background_reason(f.location.path)
+            if isinstance(f.location, CodeLocation) and f.module == "sast"
+            else None
+        )
+        if reason is None or f.severity == "info":
+            out.append(f)
+            continue
+        extra = {**f.evidence.extra, "background": reason, "original_severity": f.severity}
+        out.append(
+            f.model_copy(
+                update={
+                    "severity": "info",
+                    "evidence": f.evidence.model_copy(update={"extra": extra}),
+                }
+            )
+        )
+    return out
+
+
+def only_changed(findings: Sequence[Finding], changed: set[str] | None) -> list[Finding]:
+    """``--changed-since``: keep code findings in changed files (plus every non-code
+    finding, e.g. SEO or HTTP checks, which have no file)."""
+    if changed is None:
+        return list(findings)
+    return [
+        f
+        for f in findings
+        if not isinstance(f.location, CodeLocation) or f.location.path in changed
+    ]
 
 
 def _needs_target(orchestrator: Orchestrator, ctx: ScanContext, module_ids: Sequence[str]) -> bool:
@@ -105,9 +146,28 @@ async def run_scan(
         kind = ctx.config.target.kind
         if kind in (TargetKind.FOLDER, TargetKind.ARCHIVE):
             emit.progress(5, "copying project")
-            report = prepare_source(Path(ctx.config.target.value), ctx.work_dir)
+            original = Path(ctx.config.target.value)
+            report = prepare_source(original, ctx.work_dir, exclude=ctx.config.exclude)
             ctx.source_dir = report.root
             emit.log(f"project copied: {report.files} files, {report.bytes / 1e6:.1f} MB")
+            if report.excluded:
+                emit.log(f"{len(report.excluded)} path(s) excluded by request")
+            ctx.coverage = build_coverage(
+                report.root,
+                files=report.files,
+                total_bytes=report.bytes,
+                excluded=report.excluded,
+                exclude_patterns=ctx.config.exclude,
+                skipped_links=report.skipped_links,
+            )
+            if kind == TargetKind.FOLDER:
+                rev = await revision(original)
+                ctx.revision = rev.as_dict() if rev else None
+                if ctx.config.changed_since:
+                    ctx.changed_files = await changed_files(original, ctx.config.changed_since)
+                    emit.log(
+                        f"{len(ctx.changed_files)} file(s) changed since {ctx.config.changed_since}"
+                    )
             if report.skipped_links:
                 emit.log(f"{len(report.skipped_links)} symbolic link(s) skipped", "warning")
             fp = fingerprint(report.root)
@@ -132,7 +192,9 @@ async def run_scan(
             emit.log(f"restored {len(restored)} SQLite database(s)")
 
     outcome = await orchestrator.run(ctx, module_ids, setup=prepare, teardown=cleanup)
-    outcome.findings = deduplicate(outcome.findings)
+    outcome.findings = deduplicate(
+        only_changed(background_code(outcome.findings), ctx.changed_files)
+    )
     outcome.notes = {mid: list(res.notes) for mid, res in ctx.results.items() if res.notes}
     score_outcome(ctx, outcome)
     return outcome

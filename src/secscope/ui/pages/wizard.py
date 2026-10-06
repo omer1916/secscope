@@ -103,11 +103,15 @@ class WizardPage(QWidget):
         self.install = QCheckBox(t("ui.wizard.install"))
         self.public_url = QLineEdit()
         self.public_url.setPlaceholderText("https://www.example.com")  # an example URL, not UI copy
+        self.exclude = QLineEdit()
+        self.exclude.setPlaceholderText(t("ui.wizard.exclude.placeholder"))
+        self.exclude.setToolTip(t("ui.wizard.exclude.hint"))
         form = QFormLayout()
         form.addRow(t("ui.wizard.run_command"), self.run_cmd)
         form.addRow(t("ui.wizard.port"), self.port)
         form.addRow(t("ui.wizard.ready_path"), self.ready_path)
         form.addRow(t("ui.wizard.public_url"), self.public_url)
+        form.addRow(t("ui.wizard.exclude"), self.exclude)
         s2 = QVBoxLayout()
         s2.addWidget(self.detected)
         s2.addWidget(self.notes)
@@ -346,6 +350,7 @@ class WizardPage(QWidget):
             scope_statement_accepted=self.scope_ok.isChecked(),
             snapshot_sqlite=self.snapshot.isChecked(),
             public_url=self.public_url.text().strip() or None,
+            exclude=[p.strip() for p in self.exclude.text().split(",") if p.strip()],
         )
 
     def _summarise(self) -> None:

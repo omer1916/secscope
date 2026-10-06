@@ -12,11 +12,12 @@ from __future__ import annotations
 import os
 import shutil
 import stat
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from secscope.core.archive import ExtractLimits, UnsafeArchiveError, is_archive, safe_extract
+from secscope.core.coverage import matches_exclude
 from secscope.core.fingerprint import DEPENDENCY_DIRS
 
 
@@ -30,6 +31,8 @@ class IntakeReport:
     files: int = 0
     bytes: int = 0
     skipped_links: list[str] = field(default_factory=list[str])
+    # Paths left out because they match a user exclusion pattern (top-most match only).
+    excluded: list[str] = field(default_factory=list[str])
 
 
 def _on_rm_error(func: Callable[..., object], path: str, _exc: BaseException) -> None:
@@ -50,14 +53,22 @@ def make_read_only(root: Path) -> None:
             p.chmod(stat.S_IREAD | (p.stat().st_mode & 0o555))
 
 
-def _copy_folder(source: Path, dest: Path, limits: ExtractLimits, report: IntakeReport) -> None:
+def _copy_folder(
+    source: Path,
+    dest: Path,
+    limits: ExtractLimits,
+    report: IntakeReport,
+    exclude: Sequence[str] = (),
+) -> None:
     dest.mkdir(parents=True)
     for dirpath, dirnames, filenames in os.walk(source, followlinks=False):
         current = Path(dirpath)
         rel_dir = current.relative_to(source)
         keep: list[str] = []
         for d in dirnames:
-            if (current / d).is_symlink() or _is_junction(current / d):
+            if exclude and matches_exclude((rel_dir / d).as_posix(), exclude):
+                report.excluded.append((rel_dir / d).as_posix() + "/")
+            elif (current / d).is_symlink() or _is_junction(current / d):
                 report.skipped_links.append((rel_dir / d).as_posix())
             else:
                 keep.append(d)
@@ -66,6 +77,9 @@ def _copy_folder(source: Path, dest: Path, limits: ExtractLimits, report: Intake
         for name in filenames:
             src_file = current / name
             rel = (rel_dir / name).as_posix()
+            if exclude and matches_exclude(rel, exclude):
+                report.excluded.append(rel)
+                continue
             if src_file.is_symlink():
                 report.skipped_links.append(rel)
                 continue
@@ -94,8 +108,32 @@ def _single_top_dir(root: Path) -> Path:
     return root
 
 
+def _remove_excluded(root: Path, exclude: Sequence[str], report: IntakeReport) -> None:
+    """Archives are extracted whole (with all safety checks), then exclusions are removed."""
+    for dirpath, dirnames, filenames in os.walk(root):
+        current = Path(dirpath)
+        keep: list[str] = []
+        for d in dirnames:
+            rel = (current / d).relative_to(root).as_posix()
+            if matches_exclude(rel, exclude):
+                report.excluded.append(rel + "/")
+                remove_tree(current / d)
+            else:
+                keep.append(d)
+        dirnames[:] = keep
+        for name in filenames:
+            rel = (current / name).relative_to(root).as_posix()
+            if matches_exclude(rel, exclude):
+                report.excluded.append(rel)
+                (current / name).unlink()
+
+
 def prepare_source(
-    target: Path, work_dir: Path, limits: ExtractLimits | None = None
+    target: Path,
+    work_dir: Path,
+    limits: ExtractLimits | None = None,
+    *,
+    exclude: Sequence[str] = (),
 ) -> IntakeReport:
     """Create ``work_dir/src`` from a folder or archive and return the project root in it."""
     limits = limits or ExtractLimits()
@@ -105,7 +143,7 @@ def prepare_source(
     if target.is_dir():
         report = IntakeReport(root=dest)
         try:
-            _copy_folder(target.resolve(), dest, limits, report)
+            _copy_folder(target.resolve(), dest, limits, report, exclude)
         except BaseException:
             remove_tree(dest)
             raise
@@ -115,6 +153,8 @@ def prepare_source(
         except UnsafeArchiveError as exc:
             raise IntakeError(f"unsafe archive rejected: {exc}") from exc
         report = IntakeReport(root=_single_top_dir(dest), files=result.files, bytes=result.bytes)
+        if exclude:
+            _remove_excluded(report.root, exclude, report)
     else:
         raise IntakeError(f"not a folder or supported archive: {target}")
     make_read_only(dest)
