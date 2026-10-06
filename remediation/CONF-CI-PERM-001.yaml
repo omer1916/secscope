@@ -1,0 +1,38 @@
+rule_id: CONF-CI-PERM-001
+title:
+  tr: Dışarıdan tetiklenebilen iş akışında token yetkisi sınırsız
+  en: Externally triggerable workflow without token permission limits
+severity: medium
+category: security
+confidence: high
+why:
+  tr: 'pull_request_target, issue_comment, issues veya workflow_run ile tetiklenen iş akışında permissions: tanımlı
+    değil ya da write-all. GITHUB_TOKEN depo ayarına göre yazma yetkisiyle gelir; iş akışındaki herhangi bir açık
+    depoya yazmaya dönüşür.'
+  en: 'A workflow triggered by pull_request_target, issue_comment, issues or workflow_run declares no permissions:
+    (or write-all). GITHUB_TOKEN may then carry write access, so any flaw in the workflow becomes write access to
+    the repository.'
+fix_steps:
+  tr:
+  - 'İş akışının başına permissions: contents: read ekleyin.'
+  - Yazma gereken işlere yalnızca gereken izni iş (job) düzeyinde verin.
+  - Depo ayarlarında varsayılan iş akışı iznini 'Read repository contents' yapın.
+  en:
+  - 'Add permissions: contents: read at the top of the workflow.'
+  - Grant write scopes per job, only where needed.
+  - Set the repository's default workflow permissions to 'Read repository contents'.
+snippets:
+  github:
+    lang: yaml
+    code: "permissions:\n  contents: read\n\njobs:\n  label:\n    permissions:\n      pull-requests: write"
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 250
+- type: owasp
+  id: A02:2025
+- type: url
+  href: https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions
+effort: S

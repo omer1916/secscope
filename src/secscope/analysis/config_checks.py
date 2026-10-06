@@ -175,31 +175,154 @@ def _htaccess(root: Path, path: Path) -> Iterator[ConfigIssue | None]:
             yield _issue("CONF-HTACCESS-INDEXES-001", root, path, i, lines)
 
 
+# GitHub Actions (threat model: an outside attacker who can open fork PRs, issues and comments
+# but cannot push). Check classes follow getsentry/skills "gha-security-review" (Apache-2.0)
+# and GitHub Security Lab's "untrusted input" list; the implementation is SecScope's own.
+
+# Triggers an outsider can fire *with* the base repository's token and secrets.
+GHA_EXTERNAL_TRIGGERS = frozenset(
+    {
+        "pull_request_target",
+        "issue_comment",
+        "issues",
+        "discussion",
+        "discussion_comment",
+        "workflow_run",
+    }
+)
+# Triggers that need write access (or run with a read-only fork token): not an outsider's way in.
+GHA_INTERNAL_TRIGGERS = frozenset(
+    {"push", "workflow_dispatch", "schedule", "workflow_call", "release", "pull_request",
+     "pull_request_review", "pull_request_review_comment", "merge_group", "create", "delete"}
+)  # fmt: skip
+# Expressions whose value an outsider chooses (titles, bodies, branch names, commit text...).
+GHA_UNTRUSTED = re.compile(
+    r"\$\{\{\s*(?:"
+    r"github\.head_ref"
+    r"|github\.event\.(?:issue|pull_request|comment|review|review_comment|discussion|pages\.[^.\s}]+)"
+    r"\.(?:title|body|head\.ref|head\.label|head\.repo\.default_branch|page_name)"
+    r"|github\.event\.(?:head_commit|commits\[[^\]]*\]|commits\.\*)\.(?:message|author\.(?:email|name))"
+    r"|github\.event\.workflow_run\.(?:head_branch|head_commit\.(?:message|author\.(?:email|name))"
+    r"|pull_requests\[[^\]]*\]\.head\.ref)"
+    r")"
+)
+_SHA_PIN = re.compile(r"@[0-9a-f]{40}$")
+_RUN_BLOCK = frozenset({"|", ">", "|-", ">-", "|+", ">+"})
+
+
+def _yaml(text: str) -> dict[Any, Any] | None:
+    try:
+        data: Any = yaml.safe_load(text)
+    except yaml.YAMLError:
+        return None
+    return jdict(data) if isinstance(data, dict) else None
+
+
+def _triggers(data: dict[Any, Any] | None) -> set[str] | None:
+    """Event names of a workflow, or None when unknown. YAML 1.1 reads the key `on` as True."""
+    if data is None:
+        return None
+    on: Any = data.get("on", data.get(True))
+    if isinstance(on, str):
+        return {on}
+    if isinstance(on, list):
+        return {str(x) for x in on}  # pyright: ignore[reportUnknownVariableType,reportUnknownArgumentType]
+    if isinstance(on, dict):
+        return {str(k) for k in on}  # pyright: ignore[reportUnknownVariableType,reportUnknownArgumentType]
+    return None
+
+
+def _jobs(data: dict[Any, Any] | None) -> dict[str, dict[str, Any]]:
+    jobs = jdict(data.get("jobs")) if data else {}
+    return {str(k): jdict(v) for k, v in jobs.items()}
+
+
+def _privileged(data: dict[Any, Any], job: dict[str, Any], triggers: set[str] | None) -> bool:
+    """Job with something worth stealing: secrets, write/OIDC permissions or an external trigger."""
+    text = yaml.safe_dump(job)
+    perms = [data.get("permissions"), job.get("permissions")]
+    writes = any(
+        p == "write-all" or any(str(v) == "write" for v in jdict(p).values()) for p in perms
+    )
+    return (
+        "secrets." in text
+        or writes
+        or bool(triggers and triggers & {"pull_request_target", "workflow_run", "release"})
+    )
+
+
 def _workflow(root: Path, path: Path) -> Iterator[ConfigIssue | None]:
     lines = _lines(path)
     text = "\n".join(lines)
+    data = _yaml(text)
+    triggers = _triggers(data)
+    external = triggers is None or bool(triggers & GHA_EXTERNAL_TRIGGERS)
     if "pull_request_target" in text and re.search(
-        r"github\.event\.pull_request\.head\.(?:sha|ref)|refs/pull/", text
+        r"github\.event\.pull_request\.head\.(?:sha|ref)|refs/pull/|github\.head_ref", text
     ):
         yield _issue("CONF-CI-PRT-001", root, path, _line_of(lines, "pull_request_target"), lines)
-    # Only `run:` scripts are injectable; `env:` / `with:` values are passed as data.
-    untrusted = re.compile(
-        r"\$\{\{\s*github\.event\.(?:issue|pull_request|comment|review|head_commit|discussion)"
-        r"\.(?:title|body|head\.ref|message|label)"
-    )
-    block_indent: int | None = None
-    for i, ln in enumerate(lines, start=1):
-        indent = len(ln) - len(ln.lstrip())
-        if block_indent is not None and ln.strip() and indent <= block_indent:
-            block_indent = None
-        run_line = re.match(r"^(\s*)(?:-\s*)?run:\s*(.*)$", ln)
-        in_script = block_indent is not None or (
-            run_line is not None and run_line.group(2) not in {"|", ">", "|-", ">-"}
+
+    # 1. Expression injection: only `run:` scripts are injectable (`env:` / `with:` / `if:` are
+    #    passed as data), and only in workflows an outsider can trigger.
+    if external or (triggers is not None and not triggers <= GHA_INTERNAL_TRIGGERS):
+        block_indent: int | None = None
+        for i, ln in enumerate(lines, start=1):
+            indent = len(ln) - len(ln.lstrip())
+            if block_indent is not None and ln.strip() and indent <= block_indent:
+                block_indent = None
+            run_line = re.match(r"^(\s*)(?:-\s*)?run:\s*(.*)$", ln)
+            in_script = block_indent is not None or (
+                run_line is not None and run_line.group(2) not in _RUN_BLOCK
+            )
+            if run_line is not None and run_line.group(2) in _RUN_BLOCK:
+                block_indent = indent
+            if in_script and GHA_UNTRUSTED.search(ln) and not ln.strip().startswith("#"):
+                yield _issue("CONF-CI-INJECT-001", root, path, i, lines)
+
+    if data is None:
+        return
+    jobs = _jobs(data)
+
+    # 2. Comment-triggered commands without an authorisation check: anyone can comment.
+    if triggers and "issue_comment" in triggers:
+        guarded = re.search(
+            r"author_association|getCollaboratorPermissionLevel|collaborators/.+/permission"
+            r"|github\.actor\s*==|permission-level|check-permission",
+            text,
         )
-        if run_line is not None and run_line.group(2) in {"|", ">", "|-", ">-"}:
-            block_indent = indent
-        if in_script and untrusted.search(ln) and not ln.strip().startswith("#"):
-            yield _issue("CONF-CI-INJECT-001", root, path, i, lines)
+        runs_code = any(
+            "run" in jdict(step) or "uses" in jdict(step)
+            for job in jobs.values()
+            for step in jlist(job.get("steps"))
+        )
+        if runs_code and not guarded:
+            yield _issue("CONF-CI-COMMENT-001", root, path, _line_of(lines, "issue_comment"), lines)
+
+    # 3. Token permissions: outsider-triggered workflows must declare least privilege.
+    if external and triggers is not None:
+        top = data.get("permissions")
+        if top == "write-all":
+            yield _issue("CONF-CI-PERM-001", root, path, _line_of(lines, "permissions"), lines)
+        elif top is None and any("permissions" not in job for job in jobs.values()):
+            line = _line_of(lines, "jobs:")
+            yield _issue("CONF-CI-PERM-001", root, path, line, lines, confidence="medium")
+
+    # 4. Supply chain: third-party actions in privileged jobs must be pinned to a full SHA.
+    #    First-party actions/* and github/* on tags and local ./ actions are fine.
+    for job in jobs.values():
+        if not _privileged(data, job, triggers):
+            continue
+        for step in jlist(job.get("steps")):
+            uses = str(jdict(step).get("uses") or "")
+            owner = uses.split("/", 1)[0].lower()
+            if (
+                not uses
+                or uses.startswith(("./", "docker://"))
+                or owner in {"actions", "github"}
+                or _SHA_PIN.search(uses)
+            ):
+                continue
+            yield _issue("CONF-CI-PIN-001", root, path, _line_of(lines, uses), lines)
 
 
 def _gitignore_patterns(root: Path) -> list[str] | None:

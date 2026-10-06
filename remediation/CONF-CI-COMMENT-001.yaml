@@ -1,0 +1,40 @@
+rule_id: CONF-CI-COMMENT-001
+title:
+  tr: Yorumla tetiklenen CI komutunda yetki kontrolü yok
+  en: Comment-triggered CI command without an authorisation check
+severity: high
+category: security
+confidence: medium
+why:
+  tr: issue_comment ile tetiklenen iş akışı, yorumu yazanın depo üyesi olup olmadığını kontrol etmiyor. GitHub'daki
+    herhangi bir kullanıcı yorum yazarak bu iş akışını depo token'ı ve sırlarıyla çalıştırabilir.
+  en: The issue_comment workflow does not check whether the commenter is a member of the repository. Any GitHub
+    user can run it, with the repository's token and secrets, by posting a comment.
+impact:
+  tr: Sır çalma, depoya yazma, sürüm/dağıtım adımlarının kötüye kullanılması.
+  en: Secret theft, repository writes, abuse of release/deploy steps.
+fix_steps:
+  tr:
+  - İşi yalnızca OWNER, MEMBER veya COLLABORATOR yorumlarında çalıştırın.
+  - 'Yorum metnini run: betiğine doğrudan gömmeyin; env: üzerinden geçirin.'
+  - 'İş akışına en az yetkili permissions: bloğu ekleyin.'
+  en:
+  - Run the job only for OWNER, MEMBER or COLLABORATOR comments.
+  - 'Never inline the comment text into a run: script; pass it through env:.'
+  - 'Give the workflow a least-privilege permissions: block.'
+snippets:
+  github:
+    lang: yaml
+    code: "jobs:\n  command:\n    if: >-\n      github.event.issue.pull_request &&\n      contains(fromJSON('[\"\
+      OWNER\", \"MEMBER\", \"COLLABORATOR\"]'),\n               github.event.comment.author_association)"
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 862
+- type: owasp
+  id: A01:2025
+- type: url
+  href: https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions
+effort: S
