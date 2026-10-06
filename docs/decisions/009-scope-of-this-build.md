@@ -10,8 +10,10 @@ readiness, reporting (HTML, SARIF, CSV, JSON, diff, suppressions), the desktop U
 
 It intentionally does **not** include:
 
-- **Active dynamic testing (SPEC M4/M5)**: no attack payloads, ZAP or Nuclei scans. The scope
-  guard, sandbox runner and module contract remain in place.
+- **Weaponised dynamic testing (part of SPEC M4/M5)**: no attack payloads, ZAP or Nuclei
+  scans, exploit chaining or PoC generation. Benign runtime checks and safe reflection
+  verification were later added as the `dast_http` module (ADR-011); this exclusion is only
+  about weaponised exploitation.
 - **Load / stress / resilience testing (SPEC M7)**.
 - The wizard's **authentication step** (only meaningful for authenticated dynamic testing),
   so the wizard has four steps.

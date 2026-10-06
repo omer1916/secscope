@@ -1,12 +1,15 @@
 # SecScope
 
 > **Status: alpha.** Static analysis, secrets, dependency and configuration checks, SEO / launch
-> readiness, reporting, the desktop UI and Windows packaging work. Active dynamic testing (DAST)
-> and load testing are not part of this build ([ADR-009](docs/decisions/009-scope-of-this-build.md)).
+> readiness, benign runtime checks against your own local app, reporting, the desktop UI and
+> Windows packaging work. Weaponised attack simulation (attack payloads, ZAP/Nuclei) and load
+> testing are not part of this build ([ADR-009](docs/decisions/009-scope-of-this-build.md),
+> [ADR-011](docs/decisions/011-benign-dynamic-checks.md)).
 
 SecScope is a desktop application that tests **your own** web site, web app or API
 **on your own machine**: static analysis, secret and dependency scanning, configuration
-checks and technical SEO readiness — merged into one explainable report with copy-paste fixes.
+checks, technical SEO readiness and benign runtime checks on the running app — merged into one
+explainable report with copy-paste fixes.
 
 **Scope is loopback-only by design.** Every dynamic request goes through a scope
 guard that only allows `localhost`, `127.0.0.0/8` and `::1`. There is no setting

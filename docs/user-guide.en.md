@@ -113,5 +113,7 @@ start, and — if you enable "install dependencies" — your project's package r
 
 ## 8. Not in this build
 
-Active attack simulation (DAST), load/stress testing and lab Core Web Vitals are not included
+Weaponised attack simulation (attack payloads, ZAP/Nuclei, exploit generation), load/stress
+testing and lab Core Web Vitals are not included. Benign dynamic checks and safe reflection
+verification are included (running-app checks)
 (`docs/decisions/009-scope-of-this-build.md`).

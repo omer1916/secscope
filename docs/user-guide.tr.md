@@ -115,5 +115,6 @@ indirmeleri ve "bağımlılıkları kur" seçeneğinde projenizin paket deposu e
 
 ## 8. Bu sürümde olmayanlar
 
-Aktif saldırı simülasyonu (DAST), yük/stres testi ve laboratuvar Core Web Vitals ölçümü bu
-sürümde yoktur (`docs/decisions/009-scope-of-this-build.md`).
+Yıkıcı saldırı simülasyonu (saldırı yükleri, ZAP/Nuclei, istismar üretimi), yük/stres testi ve
+laboratuvar Core Web Vitals ölçümü bu sürümde yoktur. Güvenli dinamik kontroller ve zararsız işaretle
+doğrulama ise vardır (çalışan uygulama kontrolleri) (`docs/decisions/009-scope-of-this-build.md`).
