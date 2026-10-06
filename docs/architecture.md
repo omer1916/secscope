@@ -93,6 +93,14 @@ the UI down.
 | Packaging | `packaging/pyinstaller.spec`, `packaging/launcher.py` | One-folder build, `SecScopeApp` (windowed) + `secscope` (console, also runs the internal `worker`, `static-server`, `run-python-tool` sub-programs). [packaging/README.md](../packaging/README.md). |
 | Hardening | [threat-model.md](threat-model.md), `tests/integration/test_dogfood.py` | SecScope's own source must pass its own static analysis. |
 
+## Coverage, background code, attack surface (ADR-010)
+
+| Area | Module | Notes |
+|---|---|---|
+| Coverage / exclusions | `core/coverage.py`, `core/intake.py` | What was examined and set aside; `--exclude` applied at copy time. |
+| Git facts | `core/gitinfo.py` | Revision stamp, files changed since a ref (`--changed-since`); refs validated. |
+| Attack surface | `analysis/routes.py` | Flask/FastAPI/Express/Django routes and visible guards (inventory, not findings). |
+
 ## Network rule
 
 Only `core/scope_guard.py` (target traffic) and `core/downloader.py` (user-initiated downloads, ADR-006) may use raw network primitives. Enforced by ruff `TID251`

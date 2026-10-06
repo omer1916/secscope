@@ -82,6 +82,28 @@ secscope suppress --rule SEO-OG-001 --reason "Sosyal önizleme gerekmiyor"
 
 `--fail-on high` yüksek veya kritik bulgu varsa 3 çıkış koduyla biter (CI için).
 
+```bash
+secscope scan --path . --exclude docs --exclude "legacy/" --changed-since origin/main --fail-on high
+```
+
+- `--exclude` (veya sihirbazdaki **Hariç tutulacak yollar**): bu yollar kopyalanmaz, taranmaz ve
+  çalıştırılmaz; raporun **Kapsam** bölümünde listelenir.
+- `--changed-since`: yalnızca bu git referansından sonra değişen dosyalardaki kod bulgularını
+  raporlar (pull request incelemeleri için).
+
+### Rapordaki ek bölümler
+
+- **Kapsam:** kaç dosyanın incelendiği, hariç tutulanlar, analiz edilmeyen bağımlılık klasörleri.
+  Temiz bir sonuç neyin incelendiğini de söyler.
+- **Test ve fixture kodu:** `tests/`, `fixtures/`, `*.test.js` gibi dosyalardaki kod bulguları
+  "bilgi" düzeyinde gösterilir ve puana katılmaz. Gizli anahtarlar istisnadır: test dosyasında bile
+  gerçek görünen bir anahtar tam önemiyle raporlanır.
+- **Saldırı yüzeyi:** koddan çıkarılan uç nokta listesi ve her birinde yetki kontrolünün görünüp
+  görünmediği. Veri değiştiren ve kontrolü görünmeyen uç noktalar vurgulanır. Bu bir envanterdir,
+  bulgu değildir.
+- **Commit:** proje bir git deposuysa raporun hangi commit'i anlattığı (commit edilmemiş değişiklikler
+  dahilse belirtilir). SecScope'un oluşturduğu rapor klasörlerine `.gitignore` eklenir.
+
 ## 7. Gizlilik
 
 Telemetri yoktur. Ağ trafiği yalnızca: hedef (localhost), sizin başlattığınız araç/veritabanı

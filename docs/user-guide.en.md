@@ -81,6 +81,27 @@ secscope suppress --rule SEO-OG-001 --reason "No social previews needed"
 
 `--fail-on high` exits with code 3 when a high or critical finding exists (for CI).
 
+```bash
+secscope scan --path . --exclude docs --exclude "legacy/" --changed-since origin/main --fail-on high
+```
+
+- `--exclude` (or **Paths to exclude** in the wizard): these paths are not copied, scanned or run;
+  the report's **Coverage** section lists them.
+- `--changed-since`: report code findings only in files changed since this git reference (for pull
+  request reviews).
+
+### Extra report sections
+
+- **Coverage:** how many files were examined, what was excluded, dependency folders that were not
+  code-analysed. A clean result also says what was examined.
+- **Test and fixture code:** code findings in `tests/`, `fixtures/`, `*.test.js` and similar are shown
+  as "info" and not scored. Secrets are the exception: a real-looking key is reported at full
+  severity even in a test file.
+- **Attack surface:** endpoints found in the code and whether an authorisation check is visible on
+  each; state-changing endpoints without one are highlighted. An inventory, not findings.
+- **Commit:** for git projects, the commit the report describes (and whether uncommitted changes were
+  included). Report folders SecScope creates get a `.gitignore`.
+
 ## 7. Privacy
 
 No telemetry. Network traffic goes only to the target (localhost), tool/database downloads you
