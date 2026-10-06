@@ -41,6 +41,7 @@ def build_report(ctx: ScanContext, outcome: ScanOutcome, *, suppressed: int = 0)
             "generated": generated,
         }
     sca = ctx.results.get("sca")
+    sast = ctx.results.get("sast")
     fp = ctx.fingerprint
     return {
         "report_schema_version": REPORT_SCHEMA_VERSION,
@@ -63,6 +64,9 @@ def build_report(ctx: ScanContext, outcome: ScanOutcome, *, suppressed: int = 0)
         if fp
         else None,
         "profile": config.profile.value,
+        "revision": ctx.revision,
+        "coverage": ctx.coverage or None,
+        "changed_since": config.changed_since,
         "scope_statement_accepted": config.scope_statement_accepted,
         "status": outcome.status,
         "duration_s": round(outcome.duration_s, 3),
@@ -74,6 +78,12 @@ def build_report(ctx: ScanContext, outcome: ScanOutcome, *, suppressed: int = 0)
         "fix_plan": [item.as_dict() for item in fix_plan(outcome.findings)],
         "seo": seo,
         "sbom_path": sca.data.get("sbom_path") if sca is not None else None,
+        "attack_surface": {
+            "summary": sast.data.get("routes_summary"),
+            "routes": sast.data.get("routes", []),
+        }
+        if sast is not None and "routes" in sast.data
+        else None,
         "advisory_db": {
             k: v for k, v in (sca.data if sca else {}).items() if k.endswith("_db_updated")
         },

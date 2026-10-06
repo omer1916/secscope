@@ -31,6 +31,7 @@ details.finding{background:var(--card);border:1px solid var(--line);border-radiu
 details.finding>summary{cursor:pointer;padding:10px 12px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;list-style:none}
 details.finding>summary::-webkit-details-marker{display:none}
 details.finding[open]>summary{border-bottom:1px solid var(--line)}
+tr.review td{background:color-mix(in srgb,#d1501f 12%,transparent)}
 .rule{font-family:ui-monospace,Consolas,monospace;font-size:.8rem;color:var(--muted)}.loc{font-family:ui-monospace,Consolas,monospace;font-size:.82rem;color:var(--muted);word-break:break-all}
 .body{padding:4px 16px 14px}pre{background:var(--code);border:1px solid var(--line);border-radius:6px;padding:10px;overflow:auto;font:13px/1.45 ui-monospace,Consolas,monospace;white-space:pre-wrap;word-break:break-word}
 .note{border-left:3px solid var(--accent);padding:8px 12px;background:var(--card);border-radius:4px;color:var(--muted);font-size:.9rem}
@@ -50,6 +51,8 @@ ol.actions li{margin:6px 0}.muted{color:var(--muted)}a{color:var(--accent)}foote
     <span>{{ t("report.duration") }}: {{ "%.1f"|format(report.duration_s) }} s</span>
     <span>{{ t("report.generated") }}: {{ report.generated_at[:19].replace("T", " ") }} UTC</span>
     <span>{{ t("report.status") }}: {{ t.status(report.status) }}</span>
+    {% set revision = report.get("revision") %}{% if revision %}<span>{{ t("report.revision") }}: <code>{{ revision.commit[:12] }}</code>{% if revision.branch %} ({{ revision.branch }}){% endif %}{% if revision.dirty %} · {{ t("report.revision.dirty") }}{% endif %}</span>{% endif %}
+    {% if report.get("changed_since") %}<span>{{ t("report.changed_since", ref=report.get("changed_since")) }}</span>{% endif %}
   </div>
 </header>
 
@@ -186,6 +189,19 @@ ol.actions li{margin:6px 0}.muted{color:var(--muted)}a{color:var(--accent)}foote
 </table></div>
 </section>
 
+{% set surface = report.get("attack_surface") %}
+{% if surface and surface.routes %}
+<section aria-labelledby="surface">
+<h2 id="surface">{{ t("report.surface.title") }}</h2>
+<p>{{ t("report.surface.summary", total=surface.summary.total, changing=surface.summary.state_changing, review=surface.summary.needs_review) }}</p>
+<p class="muted">{{ t("report.surface.note") }}</p>
+<div style="overflow-x:auto"><table>
+<thead><tr><th>{{ t("report.surface.method") }}</th><th>{{ t("report.surface.path") }}</th><th>{{ t("report.surface.guard") }}</th><th>{{ t("report.col.location") }}</th></tr></thead>
+<tbody>{% for r in surface.routes %}<tr{% if r.needs_review %} class="review"{% endif %}><td class="rule">{{ r.method }}</td><td class="loc">{{ r.path }}</td><td>{{ t("report.surface.guard." ~ r.guard) }}{% if r.guard_name %} <span class="rule">{{ r.guard_name }}</span>{% endif %}{% if r.needs_review %} · <b>{{ t("report.surface.review") }}</b>{% endif %}</td><td class="loc">{{ r.file }}:{{ r.line }}</td></tr>{% endfor %}</tbody>
+</table></div>
+</section>
+{% endif %}
+
 <section aria-labelledby="meta">
 <h2 id="meta">{{ t("report.meta.title") }}</h2>
 <p><b>{{ t("report.meta.scope") }}:</b> {{ t("report.meta.scope_yes") if report.scope_statement_accepted else t("report.meta.scope_no") }}</p>
@@ -196,6 +212,18 @@ ol.actions li{margin:6px 0}.muted{color:var(--muted)}a{color:var(--accent)}foote
 <td>{% if info.reason %}{{ info.reason[lang] }}{% endif %}{% if info.install_hint %}<br><span class="muted">{{ info.install_hint[lang] }}</span>{% endif %}</td></tr>
 {% endfor %}
 </tbody></table>
+{% set cov = report.get("coverage") %}
+{% if cov %}
+<h3>{{ t("report.coverage.title") }}</h3>
+<ul>
+<li>{{ t("report.coverage.files", files=cov.files, mb="%.1f"|format(cov.bytes / 1000000)) }}{% if cov.code_files_by_language %}: {% for lang_name, n in cov.code_files_by_language.items() %}{{ lang_name }} {{ n }}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}</li>
+{% if cov.background_files %}<li>{{ t("report.coverage.background") }}: {% for k, n in cov.background_files.items() %}{{ t("report.coverage.kind." ~ k) }} {{ n }}{% if not loop.last %}, {% endif %}{% endfor %}</li>{% endif %}
+{% if cov.exclude_patterns %}<li>{{ t("report.coverage.excluded", count=cov.excluded_count) }}: <span class="loc">{{ cov.exclude_patterns|join(", ") }}</span>{% if cov.excluded %}<br><span class="loc">{{ cov.excluded|join(", ") }}</span>{% endif %}</li>{% endif %}
+{% if cov.dependency_dirs %}<li>{{ t("report.coverage.dependencies") }}: <span class="loc">{{ cov.dependency_dirs|join(", ") }}</span></li>{% endif %}
+{% if cov.skipped_links %}<li>{{ t("report.coverage.links") }}: <span class="loc">{{ cov.skipped_links|join(", ") }}</span></li>{% endif %}
+{% if report.get("changed_since") %}<li>{{ t("report.coverage.changed", ref=report.get("changed_since")) }}</li>{% endif %}
+</ul>
+{% endif %}
 {% if report.notes %}<h3>{{ t("report.meta.notes") }}</h3><ul>{% for m, notes in report.notes.items() %}{% for n in notes %}<li><b>{{ t.module(m) }}</b>: {{ t.note(n) }}</li>{% endfor %}{% endfor %}</ul>{% endif %}
 {% if report.tool_versions %}<h3>{{ t("report.meta.tools") }}</h3><p class="meta">{% for name, v in report.tool_versions.items() %}<span>{{ name }} {{ v }}</span>{% endfor %}<span>{{ report.tool.name }} {{ report.tool.version }}</span></p>{% endif %}
 {% if report.advisory_db %}<p class="meta">{{ t("report.meta.advisory_db") }}: {% for k, v in report.advisory_db.items() %}<span>{{ k.replace("_db_updated", "") }} {{ (v or "")[:10] }}</span>{% endfor %}</p>{% endif %}

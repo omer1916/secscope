@@ -14,7 +14,9 @@ from typing import Any, ClassVar
 from secscope.analysis.kb import KnowledgeBase, default_kb
 from secscope.analysis.python_checks import check_python
 from secscope.analysis.regex_rules import PatternRule, load_rules, scan_file
+from secscope.analysis.routes import extract_routes, summarise
 from secscope.analysis.source import SourceFile, iter_project
+from secscope.core.coverage import background_reason
 from secscope.core.models import Category, Confidence, Finding, LocalizedStr
 from secscope.core.process import python_tool_command, run_capture
 from secscope.core.resources import data_path
@@ -129,6 +131,14 @@ class SastModule(BaseModule):
         native = await asyncio.to_thread(native_findings, root, kb, load_rules(), stack)
         for f in native:
             emit.finding(f)
+        # Tests and fixtures are not the application's attack surface.
+        routes = [
+            r
+            for r in await asyncio.to_thread(lambda: extract_routes(iter_project(root)))
+            if background_reason(r.file) is None
+        ]
+        result.data["routes"] = [r.as_dict() for r in routes]
+        result.data["routes_summary"] = summarise(routes)
         await ctx.checkpoint()
 
         semgrep = ctx.tools.status("semgrep")
