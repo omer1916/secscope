@@ -5,6 +5,7 @@
 bandit:
   B102: {rule: SAST-EVAL-001}
   B307: {rule: SAST-EVAL-001}
+  B103: {rule: SAST-PERM-001}   # set_bad_file_permissions
   B105: {rule: SAST-HARDCODED-001}
   B106: {rule: SAST-HARDCODED-001}
   B107: {rule: SAST-HARDCODED-001}

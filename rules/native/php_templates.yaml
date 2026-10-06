@@ -79,3 +79,13 @@
 - id: SAST-XSS-001
   languages: [html, template]
   pattern: '\.(?:innerHTML|outerHTML)\s*\+?=\s*(?![''"`][^''"`$]*[''"`]\s*;?\s*$)|\bdocument\.write\('
+
+- id: SAST-FALLBACK-001
+  languages: [php]
+  pattern: '(?:\bgetenv\(\s*|\$_(?:ENV|SERVER)\[\s*|\benv\(\s*)[''"][A-Za-z0-9_]*(?:SECRET|PASSWORD|PASSWD|PWD|TOKEN|API_?KEY|APP_KEY|PRIVATE_?KEY|JWT|SALT)[A-Za-z0-9_]*[''"]\s*(?:\)\s*\?:|\]\s*\?\?|,)\s*[''"][^''"\s]+[''"]'
+  confidence: high
+
+- id: SAST-PERM-001
+  languages: [php]
+  pattern: '\bchmod\s*\(\s*[^,]+,\s*0?[0-7]?[0-7]{2}[2367]\s*\)'
+  confidence: high

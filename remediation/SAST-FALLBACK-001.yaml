@@ -1,0 +1,54 @@
+rule_id: SAST-FALLBACK-001
+title:
+  tr: Sır, ortam değişkeni yoksa koddaki varsayılana düşüyor
+  en: Secret falls back to a hardcoded default
+severity: high
+category: security
+confidence: high
+why:
+  tr: Ortam değişkeni tanımlanmadığında uygulama hata vermek yerine koddaki bilinen değerle çalışıyor. Sunucuda
+    değişken unutulursa oturumlar ve token'lar herkesin bildiği anahtarla imzalanır.
+  en: When the environment variable is missing the app keeps running with a known value from the code instead of
+    failing. If the variable is forgotten on the server, sessions and tokens are signed with a key anyone can read.
+impact:
+  tr: Oturum ve JWT sahteciliği, kimlik doğrulamanın atlatılması.
+  en: Forged sessions and JWTs, authentication bypass.
+fix_steps:
+  tr:
+  - Varsayılan değeri kaldırın; değişken yoksa uygulama başlarken hata versin.
+  - Geliştirme için değeri koda değil, git'e girmeyen .env dosyasına yazın.
+  - Daha önce bu varsayılanla imzalanmış oturumları geçersiz kılın ve anahtarı yenileyin.
+  en:
+  - Remove the default; fail at start-up when the variable is missing.
+  - For development put the value in an untracked .env file, not in the code.
+  - Rotate the key and invalidate sessions signed with the old default.
+snippets:
+  flask:
+    lang: python
+    code: 'app.secret_key = os.environ["FLASK_SECRET_KEY"]  # KeyError when missing'
+  django:
+    lang: python
+    code: SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
+  express:
+    lang: js
+    code: 'const secret = process.env.JWT_SECRET;
+
+      if (!secret) throw new Error(''JWT_SECRET must be set'');'
+  php:
+    lang: php
+    code: '$key = getenv(''APP_KEY'');
+
+      if ($key === false || $key === '''') { throw new RuntimeException(''APP_KEY must be set''); }'
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: '1188'
+- type: cwe
+  id: '798'
+- type: owasp
+  id: A07:2025
+- type: asvs
+  id: 5.0-V13
+effort: S

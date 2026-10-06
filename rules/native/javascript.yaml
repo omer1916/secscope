@@ -132,3 +132,19 @@
   languages: [javascript]
   pattern: '\.(?:send|json|end|write)\(\s*(?:\{[^}]*)?\b(?:e|err|error|ex|exception)\.stack\b'
   confidence: high
+
+# Insecure defaults: the value used when the environment variable is missing.
+- id: SAST-FALLBACK-001
+  languages: [javascript]
+  pattern: '\bprocess\.env\.[A-Za-z0-9_]*(?:SECRET|PASSWORD|PASSWD|PWD|TOKEN|API_?KEY|PRIVATE_?KEY|SIGNING_?KEY|JWT|SALT|SESSION_?KEY)[A-Za-z0-9_]*\s*(?:\|\||\?\?)\s*[''"`][^''"`\s]+[''"`]'
+  confidence: high
+
+- id: SAST-FAILOPEN-001
+  languages: [javascript]
+  pattern: '\bprocess\.env\.[A-Za-z0-9_]*(?:ORIGIN|CORS)[A-Za-z0-9_]*\s*(?:\|\||\?\?)\s*[''"`]\*[''"`]|\bprocess\.env\.(?![A-Za-z0-9_]*(?:DISABLE|NO_))[A-Za-z0-9_]*DEBUG[A-Za-z0-9_]*\s*(?:\|\||\?\?)\s*(?:true\b|[''"`](?:true|1|yes|on|\*)[''"`])'
+  confidence: high
+
+- id: SAST-PERM-001
+  languages: [javascript]
+  pattern: '\b(?:chmod|chmodSync|lchmod|lchmodSync|fchmod|fchmodSync)\(\s*[^,]+,\s*(?:0o?[0-7]?[0-7]{2}[2367]|[''"`][0-7]?[0-7]{2}[2367][''"`])\s*[,)]'
+  confidence: high

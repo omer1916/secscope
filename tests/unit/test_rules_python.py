@@ -169,6 +169,46 @@ CASES: dict[str, list[tuple[str, str]]] = {
             "try:\n    f()\nexcept ValueError:\n    log.warning('bad value')\n",
         )
     ],
+    "SAST-FALLBACK-001": [
+        (
+            "app.secret_key = os.environ.get('FLASK_SECRET', 'change-me-please')\n",
+            "app.secret_key = os.environ['FLASK_SECRET']\n",
+        ),
+        (
+            "KEY = os.getenv('JWT_SIGNING_KEY', 'devkey')\n",
+            "KEY = os.getenv('JWT_SIGNING_KEY', '')\n",
+        ),
+        (
+            "PW = os.environ.get('DB_PASSWORD', 'postgres')\n",
+            "HOST = os.environ.get('DB_HOST', 'localhost')\n",
+        ),
+    ],
+    "SAST-FAILOPEN-001": [
+        (
+            "DEBUG = os.getenv('APP_DEBUG', 'true').lower() != 'false'\n",
+            "DEBUG = os.getenv('APP_DEBUG', 'false') == 'true'\n",
+        ),
+        (
+            "ORIGINS = os.environ.get('CORS_ORIGINS', '*')\n",
+            "ORIGINS = os.environ.get('CORS_ORIGINS', 'https://app.example.com')\n",
+        ),
+        (
+            "REQUIRE_AUTH = os.environ.get('REQUIRE_AUTH', 'false') == 'true'\n",
+            "REQUIRE_AUTH = os.environ.get('REQUIRE_AUTH', 'true') == 'true'\n",
+        ),
+        (
+            "OFF = os.environ.get('DISABLE_CSRF', '1') == '1'\n",
+            "OFF = os.environ.get('DISABLE_CSRF', '0') == '1'\n",
+        ),
+    ],
+    "SAST-PERM-001": [
+        ("os.chmod(path, 0o777)\n", "os.chmod(path, 0o640)\n"),
+        (
+            "os.chmod(p, stat.S_IRWXU | stat.S_IWOTH)\n",
+            "os.chmod(p, stat.S_IRUSR | stat.S_IWUSR)\n",
+        ),
+        ("Path('x').chmod(0o666)\n", "Path('x').chmod(0o644)\n"),
+    ],
     "QUAL-DEBUGCODE-001": [
         ("import pdb\npdb.set_trace()\n", "import logging\nlogging.debug('x')\n")
     ],

@@ -1,0 +1,41 @@
+rule_id: SAST-PERM-001
+title:
+  tr: Dosya herkes tarafından yazılabilir yapılıyor
+  en: File made world-writable
+severity: medium
+category: security
+confidence: high
+why:
+  tr: chmod ile verilen izin (ör. 777/666) sunucudaki her kullanıcıya ve sürece dosyayı değiştirme hakkı veriyor.
+  en: The mode given to chmod (e.g. 777/666) lets every user and process on the server modify the file.
+impact:
+  tr: Başka bir süreç dosyayı değiştirerek kod çalıştırabilir veya veriyi bozabilir.
+  en: Another process can change the file to run code or corrupt data.
+fix_steps:
+  tr:
+  - 'En az yetki verin: dosyalar için 0o640/0o600, dizinler için 0o750/0o700.'
+  - Paylaşım gerekiyorsa herkese değil, bir gruba yazma izni verin.
+  en:
+  - 'Grant the least access: 0o640/0o600 for files, 0o750/0o700 for directories.'
+  - If sharing is needed, give write access to a group, not to everyone.
+snippets:
+  python:
+    lang: python
+    code: os.chmod(path, 0o640)
+  express:
+    lang: js
+    code: fs.chmodSync(path, 0o640);
+  php:
+    lang: php
+    code: chmod($path, 0640);
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: '732'
+- type: owasp
+  id: A01:2025
+- type: asvs
+  id: 5.0-V5
+effort: S

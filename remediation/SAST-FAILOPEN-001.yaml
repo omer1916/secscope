@@ -1,0 +1,49 @@
+rule_id: SAST-FAILOPEN-001
+title:
+  tr: Güvenlik ayarı yapılandırılmazsa güvensiz çalışıyor
+  en: Security setting is insecure when not configured
+severity: medium
+category: security
+confidence: high
+why:
+  tr: 'Ortam değişkeni tanımlanmadığında kullanılan varsayılan, bir güvenlik denetimini kapatıyor: debug açık, CORS
+    ''*'' veya kimlik doğrulama/doğrulama kapalı. Yapılandırma unutulursa uygulama sessizce güvensiz çalışır.'
+  en: 'The value used when the environment variable is missing switches a security control off: debug on, CORS ''*'',
+    or authentication/verification disabled. If configuration is forgotten, the app silently runs insecurely.'
+impact:
+  tr: Yayında hata ayrıntısı sızıntısı, her siteden istek okuma veya korumasız uç noktalar.
+  en: Error detail leaks in production, cross-site data reads, or unprotected endpoints.
+fix_steps:
+  tr:
+  - Varsayılanı güvenli değere çevirin (debug kapalı, origin listesi zorunlu, doğrulama açık).
+  - Gevşek değeri yalnızca açıkça ayarlanmış geliştirme ortamında kullanın.
+  en:
+  - Make the default the secure value (debug off, origin list required, verification on).
+  - Use the relaxed value only when a development environment sets it explicitly.
+snippets:
+  flask:
+    lang: python
+    code: 'DEBUG = os.environ.get("APP_DEBUG", "0") == "1"  # off unless enabled'
+  django:
+    lang: python
+    code: DEBUG = os.environ.get("DJANGO_DEBUG") == "1"
+  express:
+    lang: js
+    code: 'const origins = (process.env.ALLOWED_ORIGINS || '''').split('','').filter(Boolean);
+
+      if (origins.length === 0) throw new Error(''ALLOWED_ORIGINS must be set'');
+
+      app.use(cors({ origin: origins }));'
+verify:
+  tr: Düzeltmeden sonra yeniden tarayın; bu madde 'Düzeltildi' olarak görünmeli.
+  en: Re-scan after fixing; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: '1188'
+- type: cwe
+  id: '636'
+- type: owasp
+  id: A02:2025
+- type: asvs
+  id: 5.0-V13
+effort: S

@@ -222,6 +222,43 @@ CASES: list[tuple[str, str, str, str]] = [
         'login("admin", "admin");',
         '// login("admin", "admin") example in a comment',
     ),
+    (
+        "SAST-FALLBACK-001",
+        "javascript",
+        'const secret = process.env.JWT_SECRET || "supersecret";',
+        "const secret = process.env.JWT_SECRET;",
+    ),
+    (
+        "SAST-FALLBACK-001",
+        "javascript",
+        "const pw = process.env.DB_PASSWORD ?? 'postgres';",
+        "const host = process.env.DB_HOST || 'localhost';",
+    ),
+    (
+        "SAST-FALLBACK-001",
+        "php",
+        "$key = getenv('APP_KEY') ?: 'base64:devkey';",
+        "$key = getenv('APP_KEY');",
+    ),
+    (
+        "SAST-FAILOPEN-001",
+        "javascript",
+        "const origins = process.env.ALLOWED_ORIGINS || '*';",
+        "const origins = process.env.ALLOWED_ORIGINS || 'https://app.example.com';",
+    ),
+    (
+        "SAST-FAILOPEN-001",
+        "javascript",
+        "const debug = process.env.APP_DEBUG || 'true';",
+        "const debug = process.env.APP_DEBUG === 'true';",
+    ),
+    (
+        "SAST-PERM-001",
+        "javascript",
+        'fs.chmodSync("/srv/out", 0o777);',
+        'fs.chmodSync("/srv/out", 0o640);',
+    ),
+    ("SAST-PERM-001", "php", "chmod($file, 0777);", "chmod($file, 0640);"),
 ]
 
 _EXT = {

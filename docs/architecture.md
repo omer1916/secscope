@@ -56,7 +56,7 @@ the UI down.
 
 | Area | Module | Notes |
 |---|---|---|
-| Rule catalogue / KB | `analysis/kb.py`, `remediation/*.yaml` | 64 rules, tr/en, CWE + OWASP 2025 + ASVS 5.0, stack-specific snippets. Catalogue: [rules.md](rules.md), mapping: [owasp-mapping.md](owasp-mapping.md). |
+| Rule catalogue / KB | `analysis/kb.py`, `remediation/*.yaml` | 100 rules (67 static + 33 SEO), tr/en, CWE + OWASP 2025 + ASVS 5.0, stack-specific snippets. Catalogue: [rules.md](rules.md), mapping: [owasp-mapping.md](owasp-mapping.md). |
 | Native engines | `analysis/regex_rules.py`, `analysis/python_checks.py`, `analysis/secret_scan.py`, `analysis/config_checks.py`, `analysis/deps.py` | Pattern rules (JS/TS/PHP/templates), Python AST taint, secrets, config, dependency inventory + SBOM. |
 | Modules | `modules/sast.py`, `secrets.py`, `sca.py`, `config_audit.py` | Native always; Semgrep, Bandit, gitleaks, Trivy, osv-scanner when present. Docs: [modules/static-analysis.md](modules/static-analysis.md). |
 | Dedup | `core/dedup.py` | Rule families, ±2-line tolerance for code rules, confidence raised by agreement. |

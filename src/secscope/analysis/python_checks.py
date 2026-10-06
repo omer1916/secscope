@@ -70,6 +70,22 @@ DB_RESULT_METHODS = frozenset(
         "all",
     }
 )
+# Environment variables (insecure-default checks): a secret, a debug switch, an origin list, a
+# security switch. NEGATED names flip the meaning: DISABLE_AUTH=true is the insecure value.
+ENV_SECRET_NAME = re.compile(
+    r"(?i)(secret|passw(?:or)?d|pwd|api_?key|private_?key|signing_?key|jwt|token|salt|session_?key)"
+)
+ENV_DEBUG_NAME = re.compile(r"(?i)debug")
+ENV_ORIGIN_NAME = re.compile(r"(?i)(origin|cors|allowed_?hosts)")
+ENV_SWITCH_NAME = re.compile(
+    r"(?i)(auth|csrf|verify|ssl|tls|https|secure|login|protect|rate_?limit|encrypt|signature)"
+)
+ENV_NEGATED_NAME = re.compile(r"(?i)(disable|skip|insecure|bypass|allow_?all|no_)")
+ENV_GETTERS = frozenset({"os.environ.get", "os.getenv", "environ.get", "getenv"})
+TRUTHY = frozenset({"1", "true", "yes", "on", "y", "t"})
+FALSY = frozenset({"0", "false", "no", "off", "n", "f", ""})
+# stat constants that grant write access to "others".
+WORLD_WRITE_FLAGS = frozenset({"S_IWOTH", "S_IRWXO"})
 TOKENISH = re.compile(r"(?i)(token|secret|passw|otp|nonce|salt|session|api_?key|reset|verif)")
 
 
@@ -81,6 +97,7 @@ class PyIssue:
     confidence: Confidence
     severity: Severity | None = None
     note: str = ""
+    end_line: int | None = None
 
 
 def _dotted(node: ast.AST) -> str:
@@ -188,7 +205,15 @@ class _Checker(ast.NodeVisitor):
         if suppressed(self.file.line_text(line), rule_id):
             return
         self.issues.append(
-            PyIssue(rule_id, line, getattr(node, "col_offset", 0) + 1, confidence, severity, note)
+            PyIssue(
+                rule_id,
+                line,
+                getattr(node, "col_offset", 0) + 1,
+                confidence,
+                severity,
+                note,
+                getattr(node, "end_lineno", None),
+            )
         )
 
     def tainted(self, node: ast.AST | None) -> bool:
@@ -410,6 +435,25 @@ class _Checker(ast.NodeVisitor):
             if TOKENISH.search(name):
                 self.report("SAST-RAND-001", node, "high")
 
+    def _check_env_default(self, node: ast.Call) -> None:
+        """``os.environ.get("NAME", default)``: is the unconfigured state the insecure one?"""
+        var = _const_str(node.args[0])
+        default = _const_str(node.args[1])
+        if var is None or default is None:
+            return
+        value = default.strip().lower()
+        negated = bool(ENV_NEGATED_NAME.search(var))
+        if ENV_SECRET_NAME.search(var) and not negated and value:
+            self.report("SAST-FALLBACK-001", node, "high")
+        elif (ENV_DEBUG_NAME.search(var) and not negated and value in TRUTHY) or (
+            ENV_ORIGIN_NAME.search(var) and value == "*"
+        ):
+            self.report("SAST-FAILOPEN-001", node, "high")
+        elif ENV_SWITCH_NAME.search(var) and (
+            (negated and value in TRUTHY) or (not negated and value in FALSY and value)
+        ):
+            self.report("SAST-FAILOPEN-001", node, "medium")
+
     def visit_Call(self, node: ast.Call) -> None:
         name = _call_name(node)
         last = _last(name)
@@ -513,6 +557,16 @@ class _Checker(ast.NodeVisitor):
             and first is not None
         ):
             self._check_response_body(first, node)
+        # Insecure defaults: the value used when the environment variable is missing
+        if name in ENV_GETTERS and len(node.args) >= 2:
+            self._check_env_default(node)
+        # World-writable file permissions
+        if last in {"chmod", "fchmod", "lchmod"}:
+            mode = node.args[1] if name.startswith("os.") and len(node.args) > 1 else None
+            if mode is None and not name.startswith("os."):
+                mode = node.args[0] if node.args else _kw(node, "mode")
+            if mode is not None and _world_writable(mode):
+                self.report("SAST-PERM-001", node, "high")
         # Debug mode
         if last == "run" and _is_true(_kw(node, "debug")):
             self.report("SAST-DEBUG-001", node, "high")
@@ -617,6 +671,21 @@ class _Checker(ast.NodeVisitor):
         if name in {"pdb.set_trace", "ipdb.set_trace", "breakpoint"}:
             self.report("QUAL-DEBUGCODE-001", node, "high")
         self.generic_visit(node)
+
+
+def _world_writable(mode: ast.expr) -> bool:
+    if (
+        isinstance(mode, ast.Constant)
+        and isinstance(mode.value, int)
+        and not isinstance(mode.value, bool)
+    ):
+        return bool(mode.value & 0o002)
+    names = {
+        n.attr if isinstance(n, ast.Attribute) else n.id
+        for n in ast.walk(mode)
+        if isinstance(n, (ast.Attribute, ast.Name))
+    }
+    return bool(names & WORLD_WRITE_FLAGS)
 
 
 def check_python(file: SourceFile) -> Iterator[PyIssue]:
