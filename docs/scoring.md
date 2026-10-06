@@ -27,11 +27,15 @@ finding of the same rule (finding the same mistake 40 times should not zero the 
 - **Quality**: findings with category `quality` (accessibility, console errors, code quality).
 
 A sub-score exists only if a contributing module ran; e.g. a URL-only scan has no dependency
-score rather than a misleading 100.
+score rather than a misleading 100. Likewise the dependency score stays empty when no offline
+advisory database was available (an absent measurement is not a clean result), and with no
+sub-score at all the overall score is shown as "–" instead of 100/A.
 
 ## SEO and resilience
 
-Computed by the SEO (M6) and load/resilience (M7) modules and documented there.
+SEO: computed by the SEO module (see the SEO section of the report). Resilience: no module
+produces it in this build (load testing is not included, ADR-009), so its weight is always
+redistributed.
 
 ## Overall score and grade
 

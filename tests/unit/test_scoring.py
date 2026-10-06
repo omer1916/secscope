@@ -74,6 +74,7 @@ def test_confirmed_critical_caps_grade() -> None:
     s = compute_scores(
         [f("SAST-SQLI-001", "critical", "confirmed")], ran=["sast"], seo=100, resilience=100
     )
+    assert s.overall is not None
     assert s.overall >= 80
     assert (s.grade, s.grade_capped) == ("D", True)
 
@@ -82,3 +83,10 @@ def test_custom_weights() -> None:
     w = ScoreWeights(security=1.0, seo=0, resilience=0, quality=0, dependencies=0)
     s = compute_scores([f("SAST-SQLI-001")], ran=["sast", "sca"], weights=w)
     assert s.overall == 92.0
+
+
+def test_dependencies_unmeasured_without_advisory_database() -> None:
+    # No advisory DB: "no vulnerable packages found" is not evidence of safety.
+    s = compute_scores([], ran=["sast", "sca"], dependencies_measured=False)
+    assert s.dependencies is None
+    assert "dependencies" not in s.effective_weights

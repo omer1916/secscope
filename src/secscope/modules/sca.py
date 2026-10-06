@@ -282,6 +282,9 @@ class ScaModule(BaseModule):
                     f"osv-scanner failed (exit {run.returncode}): {run.stderr[-300:]}", "warning"
                 )
 
+        # Without an advisory database nothing was measured: the dependency score must not
+        # read as a clean bill of health (scoring leaves it unmeasured).
+        result.data["advisories_assessed"] = used_tools > 0
         if used_tools == 0:
             result.notes.append(
                 "reduced-coverage: no offline vulnerability database (run 'secscope tools update-db')"

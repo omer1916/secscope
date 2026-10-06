@@ -6,7 +6,8 @@ Penalty score (security, dependencies, quality): start at 100 and subtract, per 
 
 SEO and resilience scores are produced by their modules (M6/M7) and passed in.
 The overall score is the weighted mean of the available sub-scores; weights of
-missing sub-scores are redistributed proportionally (reported as such).
+missing sub-scores are redistributed proportionally (reported as such). With no
+sub-score at all there is no overall score (grade "–").
 """
 
 from __future__ import annotations
@@ -31,6 +32,9 @@ CONFIDENCE_FACTOR: dict[Confidence, float] = {
     "low": 0.25,
 }
 REPEAT_FACTOR = 0.25
+# Sub-scores a module of this build can produce, in display order. Resilience needs load
+# testing, which this build does not include (ADR-009); its weight is redistributed.
+DISPLAYED_SUBSCORES = ("security", "seo", "quality", "dependencies")
 GRADES: tuple[tuple[float, str], ...] = ((90, "A"), (80, "B"), (70, "C"), (60, "D"), (0, "F"))
 
 
@@ -67,8 +71,9 @@ class Scores:
     quality: float | None = None
     seo: float | None = None
     resilience: float | None = None
-    overall: float = 100.0
-    grade: str = "A"
+    # None (grade "–") when no sub-score was measured: nothing measured is not an "A".
+    overall: float | None = None
+    grade: str = "–"
     grade_capped: bool = False
     effective_weights: dict[str, float] = field(default_factory=dict[str, float])
 
@@ -93,8 +98,13 @@ def compute_scores(
     ran: Iterable[str] = (),
     seo: float | None = None,
     resilience: float | None = None,
+    dependencies_measured: bool = True,
 ) -> Scores:
-    """``ran``: module ids that actually ran — a sub-score exists only if a contributing module ran."""
+    """``ran``: module ids that actually ran — a sub-score exists only if a contributing module ran.
+
+    ``dependencies_measured=False`` (no advisory database) leaves the dependency score empty:
+    an absent measurement is not a clean result.
+    """
     weights = weights or ScoreWeights()
     ran_set = set(ran)
     security_modules = {
@@ -111,7 +121,7 @@ def compute_scores(
         s.security = penalty_score(
             f for f in findings if f.category == Category.SECURITY and not _is_dependency(f)
         )
-    if "sca" in ran_set:
+    if "sca" in ran_set and dependencies_measured:
         s.dependencies = penalty_score(
             f for f in findings if _is_dependency(f) and f.category == Category.SECURITY
         )
@@ -130,6 +140,8 @@ def compute_scores(
     if total_w > 0:
         s.effective_weights = {k: round(w / total_w, 4) for k, (_, w) in available.items()}
         s.overall = round(sum(v * w for v, w in available.values()) / total_w, 1)  # type: ignore[operator]
+    if s.overall is None:
+        return s
     s.grade = grade(s.overall)
     confirmed_critical = any(
         f.severity == "critical" and f.confidence == "confirmed" for f in findings

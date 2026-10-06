@@ -144,6 +144,11 @@ def score_outcome(ctx: ScanContext, outcome: ScanOutcome) -> None:
     outcome.tool_versions = {t.name: t.version or "?" for t in ctx.tools.detected() if t.available}
     seo = ctx.results.get("seo")
     seo_value = seo.data.get("seo_score", {}).get("score") if seo is not None else None
+    sca = ctx.results.get("sca")
     outcome.scores = compute_scores(
-        outcome.findings, weights=ctx.settings.weights, ran=ran, seo=seo_value
+        outcome.findings,
+        weights=ctx.settings.weights,
+        ran=ran,
+        seo=seo_value,
+        dependencies_measured=sca is None or bool(sca.data.get("advisories_assessed", True)),
     ).as_dict()
