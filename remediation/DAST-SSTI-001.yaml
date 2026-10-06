@@ -1,0 +1,44 @@
+rule_id: DAST-SSTI-001
+title:
+  tr: Şablon enjeksiyonu (girdi şablon olarak değerlendiriliyor)
+  en: Template injection (input evaluated as a template)
+severity: critical
+category: security
+confidence: high
+why:
+  tr: Parametreye gönderilen {{7*9}} işareti yanıtta 63 olarak döndü; yani uygulama kullanıcı girdisini şablon motoruyla değerlendiriyor.
+    Bu çoğu zaman sunucuda kod çalıştırmaya (RCE) kadar gider.
+  en: A {{7*9}} marker sent in a parameter came back as 63 in the response, so the app evaluates user input with a template
+    engine. This often escalates to running code on the server (RCE).
+impact:
+  tr: Sunucuda kod çalıştırma, tam sistem ele geçirme.
+  en: Code execution on the server, full system compromise.
+fix_steps:
+  tr:
+  - Kullanıcı girdisini asla şablon kaynağı olarak kullanmayın; girdiyi yalnızca şablona değişken (context) olarak verin.
+  - Sabit şablon dosyaları kullanın; dinamik şablon derlemesinden kaçının.
+  en:
+  - Never use user input as the template source; pass input only as a variable (context) into a fixed template.
+  - Use static template files; avoid compiling templates from user data.
+snippets:
+  flask:
+    lang: python
+    code: '# WRONG: render_template_string(''Hello '' + name)
+
+      # RIGHT: render_template(''hello.html'', name=name)'
+  express:
+    lang: js
+    code: '// WRONG: compiling a template from req.query
+
+      // RIGHT: res.render(''hello'', { name });  // fixed template file, name is data'
+verify:
+  tr: Düzeltip uygulamayı yeniden başlatın ve taramayı tekrarlayın; bu madde 'Düzeltildi' olmalı.
+  en: Fix it, restart the app and re-scan; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 1336
+- type: cwe
+  id: 94
+- type: owasp
+  id: A03:2025
+effort: M

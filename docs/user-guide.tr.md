@@ -61,7 +61,7 @@ duraklatabilir veya iptal edebilirsiniz. Bitince **Sonuçlar** açılır.
 
 ### Çalışan uygulama kontrolleri (dinamik)
 
-Uygulaman çalışırken (localhost'ta) ona bakıp yalnızca çalışma anında görünen açıkları bulur: eksik güvenlik başlıkları, korumasız çerezler, yanlış CORS, açıkta kalmış `.git`/`.env`/yedek dosyalar, hata sayfası sızıntısı, dizin listeleme. Saldırı yükü göndermez — normal istek atıp yanıta bakar. Yalnızca kapsam beyanını onayladığında ve yalnızca kendi localhost adresine çalışır.
+Uygulaman çalışırken (localhost'ta) ona bakıp yalnızca çalışma anında görünen açıkları bulur: eksik güvenlik başlıkları, korumasız çerezler, yanlış CORS, açıkta kalmış `.git`/`.env`/yedek dosyalar, hata sayfası sızıntısı, dizin listeleme. Saldırı yükü göndermez — normal istek atıp yanıta bakar. Ayrıca zararsız işaretlerle doğrulama yapar: GET parametrelerine zararsız bir işaret gönderip yansıyan XSS, şablon enjeksiyonu ({{7*9}}→63) ve açık yönlendirmeyi tespit eder. Saldırı yükü göndermez, POST formlarını denemez. Yalnızca kapsam beyanını onayladığında ve yalnızca kendi localhost adresine çalışır.
 
 ### Google'da görünürlük bölümü
 

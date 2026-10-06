@@ -1,0 +1,49 @@
+rule_id: DAST-XSS-001
+title:
+  tr: Girdi süzülmeden geri yansıtılıyor (yansıyan XSS)
+  en: Input reflected without escaping (reflected XSS)
+severity: high
+category: security
+confidence: high
+why:
+  tr: Çalışan uygulamaya bir parametreyle zararsız bir işaret gönderildi ve uygulama bunu HTML'e kaçış uygulamadan geri yazdı.
+    Bu, saldırganın o parametreye script koyup kurbanın tarayıcısında çalıştırabileceği anlamına gelir (yansıyan XSS).
+  en: A harmless marker sent through a parameter was written back into the HTML without escaping. This means an attacker can
+    put script in that parameter and run it in a victim's browser (reflected XSS).
+impact:
+  tr: Oturum çalma, kullanıcı adına işlem yapma, sayfa içeriğini değiştirme.
+  en: Session theft, actions as the user, defacing the page.
+fix_steps:
+  tr:
+  - Kullanıcı girdisini HTML'e yazmadan önce bağlama uygun kaçış uygulayın (şablon motorunun otomatik kaçışını açık tutun).
+  - Mümkünse girdiyi HTML yerine metin olarak ekleyin (textContent).
+  - Katmanlı savunma için sıkı bir Content-Security-Policy ekleyin.
+  en:
+  - Escape user input for the right context before writing it into HTML (keep the template engine's auto-escaping on).
+  - Insert input as text rather than HTML where possible (textContent).
+  - Add a strict Content-Security-Policy as defence in depth.
+snippets:
+  flask:
+    lang: python
+    code: '# Jinja auto-escapes by default; render via a template, not string concatenation:
+
+      return render_template(''hello.html'', name=name)  # {{ name }} is escaped'
+  express:
+    lang: js
+    code: '// escape before inserting, e.g. with a template engine that auto-escapes,
+
+      // or on the client use el.textContent = name  (not innerHTML)'
+  php:
+    lang: php
+    code: echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+verify:
+  tr: Düzeltip uygulamayı yeniden başlatın ve taramayı tekrarlayın; bu madde 'Düzeltildi' olmalı.
+  en: Fix it, restart the app and re-scan; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 79
+- type: owasp
+  id: A03:2025
+- type: asvs
+  id: 5.0-V1
+effort: S

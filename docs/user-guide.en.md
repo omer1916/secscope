@@ -61,7 +61,7 @@ or cancel. When it finishes, **Results** opens.
 
 ### Running-app checks (dynamic)
 
-While your app runs (on localhost) it inspects what only shows up at runtime: missing security headers, insecure cookies, wrong CORS, exposed `.git`/`.env`/backup files, error-page leakage, directory listing. It sends no attack payloads — just ordinary requests, inspecting the response. Runs only after you accept the scope statement, and only against your own localhost.
+While your app runs (on localhost) it inspects what only shows up at runtime: missing security headers, insecure cookies, wrong CORS, exposed `.git`/`.env`/backup files, error-page leakage, directory listing. It sends no attack payloads — just ordinary requests, inspecting the response. It also verifies with harmless markers: a benign marker sent through GET parameters reveals reflected XSS, template injection ({{7*9}}→63) and open redirects. No attack payloads; POST forms are never submitted. Runs only after you accept the scope statement, and only against your own localhost.
 
 ### Visibility in Google
 

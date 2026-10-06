@@ -97,7 +97,7 @@ the UI down.
 
 | Area | Module | Notes |
 |---|---|---|
-| Running-app checks | `modules/dast_http.py`, `analysis/http_checks.py` | Against the user's own local app only (scope guard + scope statement). Inspects responses for missing security headers, insecure cookies, permissive CORS, TRACE, directory listing, exposed .git/.env/backup files and stack-trace error pages. No attack payloads. |
+| Running-app checks | `modules/dast_http.py`, `analysis/http_checks.py` | Against the user's own local app only (scope guard + scope statement). Response inspection (missing security headers, insecure cookies, permissive CORS, TRACE, directory listing, exposed .git/.env/backup files, stack-trace error pages) plus safe reflection verification: harmless markers sent through GET parameters reveal reflected XSS, template injection ({{7*9}}→63) and open redirects. No attack payloads; POST forms are never submitted. |
 
 ## Coverage, background code, attack surface (ADR-010)
 

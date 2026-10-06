@@ -62,6 +62,7 @@ class HttpIssue:
     confidence: Confidence = "high"
     severity: Severity | None = None
     method: str = "GET"
+    parameter: str | None = None
     extra: dict[str, str] = field(default_factory=dict[str, str])
 
 
@@ -71,6 +72,42 @@ def _lower(headers: Mapping[str, str]) -> dict[str, str]:
 
 def is_https(url: str) -> bool:
     return urlsplit(url).scheme == "https"
+
+
+# --- Safe reflection verification (SPEC §6.3-C "güvenli kanıt") ------------------
+#
+# These do NOT attack the app. For each GET parameter the module sends a harmless unique
+# marker and observes how the app returns it. If the app echoes angle brackets unescaped,
+# a reflected value could become script (XSS). If a {{7*9}} marker comes back as 63, a
+# template engine evaluated user input (SSTI). If a parameter sends the browser to an
+# external address, that is an open redirect. No payload executes; the marker is inert.
+
+# Redirect-style parameter names worth checking with an out-of-scope probe URL.
+REDIRECT_PARAM_NAMES = frozenset(
+    {"next", "url", "redirect", "redirect_uri", "redirecturl", "return", "returnurl",
+     "return_url", "dest", "destination", "to", "continue", "goto", "target", "forward",
+     "r", "u", "link", "out"}
+)  # fmt: skip
+# An out-of-scope host the scope guard will refuse to follow (so it is only ever a probe).
+REDIRECT_PROBE_URL = "https://secscope-redirect-probe.example/x"
+
+
+def xss_probe_value(canary: str) -> str:
+    """A harmless marker: the canary plus angle brackets a safe app must HTML-escape."""
+    return f"{canary}<x>"
+
+
+def ssti_probe_value(canary: str) -> str:
+    """The canary plus ``{{7*9}}`` — a template engine that evaluates input returns 63."""
+    return canary + "{{7*9}}"
+
+
+def reflected_unescaped(canary: str, body: str) -> bool:
+    return f"{canary}<x>" in body  # a safe app returns {canary}&lt;x&gt;
+
+
+def template_evaluated(canary: str, body: str) -> bool:
+    return f"{canary}63" in body and f"{canary}{{{{7*9}}}}" not in body
 
 
 def check_security_headers(

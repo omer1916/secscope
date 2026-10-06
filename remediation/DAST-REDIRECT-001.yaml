@@ -1,0 +1,40 @@
+rule_id: DAST-REDIRECT-001
+title:
+  tr: Açık yönlendirme (çalışan uygulama)
+  en: Open redirect (running app)
+severity: medium
+category: security
+confidence: high
+why:
+  tr: Bir parametre, tarayıcıyı dış bir adrese yönlendiriyor. Saldırgan bu bağlantıyı kullanarak kullanıcıyı güvenilir görünen
+    sitenizden kötü niyetli bir siteye yönlendirebilir (kimlik avı).
+  en: A parameter sends the browser to an external address. An attacker can use your trusted-looking link to send users to
+    a malicious site (phishing).
+fix_steps:
+  tr:
+  - Yönlendirme hedefini izinli bir listeyle veya yalnızca site içi göreli yollarla sınırlayın.
+  - Dış adrese yönlendirmeyin; gerekiyorsa araya 'bu siteden ayrılıyorsunuz' uyarısı koyun.
+  en:
+  - Restrict the redirect target to an allow-list or to same-site relative paths only.
+  - Do not redirect to external addresses; if needed, show a 'you are leaving this site' interstitial.
+snippets:
+  flask:
+    lang: python
+    code: "from urllib.parse import urlparse\nnext = request.args.get('next', '/')\nif urlparse(next).netloc:  # external\
+      \ -> reject\n    next = '/'\nreturn redirect(next)"
+  express:
+    lang: js
+    code: 'const next = req.query.next || ''/'';
+
+      if (!next.startsWith(''/'') || next.startsWith(''//'')) return res.redirect(''/'');
+
+      res.redirect(next);'
+verify:
+  tr: Düzeltip uygulamayı yeniden başlatın ve taramayı tekrarlayın; bu madde 'Düzeltildi' olmalı.
+  en: Fix it, restart the app and re-scan; this item should show up as 'Fixed'.
+references:
+- type: cwe
+  id: 601
+- type: owasp
+  id: A01:2025
+effort: S

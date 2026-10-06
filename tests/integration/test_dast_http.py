@@ -6,7 +6,7 @@ import asyncio
 from pathlib import Path
 
 from secscope.core.config import ScanConfig, Settings, Target, TargetKind
-from secscope.core.models import Finding
+from secscope.core.models import Finding, HttpLocation
 from secscope.core.orchestrator import Orchestrator
 from secscope.core.scope_guard import ScopeGuard
 from secscope.core.toolmgr import Manifest, ToolManager
@@ -107,3 +107,27 @@ def test_scope_statement_gates_the_module(tmp_path: Path) -> None:
 
 def _registry() -> ModuleRegistry:
     return ModuleRegistry([DastHttpModule])
+
+
+def test_reflection_verification_finds_xss_ssti_and_open_redirect(tmp_path: Path) -> None:
+    rules = {f.rule_id for f in _scan(tmp_path)}
+    assert {"DAST-XSS-001", "DAST-SSTI-001", "DAST-REDIRECT-001"} <= rules
+
+
+def test_reflection_findings_name_the_parameter(tmp_path: Path) -> None:
+    findings = _scan(tmp_path)
+
+    def params(rule: str) -> set[str | None]:
+        return {
+            f.location.parameter
+            for f in findings
+            if f.rule_id == rule and isinstance(f.location, HttpLocation)
+        }
+
+    assert "name" in params("DAST-XSS-001")  # /hello reflects it unescaped
+    assert params("DAST-SSTI-001") == {"q"}  # /tmpl evaluates {{7*9}}
+    assert params("DAST-REDIRECT-001") == {"next"}  # /go follows ?next
+    xss = next(f for f in findings if f.rule_id == "DAST-XSS-001")
+    assert xss.severity == "high"
+    ssti = next(f for f in findings if f.rule_id == "DAST-SSTI-001")
+    assert ssti.severity == "critical"

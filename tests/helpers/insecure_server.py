@@ -10,10 +10,13 @@ from __future__ import annotations
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from types import TracebackType
+from urllib.parse import parse_qsl
 
 HOME = (
     b"<html><head><title>demo</title></head><body><h1>hi</h1>"
-    b'<a href="/hello?name=guest">hello</a></body></html>'
+    b'<a href="/hello?name=guest">hello</a> '
+    b'<a href="/tmpl?q=hi">tmpl</a> '
+    b'<a href="/go?next=/home">go</a></body></html>'
 )
 
 
@@ -43,13 +46,26 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(body)
 
     def do_GET(self) -> None:
-        path = self.path.split("?", 1)[0]
+        split = self.path.split("?", 1)
+        path = split[0]
+        query = dict(parse_qsl(split[1], keep_blank_values=True)) if len(split) > 1 else {}
         if path == "/":
             self._send(200, HOME, extra={"Set-Cookie": "session_id=abc123; Path=/"})
         elif path == "/.env":
             self._send(200, b"SECRET_KEY=prod-value\nDB_PASSWORD=hunter2\n", "text/plain")
         elif path == "/files/":
             self._send(200, b"<html><body><h1>Index of /files/</h1><ul></ul></body></html>")
+        elif path == "/hello":
+            # reflected input WITHOUT escaping (reflected XSS)
+            name = query.get("name", "world")
+            self._send(200, f"<html><body><h1>Hello {name}</h1></body></html>".encode())
+        elif path == "/tmpl":
+            # a naive template engine that evaluates {{7*9}} (SSTI)
+            q = query.get("q", "").replace("{{7*9}}", "63").replace("${7*9}", "63")
+            self._send(200, f"<html><body>{q}</body></html>".encode())
+        elif path == "/go":
+            # open redirect: sends the browser wherever ?next points
+            self._send(302, b"", extra={"Location": query.get("next", "/")})
         else:
             body = b"<html><body><h1>500</h1><pre>Traceback (most recent call last):\n  File app.py</pre></body></html>"
             self._send(500, body)

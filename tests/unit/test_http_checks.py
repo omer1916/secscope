@@ -146,4 +146,5 @@ def test_exposed_git_is_high() -> None:
     issue = exposed_file_issue(
         "/.git/config", 200, "[core]\n\trepositoryformatversion = 0", "[core]"
     )
-    assert issue is not None and issue.severity == "high"
+    assert issue is not None
+    assert issue.severity == "high"
