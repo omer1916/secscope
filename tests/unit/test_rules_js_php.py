@@ -222,6 +222,8 @@ CASES: list[tuple[str, str, str, str]] = [
         'login("admin", "admin");',
         '// login("admin", "admin") example in a comment',
     ),
+    ("QUAL-DEFAULTCRED-001", "python", 'USERS = {"admin": "admin"}', 'KINDS = {"test": "test"}'),
+    ("QUAL-DEFAULTCRED-001", "php", "connect('root', 'toor');", "connect($user, $pass);"),
     (
         "SAST-FALLBACK-001",
         "javascript",
@@ -264,6 +266,7 @@ CASES: list[tuple[str, str, str, str]] = [
 _EXT = {
     "javascript": "app.js",
     "php": "index.php",
+    "python": "app.py",
     "html": "index.html",
     "template": "templates/page.html",
 }

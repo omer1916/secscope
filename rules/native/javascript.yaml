@@ -124,7 +124,9 @@
 
 - id: QUAL-DEFAULTCRED-001
   languages: [javascript, php, python]
-  pattern: '(?i)[''"](?:admin|root|test|user)[''"]\s*[,:]\s*[''"]?(?:pass(?:word)?)?[''"]?\s*[,:]?\s*[''"](?:admin|root|password|123456|12345678|changeme|test|toor|letmein)[''"]'
+  # `"user", "pw"` argument pairs for any default user; `"key": "value"` only for admin/root,
+  # so plain mappings such as {"test": "test"} are not credentials.
+  pattern: '(?i)(?:[''"](?:admin|root|test|user)[''"]\s*,|[''"](?:admin|root)[''"]\s*:)\s*(?:[''"]?pass(?:word)?[''"]?\s*[,:=]\s*)?[''"](?:admin|root|password|123456|12345678|changeme|test|toor|letmein)[''"]'
   not_pattern: '^\s*(?://|#|\*|/\*|<!--)'
   confidence: low
 
