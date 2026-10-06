@@ -7,8 +7,8 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 
-from PySide6.QtCore import QByteArray, QSettings, Qt
-from PySide6.QtGui import QCloseEvent, QGuiApplication
+from PySide6.QtCore import QByteArray, QSettings, Qt, QTimer
+from PySide6.QtGui import QCloseEvent, QGuiApplication, QShowEvent
 from PySide6.QtWidgets import QHBoxLayout, QListWidget, QMainWindow, QStackedWidget, QWidget
 
 from secscope.__about__ import __app_id__, __app_name__
@@ -25,6 +25,10 @@ from secscope.ui.pages.wizard import WizardPage
 from secscope.ui.state import AppState
 
 PAGES = ("dashboard", "wizard", "monitor", "results", "history", "settings")
+
+
+# Logical pixels kept free for the title bar and borders before the frame is known.
+TITLE_BAR_RESERVE = 40
 
 
 class MainWindow(QMainWindow):
@@ -84,6 +88,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(root)
         self.resize(1280, 820)
         self._restore_geometry()
+        self._fitted = False
         self._fit_to_screen()
         self.go("dashboard")
 
@@ -122,22 +127,31 @@ class MainWindow(QMainWindow):
 
     def _restore_geometry(self) -> None:
         geometry = self._qsettings().value("window/geometry")
-        if isinstance(geometry, QByteArray):
-            self.restoreGeometry(geometry)
+        self._restored = isinstance(geometry, QByteArray) and self.restoreGeometry(geometry)
 
-    def _fit_to_screen(self) -> None:
+    def _fit_to_screen(self, *, center: bool = False) -> None:
         """Keep the window inside the usable screen area (above the taskbar), e.g. on
         1366x768 or 125 % scaled laptop screens, or after a monitor was unplugged."""
         avail = (self.screen() or QGuiApplication.primaryScreen()).availableGeometry()
-        margin = self.frameGeometry().height() - self.geometry().height()
-        width = min(self.width(), avail.width() - 16)
-        height = min(self.height(), avail.height() - margin - 16)
+        # Before the first show the frame (title bar, borders) is not known yet: reserve a
+        # typical one so the frame, not just the client area, fits.
+        frame_h = max(self.frameGeometry().height() - self.geometry().height(), TITLE_BAR_RESERVE)
+        frame_w = max(self.frameGeometry().width() - self.geometry().width(), 16)
+        width = min(self.width(), avail.width() - frame_w)
+        height = min(self.height(), avail.height() - frame_h)
         self.resize(max(width, self.minimumWidth()), max(height, self.minimumHeight()))
         frame = self.frameGeometry()
-        if not avail.contains(frame):
+        if center or not avail.contains(frame):
             frame.moveCenter(avail.center())
             frame.moveTop(max(avail.top(), frame.top()))
             self.move(frame.topLeft())
+
+    def showEvent(self, event: QShowEvent) -> None:  # noqa: N802 - Qt override
+        super().showEvent(event)
+        if not self._fitted:  # re-check once with the real frame size
+            self._fitted = True
+            # First start (no saved geometry): centre the window.
+            QTimer.singleShot(0, lambda: self._fit_to_screen(center=not self._restored))
 
     def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802 - Qt override
         self._qsettings().setValue("window/geometry", self.saveGeometry())

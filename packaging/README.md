@@ -15,9 +15,21 @@ Output `dist/SecScope/`:
 | `secscope(.exe)` | CLI; also the internal sub-programs the UI starts: `worker`, `static-server`, `run-python-tool <module>` |
 | `_internal/` | Python runtime, Qt (as replaceable shared libraries — LGPL), `secscope/_data/{rules,remediation,tools}` |
 
-Verified on Windows 10 (2026-10-06): `secscope.exe --version`, `modules`, `tools list`, a static
-scan with Bandit running in-process, an SEO scan using the bundled static server, and
-`SecScopeApp.exe` start-up.
+Both executables carry the app icon (`src/secscope/ui/assets/secscope.ico`, drawn by
+`scripts/make_icon.py`) and Windows version information (Explorer > Properties > Details) taken
+from `src/secscope/__about__.py`.
+
+## Smoke test of a build
+
+```bash
+uv run python scripts/frozen_smoke.py dist/SecScope
+```
+
+Starts `secscope.exe worker` exactly like the desktop app does, runs a static scan of
+`fixtures/vuln-flask` and an SEO scan of `fixtures/static-seo-good` (bundled static server) and
+fails unless both finish. Verified on Windows 10 (2026-10-06, 0.1.0): smoke test passed,
+`SecScopeApp.exe` starts with its own taskbar icon (~140 MB RAM), the window fits a 125 %-scaled
+1920×1080 screen.
 
 Large external tools (Trivy, gitleaks, osv-scanner, Semgrep, Chromium) are **not** bundled; the
 Tool Manager downloads them with SHA-256 verification.
