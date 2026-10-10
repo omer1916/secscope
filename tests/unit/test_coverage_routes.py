@@ -276,3 +276,29 @@ def test_example_key_in_app_code_is_reported_with_low_confidence() -> None:
 def test_real_looking_key_in_a_fixture_keeps_its_severity() -> None:
     hits = _secret_hits("fixtures/app/config.py", 'KEY = "AKIA\x5a5YQ7Q3XJ2KQ7W4P"\n')
     assert [(r, s, e) for r, s, _c, e in hits] == [("SECRET-CLOUD-001", None, False)]
+
+
+# ------------------------------------------------------------------ dependency dirs
+
+
+def test_intake_skips_dependency_dirs(tmp_path: Path) -> None:
+    # .venv/node_modules etc. must never reach the copied tree: external tools (gitleaks,
+    # Semgrep) would otherwise scan installed third-party code and flood the report.
+    project = tmp_path / "p"
+    (project / "app").mkdir(parents=True)
+    (project / "app" / "main.py").write_text("x = 1\n")
+    for dep in (".venv", "node_modules", ".git", "__pycache__"):
+        (project / dep).mkdir()
+        (project / dep / "secret.py").write_text("API_KEY = 'AKIA\x5a5YQ7Q3XJ2KQ7W4P'\n")
+    (project / "node_modules" / "left-pad").mkdir()
+    (project / "node_modules" / "left-pad" / "index.js").write_text("x\n")
+
+    report = prepare_source(project, tmp_path / "work")
+
+    assert (report.root / "app" / "main.py").is_file()
+    for dep in (".venv", "node_modules", ".git", "__pycache__"):
+        assert not (report.root / dep).exists(), f"{dep} should not be copied"
+    assert ".venv" in report.dependency_dirs
+    assert "node_modules" in report.dependency_dirs
+    # the fake key inside node_modules is never seen, so it is never a finding
+    assert report.files == 1

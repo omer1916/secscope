@@ -13,8 +13,6 @@ from collections.abc import Iterable, Sequence
 from pathlib import Path, PurePosixPath
 from typing import Any
 
-from secscope.core.fingerprint import DEPENDENCY_DIRS
-
 # Folders whose code is tests, fixtures, mocks or examples rather than the application.
 BACKGROUND_DIRS: dict[str, str] = {
     "test": "test",
@@ -105,22 +103,17 @@ def build_coverage(
     excluded: Iterable[str] = (),
     exclude_patterns: Sequence[str] = (),
     skipped_links: Iterable[str] = (),
+    dependency_dirs: Iterable[str] = (),
 ) -> dict[str, Any]:
     from secscope.analysis.source import language_of  # noqa: PLC0415 - avoid import cycle
 
     languages: Counter[str] = Counter()
     background: Counter[str] = Counter()
-    dependency_dirs: list[str] = []
-    for dirpath, dirnames, filenames in os.walk(root):
+    # Dependency dirs are not in the copied tree (intake skips them); the list comes from the
+    # intake report. Tool caches / VCS metadata are not worth listing.
+    deps = sorted(d for d in dependency_dirs if PurePosixPath(d).name not in QUIET_DIRS)
+    for dirpath, _dirnames, filenames in os.walk(root):
         here = Path(dirpath)
-        kept: list[str] = []
-        for d in sorted(dirnames):
-            if d in DEPENDENCY_DIRS:
-                if d not in QUIET_DIRS:
-                    dependency_dirs.append((here / d).relative_to(root).as_posix())
-            else:
-                kept.append(d)
-        dirnames[:] = kept
         for name in filenames:
             path = here / name
             lang = language_of(path)
@@ -140,6 +133,6 @@ def build_coverage(
         "exclude_patterns": [normalise_pattern(p) for p in exclude_patterns if p.strip()],
         "excluded_count": len(excluded_list),
         "excluded": excluded_list[:MAX_LISTED],
-        "dependency_dirs": dependency_dirs[:MAX_LISTED],
+        "dependency_dirs": deps[:MAX_LISTED],
         "skipped_links": links[:MAX_LISTED],
     }

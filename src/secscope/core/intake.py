@@ -33,6 +33,10 @@ class IntakeReport:
     skipped_links: list[str] = field(default_factory=list[str])
     # Paths left out because they match a user exclusion pattern (top-most match only).
     excluded: list[str] = field(default_factory=list[str])
+    # Dependency/VCS/build dirs (.venv, node_modules, .git, ...) not copied: SecScope never
+    # analyses installed third-party code, and external tools (gitleaks, Semgrep) would
+    # otherwise flood the report with findings from it.
+    dependency_dirs: list[str] = field(default_factory=list[str])
 
 
 def _on_rm_error(func: Callable[..., object], path: str, _exc: BaseException) -> None:
@@ -66,7 +70,9 @@ def _copy_folder(
         rel_dir = current.relative_to(source)
         keep: list[str] = []
         for d in dirnames:
-            if exclude and matches_exclude((rel_dir / d).as_posix(), exclude):
+            if d in DEPENDENCY_DIRS:
+                report.dependency_dirs.append((rel_dir / d).as_posix())
+            elif exclude and matches_exclude((rel_dir / d).as_posix(), exclude):
                 report.excluded.append((rel_dir / d).as_posix() + "/")
             elif (current / d).is_symlink() or _is_junction(current / d):
                 report.skipped_links.append((rel_dir / d).as_posix())
@@ -106,6 +112,21 @@ def _single_top_dir(root: Path) -> Path:
     if len(entries) == 1 and entries[0].is_dir():
         return entries[0]
     return root
+
+
+def _remove_dependency_dirs(root: Path, report: IntakeReport) -> None:
+    """Archives are extracted whole; dependency/VCS dirs are then removed so static analysis
+    and external tools never see installed third-party code."""
+    for dirpath, dirnames, _files in os.walk(root):
+        current = Path(dirpath)
+        keep: list[str] = []
+        for d in dirnames:
+            if d in DEPENDENCY_DIRS:
+                report.dependency_dirs.append((current / d).relative_to(root).as_posix())
+                remove_tree(current / d)
+            else:
+                keep.append(d)
+        dirnames[:] = keep
 
 
 def _remove_excluded(root: Path, exclude: Sequence[str], report: IntakeReport) -> None:
@@ -153,6 +174,7 @@ def prepare_source(
         except UnsafeArchiveError as exc:
             raise IntakeError(f"unsafe archive rejected: {exc}") from exc
         report = IntakeReport(root=_single_top_dir(dest), files=result.files, bytes=result.bytes)
+        _remove_dependency_dirs(report.root, report)
         if exclude:
             _remove_excluded(report.root, exclude, report)
     else:

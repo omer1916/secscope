@@ -159,6 +159,7 @@ async def run_scan(
                 excluded=report.excluded,
                 exclude_patterns=ctx.config.exclude,
                 skipped_links=report.skipped_links,
+                dependency_dirs=report.dependency_dirs,
             )
             if kind == TargetKind.FOLDER:
                 rev = await revision(original)
