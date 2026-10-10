@@ -29,6 +29,7 @@ from PySide6.QtWidgets import (
 
 from secscope.core.models import SEVERITY_ORDER, Finding
 from secscope.core.scoring import DISPLAYED_SUBSCORES
+from secscope.reporting.ai_prompt import render_ai_prompt
 from secscope.reporting.json_export import report_findings
 from secscope.reporting.writer import ReportFormatError, write_outputs
 from secscope.ui.state import AppState
@@ -169,12 +170,16 @@ class ResultsPage(QWidget):
         dl.addLayout(dbtns)
 
         self.open_btn = QPushButton(t("ui.results.open_report"))
+        self.ai_btn = QPushButton(t("ui.results.copy_ai"))
+        self.ai_btn.setToolTip(t("ui.results.copy_ai.hint"))
         self.export_btn = QPushButton(t("ui.results.export"))
         self.open_btn.clicked.connect(self.open_report)
+        self.ai_btn.clicked.connect(self.copy_for_ai)
         self.export_btn.clicked.connect(self.export)
         top = QHBoxLayout()
         top.addWidget(self.heading, 1)
         top.addWidget(self.open_btn)
+        top.addWidget(self.ai_btn)
         top.addWidget(self.export_btn)
 
         middle = QWidget()
@@ -296,6 +301,14 @@ class ResultsPage(QWidget):
         QMessageBox.information(
             self, t("ui.results.suppress"), t("ui.results.suppress.done", count=len(chosen))
         )
+
+    def copy_for_ai(self) -> None:
+        t = self.state.t
+        if self.report is None:
+            return
+        text = render_ai_prompt(self.report, lang=t.lang)
+        QGuiApplication.clipboard().setText(text)
+        QMessageBox.information(self, t("ui.results.copy_ai"), t("ui.results.copy_ai.done"))
 
     def _html_path(self) -> Path:
         assert self.report is not None

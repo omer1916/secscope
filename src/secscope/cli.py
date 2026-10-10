@@ -63,7 +63,7 @@ def build_parser() -> argparse.ArgumentParser:
     scan.add_argument("--ready-path", default="/", help="path polled until the app is ready")
     scan.add_argument("--out", type=Path, default=Path("reports"), help="output directory")
     scan.add_argument(
-        "--format", default="html,json", help="comma-separated: html,json,sarif,csv,pdf"
+        "--format", default="html,json", help="comma-separated: html,json,sarif,csv,pdf,ai"
     )
     scan.add_argument(
         "--fail-on", choices=SEVERITIES, help="exit 3 if a finding is at least this severe"
@@ -109,7 +109,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     report = sub.add_parser("report", help="render a stored scan again")
     report.add_argument("scan_id")
-    report.add_argument("--format", default="html", help="comma-separated: html,json,sarif,csv,pdf")
+    report.add_argument(
+        "--format", default="html", help="comma-separated: html,json,sarif,csv,pdf,ai"
+    )
     report.add_argument("--out", type=Path, default=Path("reports"))
     report.add_argument("--lang", choices=["tr", "en"])
     report.add_argument("--data-dir", type=Path, help="data directory the scan was stored in")

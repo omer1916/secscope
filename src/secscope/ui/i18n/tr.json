@@ -272,5 +272,20 @@
   "report.coverage.changed": "Kod bulguları yalnızca {ref} sonrasında değişen dosyalar için raporlandı.",
   "ui.wizard.exclude": "Hariç tutulacak yollar",
   "ui.wizard.exclude.placeholder": "ör. tests, docs/*.md, legacy/",
-  "ui.wizard.exclude.hint": "Virgülle ayırın. Bu yollar kopyalanmaz, taranmaz ve çalıştırılmaz; rapordaki Kapsam bölümünde listelenir."
+  "ui.wizard.exclude.hint": "Virgülle ayırın. Bu yollar kopyalanmaz, taranmaz ve çalıştırılmaz; rapordaki Kapsam bölümünde listelenir.",
+  "ai.title": "SecScope — düzeltilecek bulgular",
+  "ai.intro": "Aşağıda yerel bir güvenlik/SEO taramasında bulunan sorunlar var. Lütfen her bulguyu kod tabanında düzelt: belirtilen dosya ve satırı aç, sorunu gidermek için gereken değişikliği uygula. Önce kritik ve yüksek önemdekilerden başla. Değişiklikten emin değilsen önce açıkla.",
+  "ai.stack": "Proje türü",
+  "ai.summary": "Özet",
+  "ai.rules": "Her madde: ne, nerede, ilgili kod, neden sorun ve önerilen düzeltme. Verilen kod örneği yol göstericidir; projeye uyarlaman gerekebilir.",
+  "ai.what": "Ne",
+  "ai.why": "Neden",
+  "ai.fix": "Nasıl düzeltilir",
+  "ai.evidence": "İlgili kod",
+  "ai.refs": "Referans",
+  "ai.info_heading": "Bilgi düzeyi (düşük öncelik)",
+  "ai.clean": "Düzeltilecek bulgu yok.",
+  "ui.results.copy_ai": "Yapay zekâ için kopyala",
+  "ui.results.copy_ai.hint": "Tüm bulguları, kodu ve düzeltme önerileriyle birlikte panoya kopyalar; ChatGPT/Claude gibi bir yapay zekâya yapıştırıp düzelttirebilirsin.",
+  "ui.results.copy_ai.done": "Bulgular panoya kopyalandı. Bir yapay zekâ sohbetine yapıştırıp 'bu hataları düzelt' diyebilirsin."
 }

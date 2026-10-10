@@ -58,6 +58,8 @@ or cancel. When it finishes, **Results** opens.
   scans (undo in Settings).
 - **Open HTML report** opens the offline single-file report. **Export** writes HTML, JSON,
   SARIF (for IDEs/CI) and CSV.
+- **Copy for AI** copies every finding with its code and suggested fix to the clipboard; paste
+  it into an AI assistant (ChatGPT/Claude) and ask it to fix them (CLI: `--format ai`).
 
 ### Running-app checks (dynamic)
 

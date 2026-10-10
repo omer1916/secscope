@@ -9,12 +9,13 @@ from typing import Any
 
 from secscope.core.jsonutil import jdict
 from secscope.core.models import Language
+from secscope.reporting.ai_prompt import render_ai_prompt
 from secscope.reporting.csv_export import to_csv
 from secscope.reporting.html import render_html
 from secscope.reporting.json_export import report_findings, save_report
 from secscope.reporting.sarif import to_sarif
 
-FORMATS = ("html", "json", "sarif", "csv", "pdf")
+FORMATS = ("html", "json", "sarif", "csv", "pdf", "ai")
 
 
 class ReportFormatError(ValueError):
@@ -80,6 +81,10 @@ def write_outputs(
         # utf-8-sig so Excel opens Turkish characters correctly.
         path.write_text(to_csv(findings, lang=language), encoding="utf-8-sig")
         written["csv"] = path
+    if "ai" in formats:
+        path = base.with_suffix(".ai.md")
+        path.write_text(render_ai_prompt(report, lang=language), encoding="utf-8")
+        written["ai"] = path
     generated = jdict(jdict(report.get("seo")).get("generated"))
     if generated:
         patches = out_dir / "patches" / str(report["scan_id"])

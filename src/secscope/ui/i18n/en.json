@@ -272,5 +272,20 @@
   "report.coverage.changed": "Code findings are reported only for files changed since {ref}.",
   "ui.wizard.exclude": "Paths to exclude",
   "ui.wizard.exclude.placeholder": "e.g. tests, docs/*.md, legacy/",
-  "ui.wizard.exclude.hint": "Comma-separated. These paths are not copied, scanned or run; the report's Coverage section lists them."
+  "ui.wizard.exclude.hint": "Comma-separated. These paths are not copied, scanned or run; the report's Coverage section lists them.",
+  "ai.title": "SecScope — findings to fix",
+  "ai.intro": "Below are issues found by a local security/SEO scan. Please fix each finding in the codebase: open the named file and line and apply the change needed to resolve it. Start with critical and high severity. If you are unsure about a change, explain it first.",
+  "ai.stack": "Project type",
+  "ai.summary": "Summary",
+  "ai.rules": "Each item: what, where, the relevant code, why it matters and a suggested fix. The code sample is guidance; you may need to adapt it to the project.",
+  "ai.what": "What",
+  "ai.why": "Why",
+  "ai.fix": "How to fix",
+  "ai.evidence": "Relevant code",
+  "ai.refs": "References",
+  "ai.info_heading": "Info level (low priority)",
+  "ai.clean": "No findings to fix.",
+  "ui.results.copy_ai": "Copy for AI",
+  "ui.results.copy_ai.hint": "Copies all findings with their code and suggested fixes to the clipboard; paste into an AI assistant (ChatGPT/Claude) to have them fixed.",
+  "ui.results.copy_ai.done": "Findings copied to the clipboard. Paste them into an AI chat and ask it to fix them."
 }

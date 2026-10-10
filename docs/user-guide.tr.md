@@ -58,6 +58,8 @@ duraklatabilir veya iptal edebilirsiniz. Bitince **Sonuçlar** açılır.
   taramalarda gizlenir (Ayarlar'dan geri alınabilir).
 - **HTML raporu aç** çevrimdışı çalışan tek dosyalık raporu açar. **Dışa aktar** HTML, JSON,
   SARIF (IDE/CI için) ve CSV üretir.
+- **Yapay zekâ için kopyala** tüm bulguları kodu ve düzeltme önerileriyle birlikte panoya kopyalar;
+  ChatGPT/Claude gibi bir yapay zekâya yapıştırıp "bu hataları düzelt" diyebilirsin (CLI: `--format ai`).
 
 ### Çalışan uygulama kontrolleri (dinamik)
 
