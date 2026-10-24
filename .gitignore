@@ -31,6 +31,8 @@ patches/
 # OS / editors
 .DS_Store
 Thumbs.db
+*.lnk
+.claude/settings.local.json
 .idea/
 .vscode/
 

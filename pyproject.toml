@@ -1,12 +1,13 @@
 [project]
 name = "secscope"
 dynamic = ["version"]
-description = "Local-only desktop security, SEO and resilience testing platform for your own web projects."
+description = "Local-only desktop app that checks your own web project for security issues, leaked secrets, vulnerable dependencies and SEO problems before launch."
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 requires-python = ">=3.12"
 authors = [{ name = "Ömer Daştan" }]
+keywords = ["security", "sast", "dast", "secrets", "sca", "sbom", "seo", "scanner", "owasp", "desktop"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: X11 Applications :: Qt",
@@ -15,6 +16,9 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Security",
+    "Topic :: Software Development :: Quality Assurance",
+    "Natural Language :: English",
+    "Natural Language :: Turkish",
 ]
 dependencies = [
     "bandit>=1.9.4",
@@ -31,6 +35,12 @@ dependencies = [
     "pyyaml>=6.0.3",
     "selectolax>=1.0.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/omer1916/secscope"
+Source = "https://github.com/omer1916/secscope"
+Issues = "https://github.com/omer1916/secscope/issues"
+Documentation = "https://github.com/omer1916/secscope/tree/main/docs"
 
 [project.scripts]
 secscope = "secscope.cli:main"
