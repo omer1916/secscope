@@ -184,6 +184,9 @@ class _Checker(ast.NodeVisitor):
         self.file = file
         self.issues: list[PyIssue] = []
         self.scope = _Function(set())
+        # Module-level names bound exactly once to a constant string ("SELECT ... " fragments):
+        # concatenating them is not dynamic SQL/HTML.
+        self.str_constants: set[str] = set()
         self.is_settings = file.path.name in {
             "settings.py",
             "config.py",
@@ -246,6 +249,18 @@ class _Checker(ast.NodeVisitor):
                 return True
         return any(self.tainted(child) for child in ast.iter_child_nodes(node))
 
+    def is_constant_str(self, node: ast.AST) -> bool:
+        """A string built only from literals and module-level string constants."""
+        if isinstance(node, ast.Constant):
+            return isinstance(node.value, str)
+        if isinstance(node, ast.Name):
+            return node.id in self.str_constants
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+            return self.is_constant_str(node.left) and self.is_constant_str(node.right)
+        if isinstance(node, ast.JoinedStr):
+            return not any(isinstance(v, ast.FormattedValue) for v in node.values)
+        return False
+
     def dynamic_string(self, node: ast.AST | None) -> bool:
         """f-strings, concatenation, % formatting or .format() — or a name holding one."""
         if node is None:
@@ -259,7 +274,9 @@ class _Checker(ast.NodeVisitor):
                 and not isinstance(getattr(s, "value", ""), (int, float))
                 for s in sides
             ) or any(self.dynamic_string(s) for s in sides)
-            has_var = any(not isinstance(s, ast.Constant) for s in sides)
+            has_var = any(
+                not isinstance(s, ast.Constant) and not self.is_constant_str(s) for s in sides
+            )
             return has_str and has_var
         if (
             isinstance(node, ast.Call)
@@ -341,8 +358,37 @@ class _Checker(ast.NodeVisitor):
     # -------------------------------------------------------------- visits
 
     def visit_Module(self, node: ast.Module) -> None:
+        self._collect_str_constants(node)
         self._propagate(node.body)
         self.generic_visit(node)
+
+    def _collect_str_constants(self, node: ast.Module) -> None:
+        bound: dict[str, int] = {}
+        candidates: set[str] = set()
+        for stmt in node.body:
+            targets: list[ast.expr] = []
+            value: ast.expr | None = None
+            if isinstance(stmt, ast.Assign):
+                targets, value = stmt.targets, stmt.value
+            elif isinstance(stmt, ast.AnnAssign) and stmt.value is not None:
+                targets, value = [stmt.target], stmt.value
+            elif isinstance(stmt, ast.AugAssign):
+                targets = [stmt.target]
+            for target in targets:
+                if isinstance(target, ast.Name):
+                    bound[target.id] = bound.get(target.id, 0) + 1
+                    if value is not None and self.is_constant_str(value):
+                        candidates.add(target.id)
+                        self.str_constants.add(target.id)  # later constants may build on it
+        # Any other binding anywhere in the module (a function assigning it via `global`, a loop
+        # target, a second module-level assignment) makes the name variable again.
+        stores = dict.fromkeys(candidates, 0)
+        for n in ast.walk(node):
+            if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store) and n.id in stores:
+                stores[n.id] += 1
+        self.str_constants = {
+            name for name in candidates if bound.get(name) == 1 and stores[name] == 1
+        }
 
     def visit_ExceptHandler(self, node: ast.ExceptHandler) -> None:
         broad = node.type is None or (

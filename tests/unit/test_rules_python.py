@@ -21,6 +21,18 @@ CASES: dict[str, list[tuple[str, str]]] = {
             "def v():\n    cur.execute('SELECT 1')\n",
         ),
     ],
+    "SAST-SQLI-001-constants": [
+        # a module-level SQL fragment is a constant: concatenating it is not injection
+        (
+            "FRAG = ' FROM t '\ndef f(conn, name):\n    conn.execute('SELECT a' + FRAG + \"WHERE n = '\" + name + \"'\")\n",
+            "FRAG = ' FROM t WHERE x = 1 '\ndef f(conn):\n    conn.execute('SELECT a' + FRAG + 'AND b = %s', [1])\n",
+        ),
+        # ...unless it is rebound somewhere, then it is a variable again
+        (
+            "FRAG = ' FROM t '\ndef g(x):\n    global FRAG\n    FRAG = x\ndef f(conn):\n    conn.execute('SELECT a' + FRAG)\n",
+            "FRAG = ' FROM t '\nSQL = 'SELECT a' + FRAG\ndef f(conn):\n    conn.execute(SQL + 'LIMIT 1')\n",
+        ),
+    ],
     "SAST-CMDI-001": [
         (
             "def v():\n    h = request.args['h']\n    os.system('ping ' + h)\n",
@@ -225,6 +237,7 @@ def run(code: str, name: str = "app.py") -> set[str]:
     [(rule, pos) for rule, cases in CASES.items() for pos, _ in cases],
 )
 def test_positive(rule_id: str, positive: str) -> None:
+    rule_id = rule_id.removesuffix("-constants")
     assert rule_id in run(positive), positive
 
 
@@ -233,6 +246,7 @@ def test_positive(rule_id: str, positive: str) -> None:
     [(rule, neg) for rule, cases in CASES.items() for _, neg in cases],
 )
 def test_negative(rule_id: str, negative: str) -> None:
+    rule_id = rule_id.removesuffix("-constants")
     assert rule_id not in run(negative), negative
 
 
