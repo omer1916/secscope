@@ -38,6 +38,21 @@ were fixed in the engines, each with a regression test:
 
 After the fixes: **0 findings ≥ medium** — enforced by `tests/integration/test_dogfood.py`.
 
+## Real projects (2026-10)
+
+SecScope was run on two real projects of the author (a static site and a FastAPI service with a
+local `.venv`, a `.env` and a PostgreSQL connection). Every problem found was fixed with a
+regression test:
+
+| Observation | Cause | Fix |
+|---|---|---|
+| 138 findings / grade F with gitleaks installed, 12 / B without | gitleaks and Semgrep walked the copied `.venv` (installed packages) | dependency, VCS and build dirs are never copied into the scanned tree (also cut intake from ~104 s to ~1 s) |
+| A git-ignored local `.env` reported as high severity | `.gitignore` not taken into account | secrets in git-ignored files are info; git history is never demoted |
+| "No dependency manifests", yet dependencies scored 100 | `pyproject.toml` / `uv.lock` not read; an early return skipped the "measured?" flag | both are read, unpinned versions come from the project's `.venv`; nothing measured means no score |
+| `psycopg`, `httpx2` reported as typosquats | one edit away from `psycopg2` / `httpx` | added to the list of legitimate names |
+| `"SELECT …" + SQL_FROM + "…"` reported as SQL injection | module-level constant treated as a variable | names bound once to a constant string are constants |
+| Tooling folders (`.claude/skills`) reported as project code | not the application | use `--exclude .claude`; the report's Coverage section lists what was set aside |
+
 ## Optional external benchmark
 
 OWASP Juice Shop / DVWA / WebGoat can be scanned statically from their source to track detection
