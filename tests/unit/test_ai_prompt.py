@@ -11,6 +11,7 @@ from secscope.analysis.kb import default_kb
 from secscope.core.models import CodeLocation, Evidence, Finding, HttpLocation
 from secscope.reporting.ai_prompt import render_ai_prompt
 from secscope.reporting.writer import ReportFormatError, write_outputs
+from tests.fake_secrets import AWS_KEY_ID
 
 
 def _finding(rule: str, path: str = "app/db.py", line: int = 10, snippet: str = "x = 1") -> Finding:
@@ -66,10 +67,10 @@ def test_secret_value_is_masked_in_the_prompt() -> None:
         "SECRET-CLOUD-001",
         module="secrets",
         location=CodeLocation(path="config.py", line=2),
-        evidence=Evidence(snippet="AWS_KEY = AKIA\x5a5YQ7Q3XJ2KQ7W4P"),
+        evidence=Evidence(snippet=f"AWS_KEY = {AWS_KEY_ID}"),
     )
     out = render_ai_prompt(_report([f]), lang="en")
-    assert "AKIA\x5a5YQ7Q3XJ2KQ7W4P" not in out  # masked
+    assert AWS_KEY_ID not in out  # masked
 
 
 def test_python_stack_prefers_a_python_snippet_over_javascript() -> None:

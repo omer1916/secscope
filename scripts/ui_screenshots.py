@@ -22,6 +22,9 @@ from secscope.ui.main_window import MainWindow
 from secscope.ui.state import AppState
 from secscope.ui.theme import apply_theme
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tests.fake_secrets import materialize
+
 REPO = Path(__file__).resolve().parents[1]
 OUT = REPO / "docs" / "screenshots"
 
@@ -55,7 +58,8 @@ def main() -> int:
         print(f"docs/screenshots/{page}-{lang}.png")
 
     # A security-focused results page: the deliberately vulnerable Flask fixture.
-    cli_main(["scan", "--path", str(REPO / "fixtures" / "vuln-flask"), "--modules", "sast,secrets,sca,config_audit",
+    target = materialize("vuln-flask", data / "vuln-flask")
+    cli_main(["scan", "--path", str(target), "--modules", "sast,secrets,sca,config_audit",
               "--format", "json", "--out", str(data / "out"), "--data-dir", str(data)])  # fmt: skip
     state.scans_changed.emit()
     window.open_results(state.scans()[0].scan_id)

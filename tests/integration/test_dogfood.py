@@ -14,7 +14,7 @@ SRC = Path(__file__).resolve().parents[2] / "src"
 def test_secscope_source_is_clean(tmp_path: Path) -> None:
     project = tmp_path / "secscope-src"
     shutil.copytree(SRC, project)
-    # run_static scans fixtures by name; point it at the copied source instead.
+    # run_static scans fixtures by name; an absolute path points it at the copied source instead.
     run = run_static(str(project), tmp_path / "data")
     serious = [
         (f.rule_id, f.location.display(), f.evidence.snippet)

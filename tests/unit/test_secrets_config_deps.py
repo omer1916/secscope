@@ -17,18 +17,19 @@ from secscope.analysis.deps import (
 )
 from secscope.analysis.secret_scan import is_env_file, scan_secrets, shannon_entropy
 from secscope.analysis.source import SourceFile
+from tests.fake_secrets import AWS_KEY_ID, AWS_SECRET, STRIPE_KEY_SHORT
 
 # ------------------------------------------------------------------ secrets
 
 SECRET_CASES: list[tuple[str, str, str]] = [
-    ("SECRET-CLOUD-001", 'key = "AKIA\x5a5YQ7Q3XJ2KQ7W4P"', 'key = "AKIA_NOT_A_KEY"'),
+    ("SECRET-CLOUD-001", f'key = "{AWS_KEY_ID}"', 'key = "AKIA_NOT_A_KEY"'),
     (
         "SECRET-CLOUD-001",
-        "aws_secret_access_key = q8Vb\x33kT9yLm2Nx7Rp4Wz6Hs1Jd5Fg0Ac2Ue8Io3K",
+        f"aws_secret_access_key = {AWS_SECRET}",
         "aws_secret_access_key = ${AWS_SECRET}",
     ),
     ("SECRET-TOKEN-001", "GH=ghp_a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6q7R8", "GH=ghp_short"),
-    ("SECRET-TOKEN-001", "STRIPE=sk_l\x69ve_51HfakeFAKEfake0123456789", "STRIPE=sk_live_"),
+    ("SECRET-TOKEN-001", f"STRIPE={STRIPE_KEY_SHORT}", "STRIPE=sk_live_"),
     (
         "SECRET-PRIVKEY-001",
         "-----BEGIN RSA PRIVATE KEY-----\nMIIE...",
@@ -65,7 +66,7 @@ def test_secret_rules(rule_id: str, positive: str, negative: str) -> None:
 
 
 def test_one_finding_per_line_most_specific_wins() -> None:
-    hits = secrets_in('aws_key = "AKIA\x5a5YQ7Q3XJ2KQ7W4P"')
+    hits = secrets_in(f'aws_key = "{AWS_KEY_ID}"')
     assert hits == {"SECRET-CLOUD-001"}
 
 

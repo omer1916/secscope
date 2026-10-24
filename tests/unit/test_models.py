@@ -15,6 +15,7 @@ from secscope.core.models import (
     LocalizedStr,
     Ref,
 )
+from tests.fake_secrets import STRIPE_KEY_DOCS
 
 
 def make_finding(**overrides: object) -> Finding:
@@ -96,7 +97,7 @@ def test_source_tools_required() -> None:
 
 def test_evidence_masks_secrets() -> None:
     ev = Evidence(
-        snippet='API_KEY = "sk_l\x69ve_4eC39HqLyjWDarjtT1zdp7dc"',
+        snippet=f'API_KEY = "{STRIPE_KEY_DOCS}"',
         request=HttpMessage(
             method="GET",
             url="http://localhost/?token=abcdef1234567890",
@@ -106,7 +107,7 @@ def test_evidence_masks_secrets() -> None:
     )
     dumped = ev.model_dump_json()
     for secret in (
-        "4eC39HqLyjWDarjtT1zdp7dc",
+        STRIPE_KEY_DOCS,
         "abcdef1234567890",
         "abcdefghijklmnopqrstu",
         "hunter2hunter2",

@@ -6,6 +6,8 @@ Re-run after bumping a tool version in tools/manifest.toml:
 
 Absolute fixture paths are replaced by ``{ROOT}``; secrets are redacted by the tools themselves
 (gitleaks --redact) or never printed (semgrep/bandit show code lines only via our own reader).
+The tools run on a copy with the fake secrets filled in (tests/fake_secrets.py); any fake value a
+tool echoes back is \\u-escaped, so the golden files never contain one literally.
 """
 
 from __future__ import annotations
@@ -13,6 +15,7 @@ from __future__ import annotations
 import asyncio
 import json
 import sys
+import tempfile
 from pathlib import Path
 
 from secscope.core.advisories import TRIVY_PRIVACY_FLAGS, osv_env, trivy_cache
@@ -20,6 +23,9 @@ from secscope.core.config import Settings
 from secscope.core.process import python_tool_command, run_capture
 from secscope.core.resources import data_path
 from secscope.core.session import tool_manager
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tests.fake_secrets import escape_for_json, materialize
 
 REPO = Path(__file__).resolve().parents[1]
 GOLDEN = REPO / "tests" / "golden"
@@ -35,8 +41,9 @@ def _scrub(text: str, root: Path) -> str:
 async def main() -> int:
     settings = Settings()
     tools = tool_manager(settings)
+    scratch = Path(tempfile.mkdtemp(prefix="secscope-golden-"))
     for fixture in FIXTURES:
-        root = REPO / "fixtures" / fixture
+        root = materialize(fixture, scratch / fixture)
         runs: dict[str, list[str]] = {
             "semgrep": [str(tools.path("semgrep")), "scan", "--config", str(data_path("rules") / "semgrep"), "--json",
                         "--metrics=off", "--disable-version-check", "--no-rewrite-rule-ids", "--no-git-ignore", "--quiet", str(root)],
@@ -60,7 +67,8 @@ async def main() -> int:
             out = GOLDEN / tool / f"{fixture}.json"
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text(
-                _scrub(json.dumps(data, indent=1, ensure_ascii=False), root) + "\n",
+                escape_for_json(_scrub(json.dumps(data, indent=1, ensure_ascii=False), root))
+                + "\n",
                 encoding="utf-8",
                 newline="\n",
             )

@@ -17,6 +17,7 @@ from secscope.core.scan import run_scan
 from secscope.core.session import open_session, tool_manager
 from secscope.core.toolmgr import ToolManager
 from secscope.modules.registry import load_builtin
+from tests.fake_secrets import materialize
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
 STATIC_MODULES = ["sast", "secrets", "sca", "config_audit"]
@@ -51,11 +52,15 @@ class StaticRun:
 
 
 def run_static(fixture: str, scratch: Path) -> StaticRun:
+    """Scan ``fixtures/<fixture>`` (a copy with the fake secrets filled in) or any absolute dir."""
     real = Settings()
+    target = Path(fixture)
+    if not target.is_absolute():
+        target = materialize(fixture, scratch / "fixture" / fixture)
     # The scan's work dir and database live in a scratch dir; tool binaries and the
     # offline advisory databases come from the developer's real data dir.
     settings = real.model_copy(update={"data_dir": scratch})
-    config = ScanConfig(target=Target(kind=TargetKind.FOLDER, value=str(FIXTURES / fixture)))
+    config = ScanConfig(target=Target(kind=TargetKind.FOLDER, value=str(target)))
     session = open_session(config, settings, tools=real_tools())
     # SCA reads its databases from settings.data_dir: point it at the real one.
     session.ctx.settings = real

@@ -20,3 +20,11 @@
 
 `expected.yaml` lists the rule ids a scan must report (`must`) and may report (`may`), per phase
 (`static`, `dynamic`, `seo`, ...). Recall is measured against `must`.
+
+Keys shaped like live AWS or Stripe credentials are stored as `__SECSCOPE_FAKE_*__` placeholders,
+so that GitHub's push protection does not (rightly) reject them. The detection tests scan a copy
+with the fake values filled in; to scan one by hand:
+
+```bash
+uv run python -m tests.fake_secrets vuln-flask ../vuln-flask-filled
+```

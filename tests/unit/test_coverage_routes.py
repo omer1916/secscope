@@ -21,6 +21,7 @@ from secscope.core.intake import prepare_source
 from secscope.core.models import CodeLocation, Evidence, Finding
 from secscope.core.scan import background_code, only_changed
 from secscope.reporting.writer import write_outputs
+from tests.fake_secrets import AWS_KEY_ID
 
 # ------------------------------------------------------------------ exclusions
 
@@ -274,7 +275,7 @@ def test_example_key_in_app_code_is_reported_with_low_confidence() -> None:
 
 
 def test_real_looking_key_in_a_fixture_keeps_its_severity() -> None:
-    hits = _secret_hits("fixtures/app/config.py", 'KEY = "AKIA\x5a5YQ7Q3XJ2KQ7W4P"\n')
+    hits = _secret_hits("fixtures/app/config.py", f'KEY = "{AWS_KEY_ID}"\n')
     assert [(r, s, e) for r, s, _c, e in hits] == [("SECRET-CLOUD-001", None, False)]
 
 
@@ -289,7 +290,7 @@ def test_intake_skips_dependency_dirs(tmp_path: Path) -> None:
     (project / "app" / "main.py").write_text("x = 1\n")
     for dep in (".venv", "node_modules", ".git", "__pycache__"):
         (project / dep).mkdir()
-        (project / dep / "secret.py").write_text("API_KEY = 'AKIA\x5a5YQ7Q3XJ2KQ7W4P'\n")
+        (project / dep / "secret.py").write_text(f"API_KEY = '{AWS_KEY_ID}'\n")
     (project / "node_modules" / "left-pad").mkdir()
     (project / "node_modules" / "left-pad" / "index.js").write_text("x\n")
 
