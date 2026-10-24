@@ -325,7 +325,7 @@ def _workflow(root: Path, path: Path) -> Iterator[ConfigIssue | None]:
             yield _issue("CONF-CI-PIN-001", root, path, _line_of(lines, uses), lines)
 
 
-def _gitignore_patterns(root: Path) -> list[str] | None:
+def gitignore_patterns(root: Path) -> list[str] | None:
     path = root / ".gitignore"
     if not path.is_file():
         return None
@@ -355,7 +355,7 @@ def is_ignored(rel: str, patterns: list[str]) -> bool:
 
 def check_config(root: Path) -> Iterator[ConfigIssue]:
     files = list(iter_source_files(root))
-    patterns = _gitignore_patterns(root)
+    patterns = gitignore_patterns(root)
     for path in files:
         rel = path.relative_to(root).as_posix()
         name = path.name.lower()

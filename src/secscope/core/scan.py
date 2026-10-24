@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from pathlib import Path
 
+from secscope.analysis.config_checks import gitignore_patterns, is_ignored
 from secscope.core.config import TargetKind
 from secscope.core.coverage import background_reason, build_coverage
 from secscope.core.dedup import deduplicate
@@ -22,6 +23,38 @@ from secscope.core.sandbox import SandboxRunner, TargetStartError
 from secscope.core.scoring import compute_scores
 from secscope.core.snapshot import Snapshot
 from secscope.modules.base import Emitter, ScanContext
+
+
+def gitignored_secrets(findings: Sequence[Finding], root: Path | None) -> list[Finding]:
+    """Secrets in files the project's .gitignore covers (a local .env, typically) are not
+    committed: keeping secrets there is the recommended practice, so they are shown as "info"
+    (visible, not scored). Secrets found in git history are never demoted: those were committed.
+    """
+    patterns = gitignore_patterns(root) if root is not None else None
+    if not patterns:
+        return list(findings)
+    out: list[Finding] = []
+    for f in findings:
+        loc = f.location
+        if (
+            f.module != "secrets"
+            or f.rule_id == "SECRET-HISTORY-001"
+            or f.severity == "info"
+            or not isinstance(loc, CodeLocation)
+            or not is_ignored(loc.path, patterns)
+        ):
+            out.append(f)
+            continue
+        extra = {**f.evidence.extra, "gitignored": "yes", "original_severity": f.severity}
+        out.append(
+            f.model_copy(
+                update={
+                    "severity": "info",
+                    "evidence": f.evidence.model_copy(update={"extra": extra}),
+                }
+            )
+        )
+    return out
 
 
 def background_code(findings: Sequence[Finding]) -> list[Finding]:
@@ -194,7 +227,10 @@ async def run_scan(
 
     outcome = await orchestrator.run(ctx, module_ids, setup=prepare, teardown=cleanup)
     outcome.findings = deduplicate(
-        only_changed(background_code(outcome.findings), ctx.changed_files)
+        only_changed(
+            gitignored_secrets(background_code(outcome.findings), ctx.source_dir),
+            ctx.changed_files,
+        )
     )
     outcome.notes = {mid: list(res.notes) for mid, res in ctx.results.items() if res.notes}
     score_outcome(ctx, outcome)

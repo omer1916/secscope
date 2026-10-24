@@ -302,3 +302,126 @@ def test_intake_skips_dependency_dirs(tmp_path: Path) -> None:
     assert "node_modules" in report.dependency_dirs
     # the fake key inside node_modules is never seen, so it is never a finding
     assert report.files == 1
+
+
+# ------------------------------------------------------------------ dependencies (pyproject, venv)
+
+
+def test_legit_near_neighbours_are_not_typosquats() -> None:
+    from secscope.analysis.deps import Inventory, Package, typosquat_candidates  # noqa: PLC0415
+
+    inv = Inventory(
+        packages=[
+            Package("PyPI", "psycopg", "3.3.6", "pyproject.toml"),
+            Package("PyPI", "httpx2", "2.13.1", "pyproject.toml"),
+            Package("PyPI", "reqeusts", "1.0", "pyproject.toml"),  # a real-looking typo
+        ]
+    )
+    flagged = {p.name for p, _ in typosquat_candidates(inv)}
+    assert flagged == {"reqeusts"}
+
+
+def test_pyproject_dependencies_are_read(tmp_path: Path) -> None:
+    from secscope.analysis.deps import build_inventory  # noqa: PLC0415
+
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname = "demo"\ndependencies = ["fastapi>=0.115", "pyjwt==2.4.0",'
+        " \"psycopg[binary]>=3.2; python_version>'3.8'\"]\n"
+        '[dependency-groups]\ndev = ["pytest>=8"]\n',
+        encoding="utf-8",
+    )
+    inv = build_inventory(tmp_path)
+    assert inv.manifests == ["pyproject.toml"]
+    assert [(p.name, p.version) for p in inv.packages] == [("pyjwt", "2.4.0")]  # only exact pins
+    assert {"fastapi", "pyjwt", "psycopg", "pytest"} <= set(inv.declared)
+    assert inv.project_name == "demo"
+
+
+def test_tool_only_pyproject_is_not_a_manifest(tmp_path: Path) -> None:
+    from secscope.analysis.deps import build_inventory  # noqa: PLC0415
+
+    (tmp_path / "pyproject.toml").write_text("[tool.ruff]\nline-length = 100\n", encoding="utf-8")
+    assert build_inventory(tmp_path).manifests == []
+
+
+def test_uv_lock_versions_skip_the_project_itself(tmp_path: Path) -> None:
+    from secscope.analysis.deps import build_inventory  # noqa: PLC0415
+
+    (tmp_path / "uv.lock").write_text(
+        'version = 1\n[[package]]\nname = "demo"\nversion = "0.1.0"\nsource = { editable = "." }\n'
+        '[[package]]\nname = "flask"\nversion = "2.2.2"\nsource = { registry = "https://pypi.org/simple" }\n',
+        encoding="utf-8",
+    )
+    inv = build_inventory(tmp_path)
+    assert [(p.name, p.version) for p in inv.packages] == [("flask", "2.2.2")]
+
+
+def _fake_venv(project: Path, packages: dict[str, str]) -> None:
+    site = project / ".venv" / "Lib" / "site-packages"
+    site.mkdir(parents=True)
+    (project / ".venv" / "pyvenv.cfg").write_text("home = x\n", encoding="utf-8")
+    for name, version in packages.items():
+        dist = site / f"{name}-{version}.dist-info"
+        dist.mkdir()
+        (dist / "METADATA").write_text(
+            f"Metadata-Version: 2.1\nName: {name}\nVersion: {version}\n\nlong description\n",
+            encoding="utf-8",
+        )
+
+
+def test_unpinned_dependencies_take_the_installed_version(tmp_path: Path) -> None:
+    from secscope.analysis.deps import add_installed, build_inventory  # noqa: PLC0415
+
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname = "demo"\ndependencies = ["fastapi>=0.115"]\n', encoding="utf-8"
+    )
+    _fake_venv(tmp_path, {"fastapi": "0.115.6", "starlette": "0.41.3", "demo": "0.1.0"})
+    inv = build_inventory(tmp_path)
+    assert inv.packages == []
+    assert add_installed(inv, tmp_path) == ".venv"
+    got = {p.name: (p.version, p.direct, p.installed) for p in inv.packages}
+    assert got == {
+        "fastapi": ("0.115.6", True, True),  # declared -> direct
+        "starlette": ("0.41.3", False, True),  # transitive
+    }  # the project itself ("demo") is not a dependency
+    assert inv.unpinned == []  # resolved
+
+
+def test_no_venv_leaves_unpinned_dependencies_unresolved(tmp_path: Path) -> None:
+    from secscope.analysis.deps import add_installed, build_inventory  # noqa: PLC0415
+
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\ndependencies = ["fastapi>=0.115"]\n', encoding="utf-8"
+    )
+    inv = build_inventory(tmp_path)
+    assert add_installed(inv, tmp_path) is None
+    assert inv.packages == []
+    assert inv.unpinned == ["pyproject.toml: fastapi>=0.115"]
+
+
+# ------------------------------------------------------------------ git-ignored secrets
+
+
+def test_secrets_in_gitignored_files_are_info_but_history_is_not(tmp_path: Path) -> None:
+    from secscope.core.scan import gitignored_secrets  # noqa: PLC0415
+
+    (tmp_path / ".gitignore").write_text(".env\n", encoding="utf-8")
+    local = _finding("SECRET-DBURL-001", path=".env", module="secrets")
+    committed = _finding("SECRET-DBURL-001", path="config.py", module="secrets")
+    history = _finding("SECRET-HISTORY-001", path=".env", module="secrets")
+    out = {
+        (f.rule_id, f.location.path): f
+        for f in gitignored_secrets([local, committed, history], tmp_path)
+        if isinstance(f.location, CodeLocation)
+    }
+    assert out[("SECRET-DBURL-001", ".env")].severity == "info"
+    assert out[("SECRET-DBURL-001", ".env")].evidence.extra["gitignored"] == "yes"
+    assert out[("SECRET-DBURL-001", "config.py")].severity == "high"
+    assert out[("SECRET-HISTORY-001", ".env")].severity != "info"
+
+
+def test_without_gitignore_nothing_is_demoted(tmp_path: Path) -> None:
+    from secscope.core.scan import gitignored_secrets  # noqa: PLC0415
+
+    f = _finding("SECRET-DBURL-001", path=".env", module="secrets")
+    assert gitignored_secrets([f], tmp_path)[0].severity == "high"
