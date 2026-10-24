@@ -287,5 +287,7 @@
   "ai.clean": "Düzeltilecek bulgu yok.",
   "ui.results.copy_ai": "Yapay zekâ için kopyala",
   "ui.results.copy_ai.hint": "Tüm bulguları, kodu ve düzeltme önerileriyle birlikte panoya kopyalar; ChatGPT/Claude gibi bir yapay zekâya yapıştırıp düzelttirebilirsin.",
-  "ui.results.copy_ai.done": "Bulgular panoya kopyalandı. Bir yapay zekâ sohbetine yapıştırıp 'bu hataları düzelt' diyebilirsin."
+  "ui.results.copy_ai.done": "Bulgular panoya kopyalandı. Bir yapay zekâ sohbetine yapıştırıp 'bu hataları düzelt' diyebilirsin.",
+  "note.installed-versions: versions read from the project's virtualenv": "Bağımlılık sürümleri projenin sanal ortamından (.venv) okundu (kilit dosyası yok).",
+  "note.unpinned-dependencies: no exact versions (no lock file or virtualenv); dependency vulnerabilities were not checked": "Bağımlılıkların kesin sürümü yok (kilit dosyası veya .venv bulunamadı); bağımlılık açıkları kontrol edilmedi. uv.lock/poetry.lock ekleyin ya da bağımlılıkları .venv'e kurun."
 }

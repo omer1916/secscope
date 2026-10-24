@@ -17,6 +17,7 @@ from typing import Any, ClassVar
 from secscope.analysis.deps import (
     Inventory,
     Package,
+    add_installed,
     build_inventory,
     copyleft_packages,
     cyclonedx,
@@ -31,6 +32,7 @@ from secscope.core.advisories import (
     trivy_cache,
     trivy_status,
 )
+from secscope.core.config import TargetKind
 from secscope.core.jsonutil import jdict, jlist, jstr
 from secscope.core.models import (
     SEVERITY_ORDER,
@@ -213,6 +215,15 @@ class ScaModule(BaseModule):
         stack = stack_of(ctx)
         result = ModuleResult()
         inv = await asyncio.to_thread(build_inventory, root)
+        # Unpinned Python dependencies (fastapi>=0.115) get the version installed in the
+        # project's own virtualenv, which the source copy deliberately leaves out.
+        venv = None
+        if ctx.config.target.kind == TargetKind.FOLDER:
+            venv = await asyncio.to_thread(add_installed, inv, Path(ctx.config.target.value))
+        if venv is not None:
+            installed = sum(p.installed for p in inv.packages)
+            emit.log(f"{installed} dependency versions read from {venv} (no lock file)")
+            result.notes.append("installed-versions: versions read from the project's virtualenv")
         result.data["packages"] = len(inv.packages)
         result.data["manifests"] = inv.manifests
         sbom_path = ctx.work_dir / "sbom.cdx.json"
@@ -221,9 +232,26 @@ class ScaModule(BaseModule):
         emit.log(
             f"{len(inv.packages)} dependencies in {len(inv.manifests)} manifest(s); SBOM written"
         )
+        # Nothing to measure is not a clean result: the dependency score stays empty.
+        result.data["advisories_assessed"] = False
         if not inv.manifests:
             result.notes.append("no dependency manifests found")
             return result
+        if not inv.packages:
+            result.notes.append(
+                "unpinned-dependencies: no exact versions (no lock file or virtualenv); "
+                "dependency vulnerabilities were not checked"
+            )
+            return result
+        scan_dirs = [root]
+        installed_pkgs = [p for p in inv.packages if p.installed]
+        if installed_pkgs:
+            resolved = ctx.work_dir / "sca-installed"
+            resolved.mkdir(parents=True, exist_ok=True)
+            (resolved / "requirements.txt").write_text(
+                "".join(f"{p.name}=={p.version}\n" for p in installed_pkgs), encoding="utf-8"
+            )
+            scan_dirs.append(resolved)
 
         vulnerable: dict[tuple[str, str, str], VulnerablePackage] = {}
         by_key = {p.key: p for p in inv.packages}
@@ -246,40 +274,51 @@ class ScaModule(BaseModule):
         tdb = trivy_status(data_dir)
         if trivy.available and trivy.path is not None and tdb.present:
             emit.progress(30, "trivy (offline)")
-            run = await run_capture(
-                [str(trivy.path), "fs", str(root), "--scanners", "vuln", "--format", "json", "--list-all-pkgs=false",
-                 "--cache-dir", str(trivy_cache(data_dir)), "--skip-db-update", "--skip-java-db-update",
-                 "--skip-check-update", "--offline-scan", *TRIVY_PRIVACY_FLAGS, "-q"],
-                cwd=root, timeout=TOOL_TIMEOUT_S,
-            )  # fmt: skip
-            if run.returncode == 0 and run.stdout.strip():
-                record(parse_trivy(run.stdout, root), "trivy")
+            ok = False
+            for scan_dir in scan_dirs:
+                run = await run_capture(
+                    [str(trivy.path), "fs", str(scan_dir), "--scanners", "vuln", "--format", "json", "--list-all-pkgs=false",
+                     "--cache-dir", str(trivy_cache(data_dir)), "--skip-db-update", "--skip-java-db-update",
+                     "--skip-check-update", "--offline-scan", *TRIVY_PRIVACY_FLAGS, "-q"],
+                    cwd=scan_dir, timeout=TOOL_TIMEOUT_S,
+                )  # fmt: skip
+                if run.returncode == 0 and run.stdout.strip():
+                    record(parse_trivy(run.stdout, scan_dir), "trivy")
+                    ok = True
+                else:
+                    emit.log(
+                        f"trivy failed (exit {run.returncode}): {run.stderr[-300:]}", "warning"
+                    )
+            if ok:
                 used_tools += 1
                 result.data["trivy_db_updated"] = (
                     tdb.updated_at.isoformat() if tdb.updated_at else None
                 )
-            else:
-                emit.log(f"trivy failed (exit {run.returncode}): {run.stderr[-300:]}", "warning")
         await ctx.checkpoint()
 
         osv = ctx.tools.status("osv-scanner")
         odb = osv_status(data_dir)
         if osv.available and osv.path is not None and odb.present:
             emit.progress(60, "osv-scanner (offline)")
-            run = await run_capture(
-                [str(osv.path), "scan", "source", "--offline", "--offline-vulnerabilities", "-r", str(root),
-                 "--format", "json", "--verbosity", "error"],
-                cwd=root, env=osv_env(data_dir), timeout=TOOL_TIMEOUT_S,
-            )  # fmt: skip
-            if run.returncode in (0, 1) and run.stdout.strip().startswith("{"):
-                record(parse_osv(run.stdout, root), "osv-scanner")
+            ok = False
+            for scan_dir in scan_dirs:
+                run = await run_capture(
+                    [str(osv.path), "scan", "source", "--offline", "--offline-vulnerabilities", "-r", str(scan_dir),
+                     "--format", "json", "--verbosity", "error"],
+                    cwd=scan_dir, env=osv_env(data_dir), timeout=TOOL_TIMEOUT_S,
+                )  # fmt: skip
+                if run.returncode in (0, 1) and run.stdout.strip().startswith("{"):
+                    record(parse_osv(run.stdout, scan_dir), "osv-scanner")
+                    ok = True
+                else:
+                    emit.log(
+                        f"osv-scanner failed (exit {run.returncode}): {run.stderr[-300:]}",
+                        "warning",
+                    )
+            if ok:
                 used_tools += 1
                 result.data["osv_db_updated"] = (
                     odb.updated_at.isoformat() if odb.updated_at else None
-                )
-            else:
-                emit.log(
-                    f"osv-scanner failed (exit {run.returncode}): {run.stderr[-300:]}", "warning"
                 )
 
         # Without an advisory database nothing was measured: the dependency score must not

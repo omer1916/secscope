@@ -16,6 +16,8 @@ pypi: [requests, django, flask, numpy, pandas, urllib3, boto3, botocore, setupto
   cryptography, pyjwt, bcrypt, paramiko, pytest, coverage, black, flake8, mypy, ruff, rich, tqdm,
   colorama, openpyxl, xlrd, selenium, scrapy, boto, awscli, google-cloud-storage, python-dotenv,
   djangorestframework, flask-login, flask-sqlalchemy, wtforms, marshmallow, attrs, toml, tomli,
-  docker, kubernetes, pymongo, elasticsearch, openai, anthropic, transformers]
+  docker, kubernetes, pymongo, elasticsearch, openai, anthropic, transformers,
+  # Legitimate packages one edit away from a popular name (not typosquats):
+  psycopg, psycopg-binary, psycopg-pool, httpx2, pyaml, tomli-w]
 composer: [laravel/framework, symfony/symfony, guzzlehttp/guzzle, monolog/monolog, phpunit/phpunit,
   doctrine/orm, twig/twig, vlucas/phpdotenv, nesbot/carbon, league/flysystem]

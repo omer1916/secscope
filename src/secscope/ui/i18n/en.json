@@ -287,5 +287,7 @@
   "ai.clean": "No findings to fix.",
   "ui.results.copy_ai": "Copy for AI",
   "ui.results.copy_ai.hint": "Copies all findings with their code and suggested fixes to the clipboard; paste into an AI assistant (ChatGPT/Claude) to have them fixed.",
-  "ui.results.copy_ai.done": "Findings copied to the clipboard. Paste them into an AI chat and ask it to fix them."
+  "ui.results.copy_ai.done": "Findings copied to the clipboard. Paste them into an AI chat and ask it to fix them.",
+  "note.installed-versions: versions read from the project's virtualenv": "Dependency versions were read from the project's virtualenv (.venv); there is no lock file.",
+  "note.unpinned-dependencies: no exact versions (no lock file or virtualenv); dependency vulnerabilities were not checked": "Dependencies have no exact versions (no lock file or .venv found); dependency vulnerabilities were not checked. Add uv.lock/poetry.lock or install the dependencies into .venv."
 }
