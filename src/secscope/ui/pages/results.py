@@ -129,10 +129,16 @@ class ResultsPage(QWidget):
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         header = self.table.horizontalHeader()
-        for col in (0, 1, 4, 5):
+        for col in (0, 1):
             header.setSectionResizeMode(col, QHeaderView.ResizeMode.ResizeToContents)
+        # The title takes the remaining width; the location gets a fixed, resizable width. Full
+        # text is in the tooltip. Confidence and tools are shown in the detail panel, so their
+        # columns are hidden here to leave room for the title.
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.Interactive)
+        header.resizeSection(3, 160)
+        for col in (4, 5):
+            self.table.setColumnHidden(col, True)
         self.table.verticalHeader().setVisible(False)
         self.table.setWordWrap(False)
         self.table.verticalHeader().setDefaultSectionSize(26)

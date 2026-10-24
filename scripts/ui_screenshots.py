@@ -36,8 +36,13 @@ def main() -> int:
     apply_theme(app, "light")
     state = AppState(Settings(data_dir=data, language=lang), config_dir=data / "config")  # type: ignore[arg-type]
     window = MainWindow(state)
-    window.resize(1400, 880)
     window.show()
+    # The window fits itself to the (small, virtual) offscreen screen on first show; wait for
+    # that, then use a documentation-friendly size.
+    for _ in range(3):
+        app.processEvents()
+    window.resize(1400, 880)
+    app.processEvents()
     OUT.mkdir(parents=True, exist_ok=True)
     scans = state.scans()
     window.open_results(scans[0].scan_id)
@@ -48,6 +53,16 @@ def main() -> int:
         app.processEvents()
         window.grab().save(str(OUT / f"{page}-{lang}.png"))
         print(f"docs/screenshots/{page}-{lang}.png")
+
+    # A security-focused results page: the deliberately vulnerable Flask fixture.
+    cli_main(["scan", "--path", str(REPO / "fixtures" / "vuln-flask"), "--modules", "sast,secrets,sca,config_audit",
+              "--format", "json", "--out", str(data / "out"), "--data-dir", str(data)])  # fmt: skip
+    state.scans_changed.emit()
+    window.open_results(state.scans()[0].scan_id)
+    window.go("results")
+    app.processEvents()
+    window.grab().save(str(OUT / f"security-{lang}.png"))
+    print(f"docs/screenshots/security-{lang}.png")
     window.close()
     return 0
 

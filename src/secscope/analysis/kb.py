@@ -46,6 +46,21 @@ DEFAULT_STACK_ORDER = (
 )
 
 
+# Snippet keys of the same language family, best match first.
+STACK_GROUP: dict[str, tuple[str, ...]] = {
+    "python": ("python", "flask", "django", "fastapi"),
+    "flask": ("flask", "python", "django", "fastapi"),
+    "django": ("django", "python", "flask", "fastapi"),
+    "fastapi": ("fastapi", "python", "flask", "django"),
+    "javascript": ("javascript", "express"),
+    "express": ("express", "javascript"),
+    "next": ("express", "javascript"),
+    "node": ("express", "javascript"),
+    "php": ("php", "laravel"),
+    "laravel": ("laravel", "php"),
+}
+
+
 class KBEntry(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -80,8 +95,10 @@ class KBEntry(BaseModel):
         return [r.id for r in self.references if r.type == "asvs" and r.id]
 
     def remediation(self, stack: str | None = None) -> Remediation:
-        """Remediation with the detected stack's snippet first (SPEC §10)."""
+        """Remediation with the detected stack's snippet first (SPEC §10), then snippets of the
+        same language family (a Flask app sees the Python fix before the Express one)."""
         order = [stack] if stack else []
+        order += [s for s in STACK_GROUP.get(stack or "", ()) if s not in order]
         order += [s for s in DEFAULT_STACK_ORDER if s not in order]
         ordered = {k: self.snippets[k] for k in order if k in self.snippets}
         ordered.update({k: v for k, v in self.snippets.items() if k not in ordered})

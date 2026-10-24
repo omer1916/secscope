@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from secscope.analysis.kb import STACK_GROUP
 from secscope.core.jsonutil import jdict
 from secscope.core.models import CodeLocation, Finding, Language
 from secscope.reporting.json_export import report_findings
@@ -53,21 +54,6 @@ def _header(report: dict[str, Any], t: Translator, counts: dict[str, int]) -> li
         "---",
         "",
     ]
-
-
-# Snippets in the same language family as the project come first, so a Python app does not
-# get shown a JavaScript fix when a Python one exists.
-STACK_GROUP = {
-    "python": ("flask", "django", "fastapi", "python"),
-    "flask": ("flask", "django", "fastapi", "python"),
-    "django": ("django", "flask", "fastapi", "python"),
-    "fastapi": ("fastapi", "flask", "django", "python"),
-    "javascript": ("express", "javascript"),
-    "express": ("express", "javascript"),
-    "node": ("express", "javascript"),
-    "php": ("php", "laravel"),
-    "laravel": ("laravel", "php"),
-}
 
 
 def _snippet_for(finding: Finding, stack_family: str | None) -> tuple[str, str] | None:

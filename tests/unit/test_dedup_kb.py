@@ -162,3 +162,11 @@ def test_finding_from_kb_is_enriched() -> None:
     assert finding.cwe == [89]
     assert finding.owasp == ["A05:2025"]
     assert finding.remediation is not None
+
+
+def test_fix_snippet_of_the_same_language_family_comes_first() -> None:
+    from secscope.analysis.kb import default_kb  # noqa: PLC0415
+
+    entry = default_kb().get("SECRET-CLOUD-001")  # snippets: express, php, python
+    assert next(iter(entry.remediation("flask").snippets)) == "python"
+    assert next(iter(entry.remediation("express").snippets)) == "express"

@@ -145,6 +145,8 @@ class FindingsModel(QAbstractTableModel):
                     return self._t.confidence(f.confidence)
                 case _:
                     return self._t.tools(f.source_tools)
+        if role == Qt.ItemDataRole.ToolTipRole and col in {"title", "location", "tools"}:
+            return self.data(index)  # the full text of a cell that may be elided
         if role == Qt.ItemDataRole.ForegroundRole and col == "severity":
             return QColor(SEVERITY_COLORS[f.severity])
         if role == Qt.ItemDataRole.UserRole:  # sort key
