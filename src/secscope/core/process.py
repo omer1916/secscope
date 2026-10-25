@@ -24,6 +24,7 @@ import sys
 from collections.abc import AsyncIterator, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, cast
 
 import psutil
 
@@ -58,9 +59,11 @@ class _WindowsJob:
         from ctypes import wintypes  # noqa: PLC0415
 
         self._ctypes = ctypes
-        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)  # type: ignore[attr-defined]
-        self._kernel32 = kernel32
-        self._ntdll = ctypes.WinDLL("ntdll")  # type: ignore[attr-defined]
+        # Typed as Any: WinDLL exports are dynamic, and the stubs omit WinDLL off Windows.
+        win_dll = cast(Any, ctypes).WinDLL
+        kernel32: Any = win_dll("kernel32", use_last_error=True)
+        self._kernel32: Any = kernel32
+        self._ntdll: Any = win_dll("ntdll")
 
         kernel32.CreateJobObjectW.restype = wintypes.HANDLE
         kernel32.OpenProcess.restype = wintypes.HANDLE
