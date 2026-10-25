@@ -6,6 +6,7 @@ Re-record with ``uv run python scripts/record_golden.py`` after a tool version b
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from secscope.analysis.kb import default_kb
@@ -21,8 +22,10 @@ GOLDEN = REPO / "tests" / "golden"
 def golden(tool: str, fixture: str) -> tuple[str, Path]:
     root = REPO / "fixtures" / fixture
     text = (GOLDEN / tool / f"{fixture}.json").read_text(encoding="utf-8")
-    # Paths were recorded as {ROOT}; JSON escapes backslashes, so substitute the escaped form.
-    return text.replace("{ROOT}", json.dumps(str(root))[1:-1]), root
+    # Paths were recorded on Windows as {ROOT}\\sub\\file (JSON-escaped backslashes): use "/" so
+    # the same golden file resolves on every OS.
+    text = re.sub(r'\{ROOT\}[^"]*', lambda m: m.group(0).replace("\\\\", "/"), text)
+    return text.replace("{ROOT}", json.dumps(root.as_posix())[1:-1]), root
 
 
 def test_semgrep_contract() -> None:
